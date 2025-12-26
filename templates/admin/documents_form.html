@@ -1,0 +1,30 @@
+{% extends 'admin/base.html' %}
+{% block title %}Загрузить документ{% endblock %}
+{% block page_title %}Загрузить документ{% endblock %}
+
+{% block content %}
+<div class="card">
+    <form method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form-group">
+            <label>Название</label>
+            <input type="text" name="title">
+        </div>
+        <div class="form-group">
+            <label>Тип документа</label>
+            <select name="doc_type">
+                <option value="price">Прайс-лист</option>
+                <option value="cert">Сертификат</option>
+                <option value="manual">Инструкция</option>
+                <option value="other">Другое</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Файл</label>
+            <input type="file" name="file" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Загрузить</button>
+        <a href="{{ url_for('admin.documents_list') }}" class="btn btn-secondary">Отмена</a>
+    </form>
+</div>
+{% endblock %}

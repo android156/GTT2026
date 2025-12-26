@@ -1,0 +1,36 @@
+{% extends 'admin/base.html' %}
+{% block title %}{{ 'Редактировать' if redirect_rule else 'Добавить' }} редирект{% endblock %}
+{% block page_title %}{{ 'Редактировать' if redirect_rule else 'Добавить' }} редирект{% endblock %}
+
+{% block content %}
+<div class="card">
+    <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form-group">
+            <label>Откуда (from_path)</label>
+            <input type="text" name="from_path" value="{{ redirect_rule.from_path if redirect_rule else '' }}" required placeholder="/old-url/">
+        </div>
+        <div class="form-group">
+            <label>Куда (to_path)</label>
+            <input type="text" name="to_path" value="{{ redirect_rule.to_path if redirect_rule else '' }}" required placeholder="/new-url/">
+        </div>
+        <div class="form-group">
+            <label>Код редиректа</label>
+            <select name="code">
+                <option value="301" {{ 'selected' if not redirect_rule or redirect_rule.code == 301 else '' }}>301 (постоянный)</option>
+                <option value="302" {{ 'selected' if redirect_rule and redirect_rule.code == 302 else '' }}>302 (временный)</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Комментарий</label>
+            <input type="text" name="comment" value="{{ redirect_rule.comment if redirect_rule else '' }}">
+        </div>
+        <div class="form-group form-check">
+            <input type="checkbox" name="is_active" id="is_active" {{ 'checked' if redirect_rule and redirect_rule.is_active else 'checked' if not redirect_rule else '' }}>
+            <label for="is_active">Активен</label>
+        </div>
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+        <a href="{{ url_for('admin.redirects_list') }}" class="btn btn-secondary">Отмена</a>
+    </form>
+</div>
+{% endblock %}

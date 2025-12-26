@@ -1,0 +1,28 @@
+{% extends 'admin/base.html' %}
+{% block title %}Заявка #{{ lead.id }}{% endblock %}
+{% block page_title %}Заявка #{{ lead.id }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <p><strong>Дата:</strong> {{ lead.created_at.strftime('%d.%m.%Y %H:%M') if lead.created_at else '-' }}</p>
+    <p><strong>Имя:</strong> {{ lead.name or '-' }}</p>
+    <p><strong>Телефон:</strong> {{ lead.phone or '-' }}</p>
+    <p><strong>Email:</strong> {{ lead.email or '-' }}</p>
+    <p><strong>Источник:</strong> {{ lead.source }}</p>
+    <p><strong>Сообщение:</strong></p>
+    <div style="background: #f5f5f5; padding: 15px; border-radius: 4px; margin-bottom: 15px;">
+        {{ lead.message or '-' }}
+    </div>
+    <form action="{{ url_for('admin.leads_status', id=lead.id) }}" method="POST" style="display: inline-flex; gap: 10px; align-items: center;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label>Статус:</label>
+        <select name="status">
+            <option value="new" {{ 'selected' if lead.status == 'new' else '' }}>Новая</option>
+            <option value="in_progress" {{ 'selected' if lead.status == 'in_progress' else '' }}>В работе</option>
+            <option value="done" {{ 'selected' if lead.status == 'done' else '' }}>Закрыта</option>
+        </select>
+        <button type="submit" class="btn btn-sm btn-primary">Обновить</button>
+    </form>
+    <a href="{{ url_for('admin.leads_list') }}" class="btn btn-secondary" style="margin-left: 15px;">Назад</a>
+</div>
+{% endblock %}

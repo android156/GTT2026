@@ -1,0 +1,31 @@
+{% extends 'admin/base.html' %}
+{% block title %}Страницы{% endblock %}
+{% block page_title %}Страницы{% endblock %}
+
+{% block content %}
+<div class="card">
+    <p style="margin-bottom: 15px;"><a href="{{ url_for('admin.pages_add') }}" class="btn btn-success">Добавить страницу</a></p>
+    <table>
+        <thead>
+            <tr><th>Slug</th><th>URL</th><th>Заголовок</th><th>Опубликовано</th><th>Действия</th></tr>
+        </thead>
+        <tbody>
+            {% for page in pages %}
+            <tr>
+                <td>{{ page.slug }}</td>
+                <td>{{ page.url_path }}</td>
+                <td>{{ page.title }}</td>
+                <td>{{ 'Да' if page.is_published else 'Нет' }}</td>
+                <td class="actions">
+                    <a href="{{ url_for('admin.pages_edit', id=page.id) }}" class="btn btn-sm btn-primary">Изменить</a>
+                    <form action="{{ url_for('admin.pages_delete', id=page.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Удалить?')">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-sm btn-danger">Удалить</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

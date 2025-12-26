@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ seo.title if seo else site_name }}{% endblock %}</title>
+    <meta name="description" content="{% block description %}{{ seo.description if seo else '' }}{% endblock %}">
+    {% if canonical %}<link rel="canonical" href="{{ canonical }}">{% endif %}
+    {% if og %}
+    <meta property="og:title" content="{{ og['og:title'] }}">
+    <meta property="og:description" content="{{ og['og:description'] }}">
+    <meta property="og:url" content="{{ og['og:url'] }}">
+    <meta property="og:type" content="{{ og.get('og:type', 'website') }}">
+    <meta property="og:site_name" content="{{ og.get('og:site_name', site_name) }}">
+    {% if og.get('og:image') %}<meta property="og:image" content="{{ og['og:image'] }}">{% endif %}
+    {% endif %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/variables.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-inner">
+                <a href="/" class="logo">{{ site_name }}</a>
+                <nav class="main-nav">
+                    <ul class="nav-list">
+                        {% for item in menu_items %}
+                        <li class="nav-item">
+                            <a href="{{ item.url }}" 
+                               {% if item.is_external %}target="_blank"{% endif %}
+                               {% if item.target_blank %}target="_blank"{% endif %}
+                               {% if item.nofollow %}rel="nofollow"{% endif %}>
+                                {{ item.title }}
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="container">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                <div class="flash flash-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% endwith %}
+            
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-copyright">
+                    &copy; {{ site_name }}, {{ now().year if now else 2025 }}
+                </div>
+                <div class="footer-contacts">
+                    <a href="/contacts/">Контакты</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    {% block extra_js %}{% endblock %}
+    {% if org_jsonld %}
+    <script type="application/ld+json">{{ org_jsonld|safe }}</script>
+    {% endif %}
+    {% if breadcrumbs_jsonld %}
+    <script type="application/ld+json">{{ breadcrumbs_jsonld|safe }}</script>
+    {% endif %}
+    {% if product_jsonld %}
+    <script type="application/ld+json">{{ product_jsonld|safe }}</script>
+    {% endif %}
+</body>
+</html>

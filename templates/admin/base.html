@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Админка{% endblock %} - ГлавТрубТорг</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f5f5f5; }
+        .admin-layout { display: flex; min-height: 100vh; }
+        .sidebar { width: 250px; background: #2c3e50; color: white; padding: 20px 0; }
+        .sidebar-header { padding: 0 20px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidebar-header h1 { font-size: 18px; }
+        .sidebar-nav { padding: 20px 0; }
+        .sidebar-nav a { display: block; padding: 10px 20px; color: rgba(255,255,255,0.8); text-decoration: none; }
+        .sidebar-nav a:hover, .sidebar-nav a.active { background: rgba(255,255,255,0.1); color: white; }
+        .main-content { flex: 1; padding: 20px 30px; }
+        .header { background: white; margin: -20px -30px 20px; padding: 15px 30px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+        .header h2 { font-size: 20px; color: #333; }
+        .header-actions a { color: #666; text-decoration: none; }
+        .flash { padding: 12px 15px; margin-bottom: 15px; border-radius: 4px; }
+        .flash-success { background: #d4edda; color: #155724; }
+        .flash-danger { background: #f8d7da; color: #721c24; }
+        .flash-warning { background: #fff3cd; color: #856404; }
+        .flash-info { background: #d1ecf1; color: #0c5460; }
+        .card { background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 20px; margin-bottom: 20px; }
+        .card h3 { margin-bottom: 15px; color: #333; }
+        .btn { display: inline-block; padding: 8px 16px; border-radius: 4px; text-decoration: none; border: none; cursor: pointer; font-size: 14px; }
+        .btn-primary { background: #3498db; color: white; }
+        .btn-success { background: #27ae60; color: white; }
+        .btn-danger { background: #e74c3c; color: white; }
+        .btn-secondary { background: #95a5a6; color: white; }
+        .btn-sm { padding: 5px 10px; font-size: 12px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: #f8f9fa; font-weight: 600; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 500; color: #333; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; }
+        .form-group textarea { min-height: 150px; font-family: inherit; }
+        .form-check { display: flex; align-items: center; gap: 8px; }
+        .form-check input { width: auto; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; }
+        .stat-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); text-align: center; }
+        .stat-value { font-size: 32px; font-weight: bold; color: #3498db; }
+        .stat-label { color: #666; margin-top: 5px; }
+        .actions { display: flex; gap: 5px; }
+    </style>
+</head>
+<body>
+    <div class="admin-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>Админка</h1>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="{{ url_for('admin.dashboard') }}">Главная</a>
+                <a href="{{ url_for('admin.pages_list') }}">Страницы</a>
+                <a href="{{ url_for('admin.menu_list') }}">Меню</a>
+                <a href="{{ url_for('admin.categories_list') }}">Категории</a>
+                <a href="{{ url_for('admin.product_lines_list') }}">Линейки</a>
+                <a href="{{ url_for('admin.size_items_list') }}">Типоразмеры</a>
+                <a href="{{ url_for('admin.news_list') }}">Новости</a>
+                <a href="{{ url_for('admin.documents_list') }}">Документы</a>
+                <a href="{{ url_for('admin.leads_list') }}">Заявки</a>
+                <a href="{{ url_for('admin.redirects_list') }}">Редиректы</a>
+                <a href="{{ url_for('admin.settings_list') }}">Настройки</a>
+                <a href="/" target="_blank">Сайт</a>
+            </nav>
+        </aside>
+        <main class="main-content">
+            <div class="header">
+                <h2>{% block page_title %}Панель управления{% endblock %}</h2>
+                <div class="header-actions">
+                    <a href="{{ url_for('admin.logout') }}">Выйти</a>
+                </div>
+            </div>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            {% for category, message in messages %}
+            <div class="flash flash-{{ category }}">{{ message }}</div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+</body>
+</html>

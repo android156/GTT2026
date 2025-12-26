@@ -1,0 +1,53 @@
+{% extends 'admin/base.html' %}
+{% block title %}{{ 'Редактировать' if category else 'Добавить' }} категорию{% endblock %}
+{% block page_title %}{{ 'Редактировать' if category else 'Добавить' }} категорию{% endblock %}
+
+{% block content %}
+<div class="card">
+    <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form-group">
+            <label>Название</label>
+            <input type="text" name="name" value="{{ category.name if category else '' }}" required>
+        </div>
+        <div class="form-group">
+            <label>Slug (латиница, без пробелов)</label>
+            <input type="text" name="slug" value="{{ category.slug if category else '' }}" required pattern="[a-z0-9_-]+">
+        </div>
+        <div class="form-group">
+            <label>Описание (HTML)</label>
+            <textarea name="description_html">{{ category.description_html if category else '' }}</textarea>
+        </div>
+        <div class="form-group">
+            <label>Путь к изображению</label>
+            <input type="text" name="image_path" value="{{ category.image_path if category else '' }}">
+        </div>
+        <div class="form-group">
+            <label>SEO Title</label>
+            <input type="text" name="seo_title" value="{{ category.seo_title if category else '' }}">
+        </div>
+        <div class="form-group">
+            <label>SEO Description</label>
+            <input type="text" name="seo_description" value="{{ category.seo_description if category else '' }}">
+        </div>
+        <div class="form-group">
+            <label>H1</label>
+            <input type="text" name="h1" value="{{ category.h1 if category else '' }}">
+        </div>
+        <div class="form-group">
+            <label>SEO текст (HTML)</label>
+            <textarea name="seo_text_html">{{ category.seo_text_html if category else '' }}</textarea>
+        </div>
+        <div class="form-group">
+            <label>Порядок сортировки</label>
+            <input type="number" name="sort_order" value="{{ category.sort_order if category else 0 }}">
+        </div>
+        <div class="form-group form-check">
+            <input type="checkbox" name="is_active" id="is_active" {{ 'checked' if category and category.is_active else 'checked' if not category else '' }}>
+            <label for="is_active">Активна</label>
+        </div>
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+        <a href="{{ url_for('admin.categories_list') }}" class="btn btn-secondary">Отмена</a>
+    </form>
+</div>
+{% endblock %}

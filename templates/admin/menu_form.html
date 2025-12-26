@@ -1,0 +1,41 @@
+{% extends 'admin/base.html' %}
+{% block title %}{{ 'Редактировать' if item else 'Добавить' }} пункт меню{% endblock %}
+{% block page_title %}{{ 'Редактировать' if item else 'Добавить' }} пункт меню{% endblock %}
+
+{% block content %}
+<div class="card">
+    <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form-group">
+            <label>Название</label>
+            <input type="text" name="title" value="{{ item.title if item else '' }}" required>
+        </div>
+        <div class="form-group">
+            <label>URL</label>
+            <input type="text" name="url" value="{{ item.url if item else '' }}" required>
+        </div>
+        <div class="form-group">
+            <label>Порядок сортировки</label>
+            <input type="number" name="sort_order" value="{{ item.sort_order if item else 0 }}">
+        </div>
+        <div class="form-group form-check">
+            <input type="checkbox" name="is_active" id="is_active" {{ 'checked' if item and item.is_active else 'checked' if not item else '' }}>
+            <label for="is_active">Активен</label>
+        </div>
+        <div class="form-group form-check">
+            <input type="checkbox" name="is_external" id="is_external" {{ 'checked' if item and item.is_external else '' }}>
+            <label for="is_external">Внешняя ссылка</label>
+        </div>
+        <div class="form-group form-check">
+            <input type="checkbox" name="nofollow" id="nofollow" {{ 'checked' if item and item.nofollow else '' }}>
+            <label for="nofollow">Nofollow</label>
+        </div>
+        <div class="form-group form-check">
+            <input type="checkbox" name="target_blank" id="target_blank" {{ 'checked' if item and item.target_blank else '' }}>
+            <label for="target_blank">Открывать в новой вкладке</label>
+        </div>
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+        <a href="{{ url_for('admin.menu_list') }}" class="btn btn-secondary">Отмена</a>
+    </form>
+</div>
+{% endblock %}

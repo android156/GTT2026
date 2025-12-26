@@ -1,0 +1,31 @@
+{% extends 'admin/base.html' %}
+{% block title %}Меню{% endblock %}
+{% block page_title %}Меню{% endblock %}
+
+{% block content %}
+<div class="card">
+    <p style="margin-bottom: 15px;"><a href="{{ url_for('admin.menu_add') }}" class="btn btn-success">Добавить пункт</a></p>
+    <table>
+        <thead>
+            <tr><th>Порядок</th><th>Название</th><th>URL</th><th>Активен</th><th>Действия</th></tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr>
+                <td>{{ item.sort_order }}</td>
+                <td>{{ item.title }}</td>
+                <td>{{ item.url }}</td>
+                <td>{{ 'Да' if item.is_active else 'Нет' }}</td>
+                <td class="actions">
+                    <a href="{{ url_for('admin.menu_edit', id=item.id) }}" class="btn btn-sm btn-primary">Изменить</a>
+                    <form action="{{ url_for('admin.menu_delete', id=item.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Удалить?')">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-sm btn-danger">Удалить</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

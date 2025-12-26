@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<nav class="breadcrumbs">
+    {% for crumb in breadcrumbs %}
+    {% if crumb.url %}
+    <a href="{{ crumb.url }}">{{ crumb.name }}</a> /
+    {% else %}
+    <span>{{ crumb.name }}</span>
+    {% endif %}
+    {% endfor %}
+</nav>
+
+<h1>{{ seo.h1 }}</h1>
+
+{% if product_line.description_html %}
+<div class="description">{{ product_line.description_html|safe }}</div>
+{% endif %}
+
+{% if product_line.image_path %}
+<img src="{{ product_line.image_path }}" alt="{{ product_line.name }}" class="product-line-main-img">
+{% endif %}
+
+{% if size_items %}
+<h2>Типоразмеры</h2>
+<table class="size-items-table">
+    <thead>
+        <tr>
+            <th>Размер</th>
+            <th>Артикул</th>
+            <th>Цена</th>
+            <th>Наличие</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for si in size_items %}
+        <tr>
+            <td>
+                <a href="/{{ category.slug }}/{{ product_line.slug }}/{{ si.size_slug }}/">
+                    {{ si.size_text }}
+                </a>
+            </td>
+            <td>{{ si.sku or '-' }}</td>
+            <td>
+                {% if si.price %}
+                {{ "%.2f"|format(si.price) }} {{ si.currency }}{% if si.unit %}/{{ si.unit }}{% endif %}
+                {% else %}
+                По запросу
+                {% endif %}
+            </td>
+            <td>
+                {% if si.in_stock %}
+                <span class="in-stock">В наличии</span>
+                {% else %}
+                <span class="out-of-stock">Под заказ</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Типоразмеры не добавлены</p>
+{% endif %}
+
+{% if seo.seo_text %}
+<div class="seo-text">{{ seo.seo_text|safe }}</div>
+{% endif %}
+{% endblock %}

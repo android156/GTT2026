@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<nav class="breadcrumbs">
+    {% for crumb in breadcrumbs %}
+    {% if crumb.url %}
+    <a href="{{ crumb.url }}">{{ crumb.name }}</a> /
+    {% else %}
+    <span>{{ crumb.name }}</span>
+    {% endif %}
+    {% endfor %}
+</nav>
+
+<h1>{{ seo.h1 }}</h1>
+
+{% if category.description_html %}
+<div class="description">{{ category.description_html|safe }}</div>
+{% endif %}
+
+{% if category.image_path %}
+<img src="{{ category.image_path }}" alt="{{ category.name }}" class="category-main-img">
+{% endif %}
+
+{% if product_lines %}
+<div class="product-lines-grid">
+    {% for pl in product_lines %}
+    <a href="/{{ category.slug }}/{{ pl.slug }}/" class="product-line-card">
+        {% if pl.image_path %}
+        <img src="{{ pl.image_path }}" alt="{{ pl.name }}" class="product-line-img">
+        {% else %}
+        <div class="product-line-img placeholder"></div>
+        {% endif %}
+        <h3>{{ pl.name }}</h3>
+    </a>
+    {% endfor %}
+</div>
+{% else %}
+<p>Товары отсутствуют</p>
+{% endif %}
+
+{% if seo.seo_text %}
+<div class="seo-text">{{ seo.seo_text|safe }}</div>
+{% endif %}
+{% endblock %}

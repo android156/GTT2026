@@ -1,0 +1,20 @@
+{% extends 'admin/base.html' %}
+{% block title %}Импорт CSV - {{ entity }}{% endblock %}
+{% block page_title %}Импорт CSV: {{ entity }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <form method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form-group">
+            <label>CSV файл</label>
+            <input type="file" name="csv_file" accept=".csv" required>
+        </div>
+        <p style="margin-bottom: 15px; color: #666;">
+            Формат: UTF-8, разделитель — запятая. Первая строка — заголовки.
+        </p>
+        <button type="submit" class="btn btn-primary">Импортировать</button>
+        <a href="javascript:history.back()" class="btn btn-secondary">Отмена</a>
+    </form>
+</div>
+{% endblock %}

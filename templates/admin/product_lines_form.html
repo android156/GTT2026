@@ -1,0 +1,61 @@
+{% extends 'admin/base.html' %}
+{% block title %}{{ 'Редактировать' if product_line else 'Добавить' }} линейку{% endblock %}
+{% block page_title %}{{ 'Редактировать' if product_line else 'Добавить' }} линейку{% endblock %}
+
+{% block content %}
+<div class="card">
+    <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form-group">
+            <label>Категория</label>
+            <select name="category_id" required>
+                {% for cat in categories %}
+                <option value="{{ cat.id }}" {{ 'selected' if product_line and product_line.category_id == cat.id else '' }}>{{ cat.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Название</label>
+            <input type="text" name="name" value="{{ product_line.name if product_line else '' }}" required>
+        </div>
+        <div class="form-group">
+            <label>Slug</label>
+            <input type="text" name="slug" value="{{ product_line.slug if product_line else '' }}" required pattern="[a-z0-9_-]+">
+        </div>
+        <div class="form-group">
+            <label>Описание (HTML)</label>
+            <textarea name="description_html">{{ product_line.description_html if product_line else '' }}</textarea>
+        </div>
+        <div class="form-group">
+            <label>Путь к изображению</label>
+            <input type="text" name="image_path" value="{{ product_line.image_path if product_line else '' }}">
+        </div>
+        <div class="form-group">
+            <label>SEO Title</label>
+            <input type="text" name="seo_title" value="{{ product_line.seo_title if product_line else '' }}">
+        </div>
+        <div class="form-group">
+            <label>SEO Description</label>
+            <input type="text" name="seo_description" value="{{ product_line.seo_description if product_line else '' }}">
+        </div>
+        <div class="form-group">
+            <label>H1</label>
+            <input type="text" name="h1" value="{{ product_line.h1 if product_line else '' }}">
+        </div>
+        <div class="form-group">
+            <label>SEO текст (HTML)</label>
+            <textarea name="seo_text_html">{{ product_line.seo_text_html if product_line else '' }}</textarea>
+        </div>
+        <div class="form-group">
+            <label>Порядок сортировки</label>
+            <input type="number" name="sort_order" value="{{ product_line.sort_order if product_line else 0 }}">
+        </div>
+        <div class="form-group form-check">
+            <input type="checkbox" name="is_active" id="is_active" {{ 'checked' if product_line and product_line.is_active else 'checked' if not product_line else '' }}>
+            <label for="is_active">Активна</label>
+        </div>
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+        <a href="{{ url_for('admin.product_lines_list') }}" class="btn btn-secondary">Отмена</a>
+    </form>
+</div>
+{% endblock %}

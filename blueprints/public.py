@@ -1,0 +1,340 @@
+from flask import Blueprint, render_template, request, redirect, url_for, flash, abort, Response
+from extensions import db
+from models import Page, MenuItem, Category, ProductLine, SizeItem, News, Lead, Setting
+from services.seo import get_page_seo, get_canonical_url, get_og_tags
+from services.schema import generate_product_jsonld, generate_breadcrumb_jsonld, generate_organization_jsonld
+from config import RESERVED_SLUGS, Config
+from datetime import datetime
+
+public_bp = Blueprint('public', __name__)
+
+
+def get_menu_items():
+    return MenuItem.query.filter_by(is_active=True).order_by(MenuItem.sort_order).all()
+
+
+@public_bp.context_processor
+def inject_menu():
+    return {'menu_items': get_menu_items(), 'site_name': Config.SITE_NAME}
+
+
+@public_bp.route('/')
+def index():
+    news = News.query.filter_by(is_published=True).order_by(News.date.desc()).limit(5).all()
+    categories = Category.query.filter_by(is_active=True).order_by(Category.sort_order).all()
+    
+    seo = {
+        'title': f'{Config.SITE_NAME} — трубы, изоляция, комплектующие',
+        'description': f'{Config.SITE_NAME} — продажа труб, изоляционных материалов и комплектующих. Доставка по России.',
+        'h1': f'Добро пожаловать в {Config.SITE_NAME}'
+    }
+    
+    return render_template('public/index.html',
+                         news=news,
+                         categories=categories,
+                         seo=seo,
+                         canonical=get_canonical_url('/'),
+                         og=get_og_tags(seo['title'], seo['description']),
+                         org_jsonld=generate_organization_jsonld())
+
+
+@public_bp.route('/catalog/')
+def catalog():
+    categories = Category.query.filter_by(is_active=True).order_by(Category.sort_order).all()
+    
+    seo = {
+        'title': f'Каталог продукции — {Config.SITE_NAME}',
+        'description': f'Каталог продукции {Config.SITE_NAME}. Трубы, изоляция, комплектующие.',
+        'h1': 'Каталог продукции'
+    }
+    
+    breadcrumbs = [
+        {'name': 'Главная', 'url': '/'},
+        {'name': 'Каталог', 'url': None}
+    ]
+    
+    return render_template('public/catalog.html',
+                         categories=categories,
+                         seo=seo,
+                         breadcrumbs=breadcrumbs,
+                         breadcrumbs_jsonld=generate_breadcrumb_jsonld(breadcrumbs),
+                         canonical=get_canonical_url('/catalog/'),
+                         og=get_og_tags(seo['title'], seo['description']))
+
+
+@public_bp.route('/news/')
+def news_list():
+    news = News.query.filter_by(is_published=True).order_by(News.date.desc()).all()
+    
+    seo = {
+        'title': f'Новости — {Config.SITE_NAME}',
+        'description': f'Новости компании {Config.SITE_NAME}',
+        'h1': 'Новости'
+    }
+    
+    breadcrumbs = [
+        {'name': 'Главная', 'url': '/'},
+        {'name': 'Новости', 'url': None}
+    ]
+    
+    return render_template('public/news_list.html',
+                         news=news,
+                         seo=seo,
+                         breadcrumbs=breadcrumbs,
+                         breadcrumbs_jsonld=generate_breadcrumb_jsonld(breadcrumbs),
+                         canonical=get_canonical_url('/news/'),
+                         og=get_og_tags(seo['title'], seo['description']))
+
+
+@public_bp.route('/news/<slug>/')
+def news_detail(slug):
+    news_item = News.query.filter_by(slug=slug, is_published=True).first_or_404()
+    
+    seo = get_page_seo(news_item)
+    
+    breadcrumbs = [
+        {'name': 'Главная', 'url': '/'},
+        {'name': 'Новости', 'url': '/news/'},
+        {'name': news_item.title, 'url': None}
+    ]
+    
+    return render_template('public/news_detail.html',
+                         news=news_item,
+                         seo=seo,
+                         breadcrumbs=breadcrumbs,
+                         breadcrumbs_jsonld=generate_breadcrumb_jsonld(breadcrumbs),
+                         canonical=get_canonical_url(f'/news/{slug}/'),
+                         og=get_og_tags(seo['title'], seo['description']))
+
+
+@public_bp.route('/<path:url_path>')
+def static_page(url_path):
+    url_path = '/' + url_path.strip('/')  + '/'
+    
+    page = Page.query.filter_by(url_path=url_path, is_published=True).first()
+    
+    if page:
+        seo = get_page_seo(page)
+        
+        breadcrumbs = [
+            {'name': 'Главная', 'url': '/'},
+            {'name': page.title, 'url': None}
+        ]
+        
+        return render_template('public/page.html',
+                             page=page,
+                             seo=seo,
+                             breadcrumbs=breadcrumbs,
+                             breadcrumbs_jsonld=generate_breadcrumb_jsonld(breadcrumbs),
+                             canonical=get_canonical_url(url_path),
+                             og=get_og_tags(seo['title'], seo['description']))
+    
+    parts = url_path.strip('/').split('/')
+    
+    if len(parts) >= 1:
+        category_slug = parts[0]
+        
+        if category_slug in RESERVED_SLUGS:
+            abort(404)
+        
+        category = Category.query.filter_by(slug=category_slug, is_active=True).first()
+        
+        if category:
+            if len(parts) == 1:
+                return render_category(category)
+            elif len(parts) == 2:
+                product_slug = parts[1]
+                product_line = ProductLine.query.filter_by(
+                    category_id=category.id, 
+                    slug=product_slug, 
+                    is_active=True
+                ).first_or_404()
+                return render_product_line(category, product_line)
+            elif len(parts) == 3:
+                product_slug = parts[1]
+                size_slug = parts[2]
+                product_line = ProductLine.query.filter_by(
+                    category_id=category.id, 
+                    slug=product_slug, 
+                    is_active=True
+                ).first_or_404()
+                size_item = SizeItem.query.filter_by(
+                    product_line_id=product_line.id, 
+                    size_slug=size_slug
+                ).first_or_404()
+                return render_size_item(category, product_line, size_item)
+    
+    abort(404)
+
+
+def render_category(category):
+    product_lines = ProductLine.query.filter_by(
+        category_id=category.id, 
+        is_active=True
+    ).order_by(ProductLine.sort_order).all()
+    
+    seo = get_page_seo(category)
+    
+    breadcrumbs = [
+        {'name': 'Главная', 'url': '/'},
+        {'name': 'Каталог', 'url': '/catalog/'},
+        {'name': category.name, 'url': None}
+    ]
+    
+    return render_template('public/category.html',
+                         category=category,
+                         product_lines=product_lines,
+                         seo=seo,
+                         breadcrumbs=breadcrumbs,
+                         breadcrumbs_jsonld=generate_breadcrumb_jsonld(breadcrumbs),
+                         canonical=get_canonical_url(f'/{category.slug}/'),
+                         og=get_og_tags(seo['title'], seo['description']))
+
+
+def render_product_line(category, product_line):
+    size_items = SizeItem.query.filter_by(
+        product_line_id=product_line.id
+    ).order_by(SizeItem.size_text).all()
+    
+    seo = get_page_seo(product_line)
+    
+    breadcrumbs = [
+        {'name': 'Главная', 'url': '/'},
+        {'name': 'Каталог', 'url': '/catalog/'},
+        {'name': category.name, 'url': f'/{category.slug}/'},
+        {'name': product_line.name, 'url': None}
+    ]
+    
+    return render_template('public/product_line.html',
+                         category=category,
+                         product_line=product_line,
+                         size_items=size_items,
+                         seo=seo,
+                         breadcrumbs=breadcrumbs,
+                         breadcrumbs_jsonld=generate_breadcrumb_jsonld(breadcrumbs),
+                         canonical=get_canonical_url(f'/{category.slug}/{product_line.slug}/'),
+                         og=get_og_tags(seo['title'], seo['description']))
+
+
+def render_size_item(category, product_line, size_item):
+    seo = {
+        'title': size_item.full_name or f"{product_line.name} {size_item.size_text}",
+        'description': f"Купить {size_item.full_name or product_line.name} {size_item.size_text}. Цена, характеристики, наличие. {Config.SITE_NAME}.",
+        'h1': size_item.full_name or f"{product_line.name} {size_item.size_text}"
+    }
+    
+    breadcrumbs = [
+        {'name': 'Главная', 'url': '/'},
+        {'name': 'Каталог', 'url': '/catalog/'},
+        {'name': category.name, 'url': f'/{category.slug}/'},
+        {'name': product_line.name, 'url': f'/{category.slug}/{product_line.slug}/'},
+        {'name': size_item.size_text, 'url': None}
+    ]
+    
+    product_jsonld = generate_product_jsonld(size_item, product_line, category)
+    
+    return render_template('public/size_item.html',
+                         category=category,
+                         product_line=product_line,
+                         size_item=size_item,
+                         seo=seo,
+                         breadcrumbs=breadcrumbs,
+                         breadcrumbs_jsonld=generate_breadcrumb_jsonld(breadcrumbs),
+                         product_jsonld=product_jsonld,
+                         canonical=get_canonical_url(f'/{category.slug}/{product_line.slug}/{size_item.size_slug}/'),
+                         og=get_og_tags(seo['title'], seo['description']))
+
+
+@public_bp.route('/lead/', methods=['POST'])
+def submit_lead():
+    name = request.form.get('name', '')
+    phone = request.form.get('phone', '')
+    email = request.form.get('email', '')
+    message = request.form.get('message', '')
+    
+    lead = Lead(
+        name=name,
+        phone=phone,
+        email=email,
+        message=message,
+        source='site',
+        status='new'
+    )
+    db.session.add(lead)
+    db.session.commit()
+    
+    flash('Заявка успешно отправлена! Мы свяжемся с вами в ближайшее время.', 'success')
+    
+    referer = request.referrer or url_for('public.index')
+    return redirect(referer)
+
+
+@public_bp.route('/sitemap.xml')
+def sitemap():
+    pages = []
+    
+    static_pages = Page.query.filter_by(is_published=True).all()
+    for page in static_pages:
+        pages.append({
+            'loc': get_canonical_url(page.url_path),
+            'lastmod': page.updated_at.strftime('%Y-%m-%d') if page.updated_at else None,
+            'priority': '0.8'
+        })
+    
+    pages.append({
+        'loc': get_canonical_url('/'),
+        'priority': '1.0'
+    })
+    pages.append({
+        'loc': get_canonical_url('/catalog/'),
+        'priority': '0.9'
+    })
+    pages.append({
+        'loc': get_canonical_url('/news/'),
+        'priority': '0.7'
+    })
+    
+    categories = Category.query.filter_by(is_active=True).all()
+    for cat in categories:
+        pages.append({
+            'loc': get_canonical_url(f'/{cat.slug}/'),
+            'priority': '0.8'
+        })
+        
+        for pl in cat.product_lines.filter_by(is_active=True):
+            pages.append({
+                'loc': get_canonical_url(f'/{cat.slug}/{pl.slug}/'),
+                'priority': '0.7'
+            })
+            
+            for si in pl.size_items:
+                pages.append({
+                    'loc': get_canonical_url(f'/{cat.slug}/{pl.slug}/{si.size_slug}/'),
+                    'lastmod': si.updated_at.strftime('%Y-%m-%d') if si.updated_at else None,
+                    'priority': '0.6'
+                })
+    
+    news = News.query.filter_by(is_published=True).all()
+    for n in news:
+        pages.append({
+            'loc': get_canonical_url(f'/news/{n.slug}/'),
+            'lastmod': n.date.strftime('%Y-%m-%d') if n.date else None,
+            'priority': '0.5'
+        })
+    
+    sitemap_xml = render_template('sitemap.xml', pages=pages)
+    return Response(sitemap_xml, mimetype='application/xml')
+
+
+@public_bp.route('/robots.txt')
+def robots():
+    from services.seo import get_absolute_url
+    robots_txt = f"""User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /login/
+Disallow: /logout/
+
+Sitemap: {get_absolute_url('/sitemap.xml')}
+"""
+    return Response(robots_txt, mimetype='text/plain')

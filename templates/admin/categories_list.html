@@ -1,0 +1,34 @@
+{% extends 'admin/base.html' %}
+{% block title %}Категории{% endblock %}
+{% block page_title %}Категории{% endblock %}
+
+{% block content %}
+<div class="card">
+    <p style="margin-bottom: 15px;">
+        <a href="{{ url_for('admin.categories_add') }}" class="btn btn-success">Добавить категорию</a>
+        <a href="{{ url_for('admin.categories_import') }}" class="btn btn-secondary">Импорт CSV</a>
+    </p>
+    <table>
+        <thead>
+            <tr><th>Порядок</th><th>Название</th><th>Slug</th><th>Активна</th><th>Действия</th></tr>
+        </thead>
+        <tbody>
+            {% for cat in categories %}
+            <tr>
+                <td>{{ cat.sort_order }}</td>
+                <td>{{ cat.name }}</td>
+                <td>{{ cat.slug }}</td>
+                <td>{{ 'Да' if cat.is_active else 'Нет' }}</td>
+                <td class="actions">
+                    <a href="{{ url_for('admin.categories_edit', id=cat.id) }}" class="btn btn-sm btn-primary">Изменить</a>
+                    <form action="{{ url_for('admin.categories_delete', id=cat.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Удалить категорию и все её линейки?')">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-sm btn-danger">Удалить</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

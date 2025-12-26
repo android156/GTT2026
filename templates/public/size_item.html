@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<nav class="breadcrumbs">
+    {% for crumb in breadcrumbs %}
+    {% if crumb.url %}
+    <a href="{{ crumb.url }}">{{ crumb.name }}</a> /
+    {% else %}
+    <span>{{ crumb.name }}</span>
+    {% endif %}
+    {% endfor %}
+</nav>
+
+<div class="product-detail">
+    <div class="product-main">
+        {% if size_item.image_path %}
+        <img src="{{ size_item.image_path }}" alt="{{ seo.h1 }}" class="product-img">
+        {% elif product_line.image_path %}
+        <img src="{{ product_line.image_path }}" alt="{{ seo.h1 }}" class="product-img">
+        {% else %}
+        <div class="product-img placeholder"></div>
+        {% endif %}
+    </div>
+    
+    <div class="product-info">
+        <h1>{{ seo.h1 }}</h1>
+        
+        <table class="product-specs">
+            <tr>
+                <th>Артикул (SKU):</th>
+                <td>{{ size_item.sku or '-' }}</td>
+            </tr>
+            <tr>
+                <th>Размер:</th>
+                <td>{{ size_item.size_text }}</td>
+            </tr>
+            <tr>
+                <th>Цена:</th>
+                <td>
+                    {% if size_item.price %}
+                    <strong class="price">{{ "%.2f"|format(size_item.price) }} {{ size_item.currency }}</strong>
+                    {% if size_item.unit %} / {{ size_item.unit }}{% endif %}
+                    {% else %}
+                    По запросу
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <th>Единица измерения:</th>
+                <td>{{ size_item.unit or '-' }}</td>
+            </tr>
+            <tr>
+                <th>Наличие:</th>
+                <td>
+                    {% if size_item.in_stock %}
+                    <span class="in-stock">В наличии</span>
+                    {% else %}
+                    <span class="out-of-stock">Под заказ</span>
+                    {% endif %}
+                </td>
+            </tr>
+        </table>
+        
+        <div class="product-actions">
+            <h3>Оставить заявку</h3>
+            <form action="{{ url_for('public.submit_lead') }}" method="POST" class="lead-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="message" value="Заявка на товар: {{ seo.h1 }}">
+                <div class="form-row">
+                    <input type="text" name="name" placeholder="Ваше имя" required>
+                    <input type="tel" name="phone" placeholder="Телефон" required>
+                </div>
+                <input type="email" name="email" placeholder="Email">
+                <button type="submit" class="btn btn-primary">Отправить заявку</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

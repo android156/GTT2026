@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block title %}Ошибка сервера — {{ site_name }}{% endblock %}
+
+{% block content %}
+<div style="text-align: center; padding: 60px 20px;">
+    <h1>500</h1>
+    <p style="font-size: 18px; color: #666; margin-bottom: 20px;">Внутренняя ошибка сервера</p>
+    <a href="/" class="btn btn-primary">На главную</a>
+</div>
+{% endblock %}

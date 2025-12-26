@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<nav class="breadcrumbs">
+    {% for crumb in breadcrumbs %}
+    {% if crumb.url %}
+    <a href="{{ crumb.url }}">{{ crumb.name }}</a> /
+    {% else %}
+    <span>{{ crumb.name }}</span>
+    {% endif %}
+    {% endfor %}
+</nav>
+
+<h1>{{ seo.h1 }}</h1>
+
+{% if categories %}
+<div class="categories-grid">
+    {% for cat in categories %}
+    <a href="/{{ cat.slug }}/" class="category-card">
+        {% if cat.image_path %}
+        <img src="{{ cat.image_path }}" alt="{{ cat.name }}" class="category-img">
+        {% else %}
+        <div class="category-img placeholder"></div>
+        {% endif %}
+        <h3>{{ cat.name }}</h3>
+        {% if cat.description_html %}
+        <p class="category-desc">{{ cat.description_html|striptags|truncate(100) }}</p>
+        {% endif %}
+    </a>
+    {% endfor %}
+</div>
+{% else %}
+<p>Каталог пуст</p>
+{% endif %}
+{% endblock %}

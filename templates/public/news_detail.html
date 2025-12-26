@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<nav class="breadcrumbs">
+    {% for crumb in breadcrumbs %}
+    {% if crumb.url %}
+    <a href="{{ crumb.url }}">{{ crumb.name }}</a> /
+    {% else %}
+    <span>{{ crumb.name }}</span>
+    {% endif %}
+    {% endfor %}
+</nav>
+
+<article class="news-detail">
+    <div class="news-date">{{ news.date.strftime('%d.%m.%Y') if news.date else '' }}</div>
+    <h1>{{ seo.h1 }}</h1>
+    
+    <div class="news-content">
+        {{ news.content_html|safe }}
+    </div>
+    
+    {% if seo.seo_text %}
+    <div class="seo-text">{{ seo.seo_text|safe }}</div>
+    {% endif %}
+</article>
+
+<div class="news-back">
+    <a href="/news/" class="btn btn-secondary">Все новости</a>
+</div>
+{% endblock %}

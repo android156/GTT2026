@@ -1,0 +1,66 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Панель управления{% endblock %}
+{% block page_title %}Панель управления{% endblock %}
+
+{% block content %}
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-value">{{ stats.pages }}</div>
+        <div class="stat-label">Страниц</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ stats.categories }}</div>
+        <div class="stat-label">Категорий</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ stats.product_lines }}</div>
+        <div class="stat-label">Линеек</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ stats.size_items }}</div>
+        <div class="stat-label">Типоразмеров</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ stats.news }}</div>
+        <div class="stat-label">Новостей</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ stats.leads }}</div>
+        <div class="stat-label">Новых заявок</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ stats.redirects }}</div>
+        <div class="stat-label">Редиректов</div>
+    </div>
+</div>
+
+{% if recent_leads %}
+<div class="card">
+    <h3>Последние заявки</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Дата</th>
+                <th>Имя</th>
+                <th>Телефон</th>
+                <th>Email</th>
+                <th>Источник</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for lead in recent_leads %}
+            <tr>
+                <td>{{ lead.created_at.strftime('%d.%m.%Y %H:%M') if lead.created_at else '-' }}</td>
+                <td>{{ lead.name or '-' }}</td>
+                <td>{{ lead.phone or '-' }}</td>
+                <td>{{ lead.email or '-' }}</td>
+                <td>{{ lead.source }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <p style="margin-top: 15px;"><a href="{{ url_for('admin.leads_list') }}">Все заявки</a></p>
+</div>
+{% endif %}
+{% endblock %}

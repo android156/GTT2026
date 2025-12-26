@@ -1,0 +1,34 @@
+{% extends 'admin/base.html' %}
+{% block title %}Новости{% endblock %}
+{% block page_title %}Новости{% endblock %}
+
+{% block content %}
+<div class="card">
+    <p style="margin-bottom: 15px;">
+        <a href="{{ url_for('admin.news_add') }}" class="btn btn-success">Добавить новость</a>
+        <a href="{{ url_for('admin.news_import') }}" class="btn btn-secondary">Импорт CSV</a>
+    </p>
+    <table>
+        <thead>
+            <tr><th>Дата</th><th>Заголовок</th><th>Slug</th><th>Опубликовано</th><th>Действия</th></tr>
+        </thead>
+        <tbody>
+            {% for n in news %}
+            <tr>
+                <td>{{ n.date.strftime('%d.%m.%Y') if n.date else '-' }}</td>
+                <td>{{ n.title }}</td>
+                <td>{{ n.slug }}</td>
+                <td>{{ 'Да' if n.is_published else 'Нет' }}</td>
+                <td class="actions">
+                    <a href="{{ url_for('admin.news_edit', id=n.id) }}" class="btn btn-sm btn-primary">Изменить</a>
+                    <form action="{{ url_for('admin.news_delete', id=n.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Удалить?')">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-sm btn-danger">Удалить</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

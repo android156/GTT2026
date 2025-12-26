@@ -1,0 +1,32 @@
+{% extends 'admin/base.html' %}
+{% block title %}Документы{% endblock %}
+{% block page_title %}Документы{% endblock %}
+
+{% block content %}
+<div class="card">
+    <p style="margin-bottom: 15px;">
+        <a href="{{ url_for('admin.documents_upload') }}" class="btn btn-success">Загрузить документ</a>
+    </p>
+    <table>
+        <thead>
+            <tr><th>Название</th><th>Тип</th><th>Файл</th><th>Дата</th><th>Действия</th></tr>
+        </thead>
+        <tbody>
+            {% for doc in documents %}
+            <tr>
+                <td>{{ doc.title }}</td>
+                <td>{{ doc.doc_type }}</td>
+                <td><a href="/{{ doc.file_path }}" target="_blank">Скачать</a></td>
+                <td>{{ doc.created_at.strftime('%d.%m.%Y') if doc.created_at else '-' }}</td>
+                <td class="actions">
+                    <form action="{{ url_for('admin.documents_delete', id=doc.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Удалить?')">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-sm btn-danger">Удалить</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

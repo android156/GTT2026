@@ -1,0 +1,49 @@
+{% extends 'admin/base.html' %}
+{% block title %}{{ 'Редактировать' if page else 'Добавить' }} страницу{% endblock %}
+{% block page_title %}{{ 'Редактировать' if page else 'Добавить' }} страницу{% endblock %}
+
+{% block content %}
+<div class="card">
+    <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form-group">
+            <label>Slug</label>
+            <input type="text" name="slug" value="{{ page.slug if page else '' }}" required>
+        </div>
+        <div class="form-group">
+            <label>URL путь (например /about/)</label>
+            <input type="text" name="url_path" value="{{ page.url_path if page else '' }}" required>
+        </div>
+        <div class="form-group">
+            <label>Заголовок</label>
+            <input type="text" name="title" value="{{ page.title if page else '' }}" required>
+        </div>
+        <div class="form-group">
+            <label>Контент (HTML)</label>
+            <textarea name="content_html">{{ page.content_html if page else '' }}</textarea>
+        </div>
+        <div class="form-group">
+            <label>SEO Title</label>
+            <input type="text" name="seo_title" value="{{ page.seo_title if page else '' }}">
+        </div>
+        <div class="form-group">
+            <label>SEO Description</label>
+            <input type="text" name="seo_description" value="{{ page.seo_description if page else '' }}">
+        </div>
+        <div class="form-group">
+            <label>H1</label>
+            <input type="text" name="h1" value="{{ page.h1 if page else '' }}">
+        </div>
+        <div class="form-group">
+            <label>SEO текст (HTML)</label>
+            <textarea name="seo_text_html">{{ page.seo_text_html if page else '' }}</textarea>
+        </div>
+        <div class="form-group form-check">
+            <input type="checkbox" name="is_published" id="is_published" {{ 'checked' if page and page.is_published else '' }}>
+            <label for="is_published">Опубликовано</label>
+        </div>
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+        <a href="{{ url_for('admin.pages_list') }}" class="btn btn-secondary">Отмена</a>
+    </form>
+</div>
+{% endblock %}

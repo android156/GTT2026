@@ -1,0 +1,37 @@
+{% extends 'admin/base.html' %}
+{% block title %}Настройки{% endblock %}
+{% block page_title %}Настройки{% endblock %}
+
+{% block content %}
+<div class="card">
+    <form method="POST" action="{{ url_for('admin.settings_save') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        
+        <h3>Telegram</h3>
+        <div class="form-group">
+            <label>TELEGRAM_TOKEN</label>
+            <input type="text" name="setting_TELEGRAM_TOKEN" value="{% for s in settings %}{% if s.key == 'TELEGRAM_TOKEN' %}{{ s.value }}{% endif %}{% endfor %}">
+        </div>
+        <div class="form-group">
+            <label>TELEGRAM_CHAT_ID</label>
+            <input type="text" name="setting_TELEGRAM_CHAT_ID" value="{% for s in settings %}{% if s.key == 'TELEGRAM_CHAT_ID' %}{{ s.value }}{% endif %}{% endfor %}">
+        </div>
+        
+        <h3>Контакты</h3>
+        <div class="form-group">
+            <label>Телефон</label>
+            <input type="text" name="setting_PHONE" value="{% for s in settings %}{% if s.key == 'PHONE' %}{{ s.value }}{% endif %}{% endfor %}">
+        </div>
+        <div class="form-group">
+            <label>Email</label>
+            <input type="text" name="setting_EMAIL" value="{% for s in settings %}{% if s.key == 'EMAIL' %}{{ s.value }}{% endif %}{% endfor %}">
+        </div>
+        <div class="form-group">
+            <label>Адрес</label>
+            <input type="text" name="setting_ADDRESS" value="{% for s in settings %}{% if s.key == 'ADDRESS' %}{{ s.value }}{% endif %}{% endfor %}">
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Сохранить настройки</button>
+    </form>
+</div>
+{% endblock %}

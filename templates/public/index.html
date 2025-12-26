@@ -1,14 +1,41 @@
 {% extends 'base.html' %}
 
-{% block content %}
+{% block hero %}
 <section class="hero">
-    <h1>{{ seo.h1 }}</h1>
-    <p class="hero-desc">Поставки труб, изоляционных материалов и комплектующих по всей России</p>
+    <div class="container">
+        <div class="hero-content">
+            <h1>ГЛАВНЫЙ <span>ПО ГИБКИМ ТРУБАМ</span></h1>
+            <p class="hero-desc">Поставки предизолированных гибких труб для отопления, ГВС и ХВС. Работаем напрямую с производителями: ИЗОПРОФЛЕКС, ИЗОКОМ, ТВЭЛ-ПЭКС, UPONOR.</p>
+            <div class="hero-actions">
+                <a href="/catalog/" class="btn btn-primary">Каталог продукции</a>
+                <a href="/contacts/" class="btn btn-secondary">Связаться с нами</a>
+            </div>
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <div class="hero-stat-num">15+</div>
+                    <div class="hero-stat-label">Лет на рынке</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="hero-stat-num">500+</div>
+                    <div class="hero-stat-label">Проектов</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="hero-stat-num">4</div>
+                    <div class="hero-stat-label">Бренда</div>
+                </div>
+            </div>
+        </div>
+    </div>
 </section>
+{% endblock %}
 
-{% if categories %}
-<section class="section categories-section">
-    <h2>Продукция</h2>
+{% block content %}
+<section class="section">
+    <div class="section-header">
+        <h2>Продукция</h2>
+        <p>Предизолированные трубы от ведущих производителей</p>
+    </div>
+    {% if categories %}
     <div class="categories-grid">
         {% for cat in categories %}
         <a href="/{{ cat.slug }}/" class="category-card">
@@ -17,44 +44,97 @@
             {% else %}
             <div class="category-img placeholder"></div>
             {% endif %}
-            <h3>{{ cat.name }}</h3>
+            <div class="category-body">
+                <h3>{{ cat.name }}</h3>
+                {% if cat.seo_description %}
+                <p class="category-desc">{{ cat.seo_description[:100] }}{% if cat.seo_description|length > 100 %}...{% endif %}</p>
+                {% endif %}
+            </div>
         </a>
         {% endfor %}
     </div>
     <div class="section-more">
-        <a href="/catalog/" class="btn btn-primary">Весь каталог</a>
+        <a href="/catalog/" class="btn btn-outline">Весь каталог</a>
+    </div>
+    {% endif %}
+</section>
+
+<section class="features section-dark">
+    <div class="container">
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">&#10003;</div>
+                <h3>Прямые поставки</h3>
+                <p>Работаем напрямую с заводами-производителями</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">&#128666;</div>
+                <h3>Доставка по РФ</h3>
+                <p>Доставляем в любой регион России</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">&#128200;</div>
+                <h3>Лучшие цены</h3>
+                <p>Специальные условия для оптовиков</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">&#128222;</div>
+                <h3>Консультации</h3>
+                <p>Поможем подобрать оптимальное решение</p>
+            </div>
+        </div>
     </div>
 </section>
-{% endif %}
+
+<div class="gallery">
+    <img src="{{ url_for('static', filename='images/WhatsApp_Image_2019-10-21_at_13.44.44_1766758697538.jpeg') }}" alt="Трубы ГПИ">
+    <img src="{{ url_for('static', filename='images/WhatsApp_Image_2019-05-16_at_17.51.50_1766758697538.jpeg') }}" alt="Монтаж труб">
+    <img src="{{ url_for('static', filename='images/WhatsApp_Image_2020-03-04_at_20.54.14_(4)_1766758697538.jpeg') }}" alt="Прокладка трубопровода">
+    <img src="{{ url_for('static', filename='images/WhatsApp_Image_2019-10-21_at_13.49.58_1766758697538.jpeg') }}" alt="Доставка труб">
+</div>
 
 {% if news %}
-<section class="section news-section">
-    <h2>Новости</h2>
+<section class="section">
+    <div class="section-header">
+        <h2>Новости</h2>
+    </div>
     <div class="news-grid">
         {% for item in news %}
         <a href="/news/{{ item.slug }}/" class="news-card">
-            <div class="news-date">{{ item.date.strftime('%d.%m.%Y') if item.date else '' }}</div>
-            <h3>{{ item.title }}</h3>
+            <div class="news-card-body">
+                <div class="news-date">{{ item.date.strftime('%d.%m.%Y') if item.date else '' }}</div>
+                <h3>{{ item.title }}</h3>
+            </div>
         </a>
         {% endfor %}
     </div>
     <div class="section-more">
-        <a href="/news/" class="btn btn-secondary">Все новости</a>
+        <a href="/news/" class="btn btn-outline">Все новости</a>
     </div>
 </section>
 {% endif %}
 
-<section class="section cta-section">
-    <h2>Оставьте заявку</h2>
-    <form action="{{ url_for('public.submit_lead') }}" method="POST" class="lead-form">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <div class="form-row">
-            <input type="text" name="name" placeholder="Ваше имя" required>
-            <input type="tel" name="phone" placeholder="Телефон" required>
-            <input type="email" name="email" placeholder="Email">
-        </div>
-        <textarea name="message" placeholder="Сообщение"></textarea>
-        <button type="submit" class="btn btn-primary">Отправить заявку</button>
-    </form>
+<section class="cta-section">
+    <div class="cta-content">
+        <h2>Оставьте заявку</h2>
+        <p>Наши специалисты свяжутся с вами в течение 15 минут и помогут подобрать оптимальное решение для вашего проекта.</p>
+    </div>
+    <div class="cta-form">
+        <h3>Получить консультацию</h3>
+        <form action="{{ url_for('public.submit_lead') }}" method="POST" class="lead-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="form-row">
+                <input type="text" name="name" placeholder="Ваше имя" required>
+            </div>
+            <div class="form-row">
+                <input type="tel" name="phone" placeholder="Телефон" required>
+            </div>
+            <div class="form-row">
+                <input type="email" name="email" placeholder="Email">
+            </div>
+            <textarea name="message" placeholder="Опишите ваш проект или задайте вопрос"></textarea>
+            <button type="submit" class="btn btn-primary">Отправить заявку</button>
+        </form>
+    </div>
 </section>
 {% endblock %}

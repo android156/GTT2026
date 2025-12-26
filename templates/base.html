@@ -20,28 +20,41 @@
 </head>
 <body>
     <header class="header">
-        <div class="container">
-            <div class="header-inner">
-                <a href="/" class="logo">{{ site_name }}</a>
-                <nav class="main-nav">
-                    <ul class="nav-list">
-                        {% for item in menu_items %}
-                        <li class="nav-item">
-                            <a href="{{ item.url }}" 
-                               {% if item.is_external %}target="_blank"{% endif %}
-                               {% if item.target_blank %}target="_blank"{% endif %}
-                               {% if item.nofollow %}rel="nofollow"{% endif %}>
-                                {{ item.title }}
-                            </a>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                </nav>
+        <div class="header-top">
+            <div class="container">
+                <div class="header-top-inner">
+                    <span class="header-phone"><a href="tel:+74995044121">+7 (499) 504-41-21</a></span>
+                    <span>Пн-Пт: 9:00-18:00</span>
+                </div>
+            </div>
+        </div>
+        <div class="header-main">
+            <div class="container">
+                <div class="header-inner">
+                    <a href="/" class="logo">
+                        <img src="{{ url_for('static', filename='images/2_1766758792749.png') }}" alt="{{ site_name }}">
+                    </a>
+                    <nav class="main-nav">
+                        <ul class="nav-list">
+                            {% for item in menu_items %}
+                            <li class="nav-item">
+                                <a href="{{ item.url }}" 
+                                   {% if item.is_external %}target="_blank"{% endif %}
+                                   {% if item.target_blank %}target="_blank"{% endif %}
+                                   {% if item.nofollow %}rel="nofollow"{% endif %}>
+                                    {{ item.title }}
+                                </a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </nav>
+                </div>
             </div>
         </div>
     </header>
 
     <main class="main">
+        {% block hero %}{% endblock %}
         <div class="container">
             {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
@@ -59,11 +72,45 @@
 
     <footer class="footer">
         <div class="container">
-            <div class="footer-inner">
-                <div class="footer-copyright">
-                    &copy; {{ site_name }}, {{ now().year if now else 2025 }}
+            <div class="footer-grid">
+                <div class="footer-about">
+                    <div class="footer-logo">
+                        <img src="{{ url_for('static', filename='images/2_1766758792749.png') }}" alt="{{ site_name }}">
+                    </div>
+                    <p class="footer-desc">Поставки гибких предизолированных труб для отопления, горячего и холодного водоснабжения. Работаем с 2010 года.</p>
                 </div>
-                <div class="footer-contacts">
+                <div class="footer-nav">
+                    <div class="footer-title">Каталог</div>
+                    <ul class="footer-links">
+                        <li><a href="/izokom/">Трубы ИЗОКОМ</a></li>
+                        <li><a href="/izopeks/">Трубы ТВЭЛ-ПЭКС</a></li>
+                        <li><a href="/izoprofleks_kasafleks/">Трубы ИЗОПРОФЛЕКС</a></li>
+                        <li><a href="/uponor_ecoflex/">Трубы УПОНОР</a></li>
+                    </ul>
+                </div>
+                <div class="footer-nav">
+                    <div class="footer-title">Компания</div>
+                    <ul class="footer-links">
+                        <li><a href="/about/">О компании</a></li>
+                        <li><a href="/services/">Услуги</a></li>
+                        <li><a href="/documentation/">Документация</a></li>
+                        <li><a href="/news/">Новости</a></li>
+                    </ul>
+                </div>
+                <div class="footer-contacts-block">
+                    <div class="footer-title">Контакты</div>
+                    <div class="footer-contact">
+                        <a href="tel:+74995044121">+7 (499) 504-41-21</a><br>
+                        info@glavtrubtorg.ru<br>
+                        Москва, ул. Примерная, д. 1
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <div class="footer-copyright">
+                    &copy; {{ site_name }}, {{ now().year if now else 2025 }}. Все права защищены.
+                </div>
+                <div class="footer-legal">
                     <a href="/contacts/">Контакты</a>
                 </div>
             </div>

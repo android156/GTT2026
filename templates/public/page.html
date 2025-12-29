@@ -1,5 +1,18 @@
 {% extends 'base.html' %}
 
+{% block hero %}
+{% if hero %}
+<section class="hero page-hero" style="background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('{{ hero.image }}');">
+    <div class="container">
+        <div class="hero-content">
+            <h1>{{ hero.title }}</h1>
+            {% if hero.subtitle %}<p class="hero-desc">{{ hero.subtitle }}</p>{% endif %}
+        </div>
+    </div>
+</section>
+{% endif %}
+{% endblock %}
+
 {% block content %}
 <nav class="breadcrumbs">
     {% for crumb in breadcrumbs %}
@@ -11,7 +24,9 @@
     {% endfor %}
 </nav>
 
+{% if not hero %}
 <h1>{{ seo.h1 }}</h1>
+{% endif %}
 
 <div class="page-content">
     {{ page.content_html|safe }}

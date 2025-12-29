@@ -44,6 +44,9 @@ class MenuItem(db.Model):
     is_external = db.Column(db.Boolean, default=False)
     nofollow = db.Column(db.Boolean, default=False)
     target_blank = db.Column(db.Boolean, default=False)
+    hero_image = db.Column(db.String(300), default='')
+    hero_title = db.Column(db.String(200), default='')
+    hero_subtitle = db.Column(db.String(300), default='')
 
 
 class Category(db.Model):

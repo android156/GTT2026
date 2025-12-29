@@ -4,38 +4,79 @@
 
 {% block content %}
 <div class="card">
-    <form method="POST">
+    <form method="POST" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        
+        <h3>Основные настройки</h3>
         <div class="form-group">
-            <label>Название</label>
-            <input type="text" name="title" value="{{ item.title if item else '' }}" required>
+            <label>Название <span class="required">*</span></label>
+            <input type="text" name="title" value="{{ item.title if item else '' }}" required placeholder="Например: О компании">
+            <small class="hint">Текст, который будет отображаться в меню</small>
         </div>
         <div class="form-group">
-            <label>URL</label>
-            <input type="text" name="url" value="{{ item.url if item else '' }}" required>
+            <label>URL <span class="required">*</span></label>
+            <input type="text" name="url" value="{{ item.url if item else '' }}" required placeholder="Например: /about/">
+            <small class="hint">Ссылка на страницу. Внутренние: /about/, /services/. Внешние: https://example.com</small>
         </div>
         <div class="form-group">
             <label>Порядок сортировки</label>
-            <input type="number" name="sort_order" value="{{ item.sort_order if item else 0 }}">
+            <input type="number" name="sort_order" value="{{ item.sort_order if item else 0 }}" placeholder="0">
+            <small class="hint">Чем меньше число, тем левее пункт в меню. Например: 10, 20, 30</small>
         </div>
+        
+        <h3>Hero-секция страницы</h3>
+        <p class="section-desc">Изображение и текст будут отображаться в шапке страницы, на которую ведёт этот пункт меню</p>
+        
+        <div class="form-group">
+            <label>Hero-изображение</label>
+            {% if item and item.hero_image %}
+            <div class="current-image">
+                <img src="{{ item.hero_image }}" alt="Текущее изображение" style="max-width: 300px; max-height: 150px;">
+                <div class="form-check" style="margin-top: 10px;">
+                    <input type="checkbox" name="delete_hero_image" id="delete_hero_image">
+                    <label for="delete_hero_image">Удалить изображение</label>
+                </div>
+            </div>
+            {% endif %}
+            <input type="file" name="hero_image_file" accept="image/*">
+            <small class="hint">Рекомендуемый размер: 1920x600 px. Форматы: JPG, PNG, WebP. Автоматически сжимается</small>
+        </div>
+        <div class="form-group">
+            <label>Hero-заголовок</label>
+            <input type="text" name="hero_title" value="{{ item.hero_title if item else '' }}" placeholder="Например: О нашей компании">
+            <small class="hint">Крупный заголовок поверх изображения. Если пусто — используется название пункта меню</small>
+        </div>
+        <div class="form-group">
+            <label>Hero-подзаголовок</label>
+            <input type="text" name="hero_subtitle" value="{{ item.hero_subtitle if item else '' }}" placeholder="Например: Работаем с 2010 года">
+            <small class="hint">Дополнительный текст под заголовком</small>
+        </div>
+        
+        <h3>Дополнительные настройки</h3>
         <div class="form-group form-check">
             <input type="checkbox" name="is_active" id="is_active" {{ 'checked' if item and item.is_active else 'checked' if not item else '' }}>
             <label for="is_active">Активен</label>
+            <small class="hint">Неактивные пункты не отображаются в меню</small>
         </div>
         <div class="form-group form-check">
             <input type="checkbox" name="is_external" id="is_external" {{ 'checked' if item and item.is_external else '' }}>
             <label for="is_external">Внешняя ссылка</label>
+            <small class="hint">Отметьте, если ссылка ведёт на другой сайт</small>
         </div>
         <div class="form-group form-check">
             <input type="checkbox" name="nofollow" id="nofollow" {{ 'checked' if item and item.nofollow else '' }}>
             <label for="nofollow">Nofollow</label>
+            <small class="hint">Добавить rel="nofollow" для SEO</small>
         </div>
         <div class="form-group form-check">
             <input type="checkbox" name="target_blank" id="target_blank" {{ 'checked' if item and item.target_blank else '' }}>
             <label for="target_blank">Открывать в новой вкладке</label>
         </div>
-        <button type="submit" class="btn btn-primary">Сохранить</button>
-        <a href="{{ url_for('admin.menu_list') }}" class="btn btn-secondary">Отмена</a>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+            <a href="{{ url_for('admin.menu_list') }}" class="btn btn-secondary">Отмена</a>
+        </div>
     </form>
 </div>
 {% endblock %}

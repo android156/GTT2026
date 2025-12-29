@@ -13,6 +13,17 @@ def get_menu_items():
     return MenuItem.query.filter_by(is_active=True).order_by(MenuItem.sort_order).all()
 
 
+def get_hero_for_url(url):
+    menu_item = MenuItem.query.filter_by(url=url, is_active=True).first()
+    if menu_item and menu_item.hero_image:
+        return {
+            'image': menu_item.hero_image,
+            'title': menu_item.hero_title or menu_item.title,
+            'subtitle': menu_item.hero_subtitle
+        }
+    return None
+
+
 @public_bp.context_processor
 def inject_menu():
     return {'menu_items': get_menu_items(), 'site_name': Config.SITE_NAME}
@@ -53,9 +64,12 @@ def catalog():
         {'name': 'Каталог', 'url': None}
     ]
     
+    hero = get_hero_for_url('/catalog/')
+    
     return render_template('public/catalog.html',
                          categories=categories,
                          seo=seo,
+                         hero=hero,
                          breadcrumbs=breadcrumbs,
                          breadcrumbs_jsonld=generate_breadcrumb_jsonld(breadcrumbs),
                          canonical=get_canonical_url('/catalog/'),
@@ -77,9 +91,12 @@ def news_list():
         {'name': 'Новости', 'url': None}
     ]
     
+    hero = get_hero_for_url('/news/')
+    
     return render_template('public/news_list.html',
                          news=news,
                          seo=seo,
+                         hero=hero,
                          breadcrumbs=breadcrumbs,
                          breadcrumbs_jsonld=generate_breadcrumb_jsonld(breadcrumbs),
                          canonical=get_canonical_url('/news/'),
@@ -121,9 +138,12 @@ def static_page(url_path):
             {'name': page.title, 'url': None}
         ]
         
+        hero = get_hero_for_url(url_path)
+        
         return render_template('public/page.html',
                              page=page,
                              seo=seo,
+                             hero=hero,
                              breadcrumbs=breadcrumbs,
                              breadcrumbs_jsonld=generate_breadcrumb_jsonld(breadcrumbs),
                              canonical=get_canonical_url(url_path),

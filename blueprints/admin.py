@@ -1,10 +1,11 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
+from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, jsonify
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.utils import secure_filename
 from extensions import db, login_manager
 from models import User, Page, MenuItem, Category, ProductLine, SizeItem, News, DocumentFile, Lead, RedirectRule, Setting
 from services.importers import import_categories_csv, import_product_lines_csv, import_size_items_csv, import_news_csv
 from services.slug import generate_slug, is_reserved_slug, validate_slug
+from services.image_uploader import save_uploaded_image, delete_image
 from config import Config
 import os
 import bleach
@@ -158,6 +159,12 @@ def menu_list():
 @login_required
 def menu_add():
     if request.method == 'POST':
+        hero_image = ''
+        if 'hero_image_file' in request.files:
+            file = request.files['hero_image_file']
+            if file and file.filename:
+                hero_image = save_uploaded_image(file, 'hero', max_size=(1920, 1080))
+        
         item = MenuItem(
             title=request.form.get('title', ''),
             url=request.form.get('url', ''),
@@ -165,7 +172,10 @@ def menu_add():
             is_active=request.form.get('is_active') == 'on',
             is_external=request.form.get('is_external') == 'on',
             nofollow=request.form.get('nofollow') == 'on',
-            target_blank=request.form.get('target_blank') == 'on'
+            target_blank=request.form.get('target_blank') == 'on',
+            hero_image=hero_image or request.form.get('hero_image', ''),
+            hero_title=request.form.get('hero_title', ''),
+            hero_subtitle=request.form.get('hero_subtitle', '')
         )
         db.session.add(item)
         db.session.commit()
@@ -181,6 +191,18 @@ def menu_edit(id):
     item = MenuItem.query.get_or_404(id)
     
     if request.method == 'POST':
+        if 'hero_image_file' in request.files:
+            file = request.files['hero_image_file']
+            if file and file.filename:
+                if item.hero_image:
+                    delete_image(item.hero_image)
+                item.hero_image = save_uploaded_image(file, 'hero', max_size=(1920, 1080))
+        
+        if request.form.get('delete_hero_image') == 'on':
+            if item.hero_image:
+                delete_image(item.hero_image)
+            item.hero_image = ''
+        
         item.title = request.form.get('title', '')
         item.url = request.form.get('url', '')
         item.sort_order = int(request.form.get('sort_order', 0) or 0)
@@ -188,6 +210,8 @@ def menu_edit(id):
         item.is_external = request.form.get('is_external') == 'on'
         item.nofollow = request.form.get('nofollow') == 'on'
         item.target_blank = request.form.get('target_blank') == 'on'
+        item.hero_title = request.form.get('hero_title', '')
+        item.hero_subtitle = request.form.get('hero_subtitle', '')
         db.session.commit()
         flash('Пункт меню обновлён', 'success')
         return redirect(url_for('admin.menu_list'))
@@ -222,11 +246,17 @@ def categories_add():
             flash(f'Slug "{slug}" зарезервирован системой', 'danger')
             return render_template('admin/categories_form.html', category=None)
         
+        image_path = ''
+        if 'image_file' in request.files:
+            file = request.files['image_file']
+            if file and file.filename:
+                image_path = save_uploaded_image(file, 'categories')
+        
         cat = Category(
             name=request.form.get('name', ''),
             slug=slug,
             description_html=sanitize_html(request.form.get('description_html', '')),
-            image_path=request.form.get('image_path', ''),
+            image_path=image_path or request.form.get('image_path', ''),
             seo_title=request.form.get('seo_title', ''),
             seo_description=request.form.get('seo_description', ''),
             h1=request.form.get('h1', ''),
@@ -254,10 +284,21 @@ def categories_edit(id):
             flash(f'Slug "{slug}" зарезервирован системой', 'danger')
             return render_template('admin/categories_form.html', category=cat)
         
+        if 'image_file' in request.files:
+            file = request.files['image_file']
+            if file and file.filename:
+                if cat.image_path:
+                    delete_image(cat.image_path)
+                cat.image_path = save_uploaded_image(file, 'categories')
+        
+        if request.form.get('delete_image') == 'on':
+            if cat.image_path:
+                delete_image(cat.image_path)
+            cat.image_path = ''
+        
         cat.name = request.form.get('name', '')
         cat.slug = slug
         cat.description_html = sanitize_html(request.form.get('description_html', ''))
-        cat.image_path = request.form.get('image_path', '')
         cat.seo_title = request.form.get('seo_title', '')
         cat.seo_description = request.form.get('seo_description', '')
         cat.h1 = request.form.get('h1', '')
@@ -311,12 +352,18 @@ def product_lines_add():
     categories = Category.query.order_by(Category.name).all()
     
     if request.method == 'POST':
+        image_path = ''
+        if 'image_file' in request.files:
+            file = request.files['image_file']
+            if file and file.filename:
+                image_path = save_uploaded_image(file, 'products')
+        
         pl = ProductLine(
             category_id=int(request.form.get('category_id')),
             name=request.form.get('name', ''),
             slug=request.form.get('slug', '').strip(),
             description_html=sanitize_html(request.form.get('description_html', '')),
-            image_path=request.form.get('image_path', ''),
+            image_path=image_path or request.form.get('image_path', ''),
             seo_title=request.form.get('seo_title', ''),
             seo_description=request.form.get('seo_description', ''),
             h1=request.form.get('h1', ''),
@@ -339,11 +386,22 @@ def product_lines_edit(id):
     categories = Category.query.order_by(Category.name).all()
     
     if request.method == 'POST':
+        if 'image_file' in request.files:
+            file = request.files['image_file']
+            if file and file.filename:
+                if pl.image_path:
+                    delete_image(pl.image_path)
+                pl.image_path = save_uploaded_image(file, 'products')
+        
+        if request.form.get('delete_image') == 'on':
+            if pl.image_path:
+                delete_image(pl.image_path)
+            pl.image_path = ''
+        
         pl.category_id = int(request.form.get('category_id'))
         pl.name = request.form.get('name', '')
         pl.slug = request.form.get('slug', '').strip()
         pl.description_html = sanitize_html(request.form.get('description_html', ''))
-        pl.image_path = request.form.get('image_path', '')
         pl.seo_title = request.form.get('seo_title', '')
         pl.seo_description = request.form.get('seo_description', '')
         pl.h1 = request.form.get('h1', '')

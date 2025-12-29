@@ -4,58 +4,92 @@
 
 {% block content %}
 <div class="card">
-    <form method="POST">
+    <form method="POST" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        
+        <h3>Основная информация</h3>
         <div class="form-group">
-            <label>Категория</label>
+            <label>Категория <span class="required">*</span></label>
             <select name="category_id" required>
+                <option value="">-- Выберите категорию --</option>
                 {% for cat in categories %}
                 <option value="{{ cat.id }}" {{ 'selected' if product_line and product_line.category_id == cat.id else '' }}>{{ cat.name }}</option>
                 {% endfor %}
             </select>
+            <small class="hint">К какой категории относится эта линейка товаров</small>
         </div>
         <div class="form-group">
-            <label>Название</label>
-            <input type="text" name="name" value="{{ product_line.name if product_line else '' }}" required>
+            <label>Название <span class="required">*</span></label>
+            <input type="text" name="name" value="{{ product_line.name if product_line else '' }}" required placeholder="Например: ИЗОКОМ-А PE-Xa">
+            <small class="hint">Название линейки товаров</small>
         </div>
         <div class="form-group">
-            <label>Slug</label>
-            <input type="text" name="slug" value="{{ product_line.slug if product_line else '' }}" required pattern="[a-z0-9_-]+">
+            <label>Slug <span class="required">*</span></label>
+            <input type="text" name="slug" value="{{ product_line.slug if product_line else '' }}" required pattern="[a-z0-9_-]+" placeholder="Например: izokom-a-pe-xa">
+            <small class="hint">Часть URL. Только латиница, цифры, дефис. Пример: сайт.ру/izokom/izokom-a-pe-xa/</small>
         </div>
+        
+        <h3>Изображение</h3>
         <div class="form-group">
-            <label>Описание (HTML)</label>
-            <textarea name="description_html">{{ product_line.description_html if product_line else '' }}</textarea>
+            <label>Загрузить изображение</label>
+            {% if product_line and product_line.image_path %}
+            <div class="current-image">
+                <img src="{{ product_line.image_path }}" alt="Текущее изображение" style="max-width: 200px; max-height: 150px;">
+                <div class="form-check" style="margin-top: 10px;">
+                    <input type="checkbox" name="delete_image" id="delete_image">
+                    <label for="delete_image">Удалить изображение</label>
+                </div>
+            </div>
+            {% endif %}
+            <input type="file" name="image_file" accept="image/*">
+            <small class="hint">Рекомендуемый размер: 600x400 px. JPG, PNG, WebP. Автоматически сжимается</small>
         </div>
+        
+        <h3>Контент</h3>
         <div class="form-group">
-            <label>Путь к изображению</label>
-            <input type="text" name="image_path" value="{{ product_line.image_path if product_line else '' }}">
+            <label>Описание</label>
+            <textarea name="description_html" rows="5" placeholder="Описание линейки товаров...">{{ product_line.description_html if product_line else '' }}</textarea>
+            <small class="hint">Текст отображается на странице линейки. Можно использовать HTML</small>
         </div>
+        
+        <h3>SEO настройки</h3>
         <div class="form-group">
             <label>SEO Title</label>
-            <input type="text" name="seo_title" value="{{ product_line.seo_title if product_line else '' }}">
+            <input type="text" name="seo_title" value="{{ product_line.seo_title if product_line else '' }}" placeholder="Например: ИЗОКОМ-А PE-Xa — купить | ГлавТрубТорг">
+            <small class="hint">Заголовок страницы для поисковиков. 50-70 символов</small>
         </div>
         <div class="form-group">
             <label>SEO Description</label>
-            <input type="text" name="seo_description" value="{{ product_line.seo_description if product_line else '' }}">
+            <textarea name="seo_description" rows="2" placeholder="Описание для поисковых систем...">{{ product_line.seo_description if product_line else '' }}</textarea>
+            <small class="hint">Описание в результатах поиска. 150-160 символов</small>
         </div>
         <div class="form-group">
-            <label>H1</label>
-            <input type="text" name="h1" value="{{ product_line.h1 if product_line else '' }}">
+            <label>H1 заголовок</label>
+            <input type="text" name="h1" value="{{ product_line.h1 if product_line else '' }}" placeholder="Например: Труба ИЗОКОМ-А PE-Xa">
+            <small class="hint">Главный заголовок на странице</small>
         </div>
         <div class="form-group">
-            <label>SEO текст (HTML)</label>
-            <textarea name="seo_text_html">{{ product_line.seo_text_html if product_line else '' }}</textarea>
+            <label>SEO текст</label>
+            <textarea name="seo_text_html" rows="4" placeholder="Дополнительный текст для SEO...">{{ product_line.seo_text_html if product_line else '' }}</textarea>
+            <small class="hint">Текст внизу страницы для SEO</small>
         </div>
+        
+        <h3>Настройки</h3>
         <div class="form-group">
             <label>Порядок сортировки</label>
-            <input type="number" name="sort_order" value="{{ product_line.sort_order if product_line else 0 }}">
+            <input type="number" name="sort_order" value="{{ product_line.sort_order if product_line else 0 }}" placeholder="0">
+            <small class="hint">Сортировка по возрастанию. 10, 20, 30...</small>
         </div>
         <div class="form-group form-check">
             <input type="checkbox" name="is_active" id="is_active" {{ 'checked' if product_line and product_line.is_active else 'checked' if not product_line else '' }}>
             <label for="is_active">Активна</label>
+            <small class="hint">Неактивные линейки не отображаются на сайте</small>
         </div>
-        <button type="submit" class="btn btn-primary">Сохранить</button>
-        <a href="{{ url_for('admin.product_lines_list') }}" class="btn btn-secondary">Отмена</a>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+            <a href="{{ url_for('admin.product_lines_list') }}" class="btn btn-secondary">Отмена</a>
+        </div>
     </form>
 </div>
 {% endblock %}

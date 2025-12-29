@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block hero %}
-<section class="hero-section small-hero" style="background-color: #2c3e50;">
+<section class="hero page-hero" style="background-image: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('/static/images/WhatsApp_Image_2019-10-21_at_13.44.44_1766758697538.jpeg');">
     <div class="container">
         <div class="hero-content">
             <h1>{{ service.h1 or service.title }}</h1>
@@ -11,27 +11,37 @@
 {% endblock %}
 
 {% block content %}
+<nav class="breadcrumbs">
+    {% for crumb in breadcrumbs %}
+    {% if crumb.url %}
+    <a href="{{ crumb.url }}">{{ crumb.name }}</a> /
+    {% else %}
+    <span>{{ crumb.name }}</span>
+    {% endif %}
+    {% endfor %}
+</nav>
+
 <div class="service-detail">
     {% if service.image_path %}
-    <div class="service-image">
-        <img src="/{{ service.image_path }}" alt="{{ service.title }}">
+    <div class="service-image" style="margin-bottom: 40px; text-align: center; background: white; padding: 30px; border-radius: var(--radius-lg); box-shadow: var(--shadow); border: 1px solid var(--border-color);">
+        <img src="/{{ service.image_path }}" alt="{{ service.title }}" style="max-width: 100%; max-height: 400px; object-fit: contain;">
     </div>
     {% endif %}
     
-    <div class="content-text">
+    <div class="content-text" style="font-size: 16px; line-height: 1.8; color: var(--text-color);">
         {{ service.content_html|safe }}
     </div>
     
-    <div class="service-action">
-        <a href="#callback" class="btn btn-primary btn-lg">Оставить заявку на услугу</a>
+    <div class="service-action" style="text-align: center; margin: 60px 0; padding: 40px; background: var(--bg-light); border-radius: var(--radius-lg); border: 1px solid var(--border-color);">
+        <h3 style="margin-bottom: 20px;">Заинтересовала услуга?</h3>
+        <p style="margin-bottom: 30px; color: var(--text-light);">Оставьте заявку, и наш специалист свяжется с вами для консультации.</p>
+        <a href="#callback" class="btn btn-primary">Оставить заявку</a>
     </div>
+    
+    {% if service.seo_text_html %}
+    <div class="seo-text" style="margin-top: 60px; padding-top: 40px; border-top: 2px solid var(--border-color);">
+        {{ service.seo_text_html|safe }}
+    </div>
+    {% endif %}
 </div>
-
-<style>
-.service-detail { max-width: 900px; margin: 40px auto; }
-.service-image { margin-bottom: 30px; border-radius: 8px; overflow: hidden; text-align: center; background: #f8f9fa; padding: 20px; }
-.service-image img { max-width: 100%; max-height: 400px; object-fit: contain; }
-.content-text { font-size: 1.1rem; line-height: 1.6; margin-bottom: 40px; }
-.service-action { text-align: center; margin: 50px 0; padding: 30px; background: #f8f9fa; border-radius: 8px; }
-</style>
 {% endblock %}

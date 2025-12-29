@@ -30,6 +30,26 @@
 
 <div class="page-content">
     {{ page.content_html|safe }}
+    
+    {% if page.url_path == '/contacts/' %}
+    <div id="map" style="width: 100%; height: 450px; margin-top: 30px; border: 1px solid var(--border-color);"></div>
+    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
+    <script>
+        ymaps.ready(function () {
+            var myMap = new ymaps.Map("map", {
+                center: [55.899786, 37.552003], // Координаты центра (Москва, Лианозовский проезд, 6)
+                zoom: 16
+            });
+
+            var myPlacemark = new ymaps.Placemark(myMap.getCenter(), {
+                hintContent: 'Группа ГЛАВТРУБТОРГ',
+                balloonContent: '127253, Москва, Лианозовский проезд, дом 6'
+            });
+
+            myMap.geoObjects.add(myPlacemark);
+        });
+    </script>
+    {% endif %}
 </div>
 
 {% if seo.seo_text %}

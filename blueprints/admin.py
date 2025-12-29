@@ -77,22 +77,25 @@ def dashboard():
 
 
 
+@admin_bp.route('/services/')
+@login_required
+def services_list():
+    services = Service.query.order_by(Service.sort_order).all()
+    return render_template('admin/services_list.html', services=services)
+
 @admin_bp.route('/services/add/', methods=['GET', 'POST'])
 @login_required
 def services_add():
     if request.method == 'POST':
         title = request.form.get('title', '').strip()
         slug = request.form.get('slug', '').strip() or generate_slug(title)
-        
         image_path = ''
         if 'image_file' in request.files:
             file = request.files['image_file']
             if file and file.filename:
                 image_path = save_uploaded_image(file, 'services')
-        
         service = Service(
-            title=title,
-            slug=slug,
+            title=title, slug=slug,
             content_html=sanitize_html(request.form.get('content_html', '')),
             image_path=image_path or request.form.get('image_path', ''),
             seo_title=request.form.get('seo_title', ''),
@@ -106,28 +109,21 @@ def services_add():
         db.session.commit()
         flash('Услуга добавлена', 'success')
         return redirect(url_for('admin.services_list'))
-    
     return render_template('admin/services_form.html', service=None)
-
 
 @admin_bp.route('/services/<int:id>/edit/', methods=['GET', 'POST'])
 @login_required
 def services_edit(id):
     service = Service.query.get_or_404(id)
-    
     if request.method == 'POST':
         if 'image_file' in request.files:
             file = request.files['image_file']
             if file and file.filename:
-                if service.image_path:
-                    delete_image(service.image_path)
+                if service.image_path: delete_image(service.image_path)
                 service.image_path = save_uploaded_image(file, 'services')
-        
         if request.form.get('delete_image') == 'on':
-            if service.image_path:
-                delete_image(service.image_path)
+            if service.image_path: delete_image(service.image_path)
             service.image_path = ''
-            
         service.title = request.form.get('title', '').strip()
         service.slug = request.form.get('slug', '').strip() or generate_slug(service.title)
         service.content_html = sanitize_html(request.form.get('content_html', ''))
@@ -137,26 +133,20 @@ def services_edit(id):
         service.seo_text_html = sanitize_html(request.form.get('seo_text_html', ''))
         service.sort_order = int(request.form.get('sort_order', 0) or 0)
         service.is_active = request.form.get('is_active') == 'on'
-        
         db.session.commit()
         flash('Услуга обновлена', 'success')
         return redirect(url_for('admin.services_list'))
-    
     return render_template('admin/services_form.html', service=service)
-
 
 @admin_bp.route('/services/<int:id>/delete/', methods=['POST'])
 @login_required
 def services_delete(id):
     service = Service.query.get_or_404(id)
-    if service.image_path:
-        delete_image(service.image_path)
+    if service.image_path: delete_image(service.image_path)
     db.session.delete(service)
     db.session.commit()
     flash('Услуга удалена', 'success')
     return redirect(url_for('admin.services_list'))
-
-
 @admin_bp.route('/pages/')
 @login_required
 def pages_list():

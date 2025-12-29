@@ -33,10 +33,7 @@ def generate_filename(original_filename):
     return f"{uuid.uuid4().hex[:12]}.{ext}"
 
 
-def compress_image(image, max_size=MAX_SIZE, quality=QUALITY):
-    if image.mode in ('RGBA', 'P'):
-        image = image.convert('RGB')
-    
+def compress_image(image, max_size=MAX_SIZE):
     image.thumbnail(max_size, Image.Resampling.LANCZOS)
     return image
 
@@ -58,8 +55,28 @@ def save_uploaded_image(file, subfolder='misc', max_size=MAX_SIZE, quality=QUALI
     
     try:
         image = Image.open(file)
-        image = compress_image(image, max_size, quality)
-        image.save(filepath, 'JPEG' if filename.endswith('.jpg') else image.format, quality=quality, optimize=True)
+        original_format = image.format
+        
+        ext = filename.rsplit('.', 1)[1].lower()
+        
+        if ext in ('jpg', 'jpeg'):
+            if image.mode in ('RGBA', 'P'):
+                image = image.convert('RGB')
+            image = compress_image(image, max_size)
+            image.save(filepath, 'JPEG', quality=quality, optimize=True)
+        elif ext == 'webp':
+            image = compress_image(image, max_size)
+            image.save(filepath, 'WEBP', quality=quality)
+        elif ext == 'png':
+            image = compress_image(image, max_size)
+            image.save(filepath, 'PNG', optimize=True)
+        elif ext == 'gif':
+            image = compress_image(image, max_size)
+            image.save(filepath, 'GIF')
+        else:
+            image = compress_image(image, max_size)
+            image.save(filepath)
+        
         return f"/{filepath}"
     except Exception as e:
         print(f"Image upload error: {e}")

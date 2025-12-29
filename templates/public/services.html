@@ -1,5 +1,20 @@
 {% extends 'base.html' %}
 
+{% block hero %}
+{% if hero %}
+<section class="hero-section" style="background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('{{ url_for('static', filename=hero.image.replace('static/', '')) }}');">
+    <div class="container">
+        <div class="hero-content">
+            <h1>{{ hero.title }}</h1>
+            {% if hero.subtitle %}
+            <p class="hero-subtitle">{{ hero.subtitle }}</p>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endif %}
+{% endblock %}
+
 {% block content %}
 <div class="services-page">
     <div class="services-grid">

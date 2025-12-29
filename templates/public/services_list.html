@@ -24,7 +24,7 @@
         {% if s.image_path %}<img src="{{ s.image_path }}" alt="{{ s.title }}" class="service-img">{% endif %}
         <div class="service-body">
             <h3>{{ s.title }}</h3>
-            <p>{{ s.seo_description|truncate(120) }}</p>
+            <p>{{ (s.seo_description or '')|truncate(120) }}</p>
         </div>
     </a>
     {% endfor %}

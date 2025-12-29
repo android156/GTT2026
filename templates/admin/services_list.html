@@ -10,6 +10,7 @@
             <tr>
                 <th>ID</th>
                 <th>Заголовок</th>
+                <th>Изображение</th>
                 <th>Slug</th>
                 <th>Порядок</th>
                 <th>Активна</th>
@@ -21,14 +22,23 @@
             <tr>
                 <td>{{ s.id }}</td>
                 <td>{{ s.title }}</td>
+                <td>
+                    {% if s.image_path %}
+                    <img src="/{{ s.image_path }}" style="height: 30px; border-radius: 3px;">
+                    {% else %}
+                    <span style="color: #ccc;">нет</span>
+                    {% endif %}
+                </td>
                 <td>{{ s.slug }}</td>
                 <td>{{ s.sort_order }}</td>
                 <td>{{ '✅' if s.is_active else '❌' }}</td>
                 <td class="admin-actions">
-                    <a href="{{ url_for('admin.services_edit', id=s.id) }}" class="btn btn-sm btn-edit">Редактировать</a>
-                    <form action="{{ url_for('admin.services_delete', id=s.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Удалить услугу?')">
-                        <button type="submit" class="btn btn-sm btn-delete">Удалить</button>
-                    </form>
+                    <div style="display: flex; gap: 5px;">
+                        <a href="{{ url_for('admin.services_edit', id=s.id) }}" class="btn btn-sm btn-primary">Редактировать</a>
+                        <form action="{{ url_for('admin.services_delete', id=s.id) }}" method="POST" onsubmit="return confirm('Удалить услугу?')">
+                            <button type="submit" class="btn btn-sm btn-danger">Удалить</button>
+                        </form>
+                    </div>
                 </td>
             </tr>
             {% endfor %}

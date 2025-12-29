@@ -76,6 +76,46 @@ def catalog():
                          og=get_og_tags(seo['title'], seo['description']))
 
 
+
+@public_bp.route('/services/')
+def services_list():
+    services = Service.query.filter_by(is_active=True).order_by(Service.sort_order).all()
+    seo = {
+        'title': f'Услуги — {Config.SITE_NAME}',
+        'description': f'Услуги компании {Config.SITE_NAME}. Доставка, монтаж и другие сервисы.',
+        'h1': 'Наши услуги'
+    }
+    breadcrumbs = [
+        {'name': 'Главная', 'url': '/'},
+        {'name': 'Услуги', 'url': None}
+    ]
+    hero = get_hero_for_url('/services/')
+    return render_template('public/services.html', 
+                         services=services, 
+                         seo=seo, 
+                         hero=hero,
+                         breadcrumbs=breadcrumbs,
+                         breadcrumbs_jsonld=generate_breadcrumb_jsonld(breadcrumbs),
+                         canonical=get_canonical_url('/services/'),
+                         og=get_og_tags(seo['title'], seo['description']))
+
+@public_bp.route('/services/<slug>/')
+def service_detail(slug):
+    service = Service.query.filter_by(slug=slug, is_active=True).first_or_404()
+    seo = get_page_seo(service)
+    breadcrumbs = [
+        {'name': 'Главная', 'url': '/'},
+        {'name': 'Услуги', 'url': '/services/'},
+        {'name': service.title, 'url': None}
+    ]
+    return render_template('public/service_detail.html',
+                         service=service,
+                         seo=seo,
+                         breadcrumbs=breadcrumbs,
+                         breadcrumbs_jsonld=generate_breadcrumb_jsonld(breadcrumbs),
+                         canonical=get_canonical_url(f'/services/{slug}/'),
+                         og=get_og_tags(seo['title'], seo['description']))
+
 @public_bp.route('/news/')
 def news_list():
     news = News.query.filter_by(is_published=True).order_by(News.date.desc()).all()

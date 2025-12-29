@@ -1,14 +1,55 @@
-{% extends 'base.html' %}
+{% extends 'public/base.html' %}
+
 {% block content %}
-<nav class="breadcrumbs">
-    {% for crumb in breadcrumbs %}
-    {% if crumb.url %}<a href="{{ crumb.url }}">{{ crumb.name }}</a> / {% else %}<span>{{ crumb.name }}</span>{% endif %}
-    {% endfor %}
-</nav>
-<h1>{{ service.h1 or service.title }}</h1>
-<div class="service-content">
-    {% if service.image_path %}<img src="{{ service.image_path }}" alt="{{ service.title }}" class="service-main-img">{% endif %}
-    {{ service.content_html|safe }}
+<div class="service-detail">
+    <div class="service-main-content">
+        {% if service.image_path %}
+        <div class="service-image">
+            <img src="/{{ service.image_path }}" alt="{{ service.title }}">
+        </div>
+        {% endif %}
+        
+        <div class="content-text">
+            {{ service.content_html|safe }}
+        </div>
+    </div>
+    
+    {% if service.seo_text_html %}
+    <div class="seo-text-bottom">
+        {{ service.seo_text_html|safe }}
+    </div>
+    {% endif %}
+    
+    <div class="service-action">
+        <a href="#callback" class="btn btn-primary btn-lg">Оставить заявку на услугу</a>
+    </div>
 </div>
-{% if service.seo_text_html %}<div class="seo-text">{{ service.seo_text_html|safe }}</div>{% endif %}
-{% endblock %}
+
+<style>
+.service-detail {
+    max-width: 900px;
+    margin: 0 auto;
+}
+.service-image {
+    margin-bottom: 30px;
+    border-radius: 8px;
+    overflow: hidden;
+}
+.service-image img {
+    width: 100%;
+    max-height: 400px;
+    object-fit: cover;
+}
+.content-text {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 40px;
+}
+.service-action {
+    text-align: center;
+    margin: 50px 0;
+    padding: 30px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+</style>

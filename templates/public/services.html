@@ -1,4 +1,4 @@
-{% extends 'public/base.html' %}
+{% extends 'base.html' %}
 
 {% block content %}
 <div class="services-page">
@@ -18,66 +18,16 @@
         </a>
         {% endfor %}
     </div>
-    
-    {% if seo.seo_text_html %}
-    <div class="seo-text">
-        {{ seo.seo_text_html|safe }}
-    </div>
-    {% endif %}
 </div>
 
 <style>
-.services-page {
-    padding: 40px 0;
-}
-.services-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 30px;
-    margin-bottom: 50px;
-}
-.service-card {
-    background: white;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    text-decoration: none;
-    color: inherit;
-    transition: transform 0.2s, box-shadow 0.2s;
-    border: 1px solid #eee;
-}
-.service-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 15px rgba(0,0,0,0.1);
-}
-.service-card-image {
-    height: 250px;
-    background: #f8f9fa;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-}
-.service-card-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    padding: 20px;
-}
-.image-placeholder {
-    width: 100%;
-    height: 100%;
-    background: #eee;
-}
-.service-card-content {
-    padding: 20px;
-    text-align: center;
-    border-top: 1px solid #eee;
-}
-.service-card-content h3 {
-    margin: 0;
-    font-size: 1.25rem;
-    color: #cc0000;
-}
+.services-page { padding: 40px 0; }
+.services-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px; margin-bottom: 50px; }
+.service-card { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-decoration: none; color: inherit; transition: transform 0.2s; border: 1px solid #eee; }
+.service-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px rgba(0,0,0,0.1); }
+.service-card-image { height: 250px; background: #f8f9fa; display: flex; align-items: center; justify-content: center; }
+.service-card-image img { width: 100%; height: 100%; object-fit: contain; padding: 20px; }
+.service-card-content { padding: 20px; text-align: center; border-top: 1px solid #eee; }
+.service-card-content h3 { margin: 0; font-size: 1.25rem; color: #cc0000; }
 </style>
 {% endblock %}

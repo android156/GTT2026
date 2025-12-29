@@ -1,0 +1,89 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{{ section.title or 'Редактирование раздела' }}{% endblock %}
+
+{% block page_title %}{{ section.title or 'Редактирование раздела' }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <form method="POST" enctype="multipart/form-data">
+        <h3>Основные настройки</h3>
+        
+        <div class="form-group">
+            <label>Название раздела</label>
+            <input type="text" name="title" value="{{ section.title or '' }}">
+            <span class="hint">Название для админки</span>
+        </div>
+        
+        <div class="form-group">
+            <label>Заголовок H1</label>
+            <input type="text" name="h1" value="{{ section.h1 or '' }}">
+            <span class="hint">Главный заголовок на странице</span>
+        </div>
+        
+        {% if section_key == 'index' %}
+        <div class="form-group">
+            <label>Контент главной страницы</label>
+            <textarea name="content_html" rows="10">{{ section.content_html or '' }}</textarea>
+            <span class="hint">HTML-контент страницы (опционально)</span>
+        </div>
+        {% endif %}
+        
+        <h3>Hero-изображение</h3>
+        <p class="section-desc">Фоновое изображение в шапке раздела</p>
+        
+        {% if section.hero_image %}
+        <div class="current-image">
+            <img src="{{ section.hero_image }}" alt="Hero" style="max-width: 400px; max-height: 150px; object-fit: cover;">
+            <div class="form-check" style="margin-top: 10px;">
+                <input type="checkbox" name="delete_hero_image" id="delete_hero_image">
+                <label for="delete_hero_image">Удалить изображение</label>
+            </div>
+        </div>
+        {% endif %}
+        
+        <div class="form-group">
+            <label>Загрузить изображение</label>
+            <input type="file" name="hero_image_file" accept="image/*">
+            <span class="hint">Рекомендуемый размер: 1920x400 px</span>
+        </div>
+        
+        <div class="form-group">
+            <label>Заголовок в Hero</label>
+            <input type="text" name="hero_title" value="{{ section.hero_title or '' }}">
+            <span class="hint">Крупный текст поверх изображения</span>
+        </div>
+        
+        <div class="form-group">
+            <label>Подзаголовок в Hero</label>
+            <input type="text" name="hero_subtitle" value="{{ section.hero_subtitle or '' }}">
+            <span class="hint">Дополнительный текст под заголовком</span>
+        </div>
+        
+        <h3>SEO-настройки</h3>
+        
+        <div class="form-group">
+            <label>SEO Title</label>
+            <input type="text" name="seo_title" value="{{ section.seo_title or '' }}" maxlength="200">
+            <span class="hint">Мета-тег title для поисковых систем (до 70 символов)</span>
+        </div>
+        
+        <div class="form-group">
+            <label>SEO Description</label>
+            <textarea name="seo_description" rows="3" maxlength="300">{{ section.seo_description or '' }}</textarea>
+            <span class="hint">Мета-описание для поисковых систем (до 160 символов)</span>
+        </div>
+        
+        <div class="form-group">
+            <label>SEO-текст</label>
+            <textarea name="seo_text_html" rows="6">{{ section.seo_text_html or '' }}</textarea>
+            <span class="hint">Текстовый блок в нижней части страницы</span>
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+            <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary">Отмена</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

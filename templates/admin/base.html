@@ -14,6 +14,10 @@
         .sidebar-nav { padding: 20px 0; }
         .sidebar-nav a { display: block; padding: 10px 20px; color: rgba(255,255,255,0.8); text-decoration: none; }
         .sidebar-nav a:hover, .sidebar-nav a.active { background: rgba(255,255,255,0.1); color: white; }
+        .sidebar-group-title { padding: 15px 20px 5px; color: rgba(255,255,255,0.5); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 10px; }
+        .sidebar-group-title:first-of-type { margin-top: 0; }
+        .sidebar-subitems a { padding-left: 35px; font-size: 13px; }
+        .sidebar-external { margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px !important; }
         .main-content { flex: 1; padding: 20px 30px; }
         .header { background: white; margin: -20px -30px 20px; padding: 15px 30px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
         .header h2 { font-size: 20px; color: #333; }
@@ -67,18 +71,35 @@
             </div>
             <nav class="sidebar-nav">
                 <a href="{{ url_for('admin.dashboard') }}">Главная</a>
+                
+                <div class="sidebar-group-title">Контент</div>
+                <a href="{{ url_for('admin.section_edit', section_key='index') }}">Главная страница</a>
                 <a href="{{ url_for('admin.pages_list') }}">Страницы</a>
-                <a href="{{ url_for('admin.menu_list') }}">Меню</a>
-                <a href="{{ url_for('admin.categories_list') }}">Категории</a>
-                <a href="{{ url_for('admin.product_lines_list') }}">Линейки</a>
-                <a href="{{ url_for('admin.size_items_list') }}">Типоразмеры</a>
-                <a href="{{ url_for('admin.services_list') }}">Услуги</a>
+                <a href="{{ url_for('admin.section_edit', section_key='news') }}">Раздел новостей</a>
                 <a href="{{ url_for('admin.news_list') }}">Новости</a>
                 <a href="{{ url_for('admin.documents_list') }}">Документы</a>
+                
+                <div class="sidebar-group-title">Каталог</div>
+                <a href="{{ url_for('admin.section_edit', section_key='catalog') }}">Настройки каталога</a>
+                <a href="{{ url_for('admin.categories_list') }}">Категории</a>
+                <div class="sidebar-subitems">
+                    <a href="{{ url_for('admin.product_lines_list') }}">Линейки</a>
+                    <a href="{{ url_for('admin.size_items_list') }}">Типоразмеры</a>
+                </div>
+                
+                <div class="sidebar-group-title">Услуги</div>
+                <a href="{{ url_for('admin.section_edit', section_key='services') }}">Настройки раздела</a>
+                <a href="{{ url_for('admin.services_list') }}">Список услуг</a>
+                
+                <div class="sidebar-group-title">Заявки</div>
                 <a href="{{ url_for('admin.leads_list') }}">Заявки</a>
+                
+                <div class="sidebar-group-title">Настройки</div>
+                <a href="{{ url_for('admin.menu_list') }}">Меню</a>
                 <a href="{{ url_for('admin.redirects_list') }}">Редиректы</a>
-                <a href="{{ url_for('admin.settings_list') }}">Настройки</a>
-                <a href="/" target="_blank">Сайт</a>
+                <a href="{{ url_for('admin.settings_list') }}">Общие настройки</a>
+                
+                <a href="/" target="_blank" class="sidebar-external">Открыть сайт</a>
             </nav>
         </aside>
         <main class="main-content">

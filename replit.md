@@ -66,5 +66,23 @@ python app.py
 - Ручные редиректы через админку имеют приоритет
 
 ## Последние изменения
+- 2025-12-29: Реструктуризация админки - группировка меню (Контент, Каталог, Услуги, Заявки, Настройки)
+- 2025-12-29: Добавлена модель SiteSection для управления разделами сайта (главная, новости, каталог, услуги)
+- 2025-12-29: Перенос Hero-настроек из MenuItem в соответствующие модели (Page, Category, Service, SiteSection)
 - 2025-12-29: Добавлена Яндекс.Карта на страницу контактов (/contacts/)
 - 2025-12-26: Создан проект с нуля по ТЗ
+
+## Модели БД
+- **User** - пользователи админки
+- **Page** - статические страницы (about, contacts, price, documentation) + hero_image/title/subtitle
+- **MenuItem** - пункты меню
+- **Category** - категории каталога + hero_image/title/subtitle
+- **ProductLine** - линейки продукции
+- **SizeItem** - типоразмеры
+- **Service** - услуги + hero_image/title/subtitle
+- **News** - новости
+- **SiteSection** - разделы сайта (index, news, catalog, services) с hero и SEO настройками
+- **Lead** - заявки
+- **RedirectRule** - редиректы
+- **Setting** - общие настройки
+- **DocumentFile** - документы

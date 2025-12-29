@@ -64,6 +64,24 @@
             <small class="hint">Текст внизу страницы для поисковой оптимизации</small>
         </div>
         
+        <h3>Hero-изображение</h3>
+        <p class="section-desc">Фоновое изображение в шапке страницы категории</p>
+        <div class="form-group">
+            <label>URL Hero-изображения</label>
+            <input type="text" name="hero_image" value="{{ category.hero_image if category else '' }}" placeholder="/static/images/hero.jpg">
+            <small class="hint">Путь к изображению или внешний URL (если пусто - используется изображение категории)</small>
+        </div>
+        <div class="form-group">
+            <label>Заголовок в Hero</label>
+            <input type="text" name="hero_title" value="{{ category.hero_title if category else '' }}">
+            <small class="hint">Крупный текст поверх изображения (если пусто - название категории)</small>
+        </div>
+        <div class="form-group">
+            <label>Подзаголовок в Hero</label>
+            <input type="text" name="hero_subtitle" value="{{ category.hero_subtitle if category else '' }}">
+            <small class="hint">Дополнительный текст</small>
+        </div>
+        
         <h3>Настройки отображения</h3>
         <div class="form-group">
             <label>Порядок сортировки</label>

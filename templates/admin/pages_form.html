@@ -38,6 +38,23 @@
             <label>SEO текст (HTML)</label>
             <textarea name="seo_text_html">{{ page.seo_text_html if page else '' }}</textarea>
         </div>
+        
+        <h3>Hero-изображение</h3>
+        <p class="section-desc">Фоновое изображение в шапке страницы</p>
+        <div class="form-group">
+            <label>URL изображения</label>
+            <input type="text" name="hero_image" value="{{ page.hero_image if page else '' }}" placeholder="/static/images/hero.jpg">
+            <span class="hint">Путь к изображению или внешний URL</span>
+        </div>
+        <div class="form-group">
+            <label>Заголовок в Hero</label>
+            <input type="text" name="hero_title" value="{{ page.hero_title if page else '' }}">
+        </div>
+        <div class="form-group">
+            <label>Подзаголовок в Hero</label>
+            <input type="text" name="hero_subtitle" value="{{ page.hero_subtitle if page else '' }}">
+        </div>
+        
         <div class="form-group form-check">
             <input type="checkbox" name="is_published" id="is_published" {{ 'checked' if page and page.is_published else '' }}>
             <label for="is_published">Опубликовано</label>

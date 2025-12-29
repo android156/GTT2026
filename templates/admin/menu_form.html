@@ -24,34 +24,6 @@
             <small class="hint">Чем меньше число, тем левее пункт в меню. Например: 10, 20, 30</small>
         </div>
         
-        <h3>Hero-секция страницы</h3>
-        <p class="section-desc">Изображение и текст будут отображаться в шапке страницы, на которую ведёт этот пункт меню</p>
-        
-        <div class="form-group">
-            <label>Hero-изображение</label>
-            {% if item and item.hero_image %}
-            <div class="current-image">
-                <img src="{{ item.hero_image }}" alt="Текущее изображение" style="max-width: 300px; max-height: 150px;">
-                <div class="form-check" style="margin-top: 10px;">
-                    <input type="checkbox" name="delete_hero_image" id="delete_hero_image">
-                    <label for="delete_hero_image">Удалить изображение</label>
-                </div>
-            </div>
-            {% endif %}
-            <input type="file" name="hero_image_file" accept="image/*">
-            <small class="hint">Рекомендуемый размер: 1920x600 px. Форматы: JPG, PNG, WebP. Автоматически сжимается</small>
-        </div>
-        <div class="form-group">
-            <label>Hero-заголовок</label>
-            <input type="text" name="hero_title" value="{{ item.hero_title if item else '' }}" placeholder="Например: О нашей компании">
-            <small class="hint">Крупный заголовок поверх изображения. Если пусто — используется название пункта меню</small>
-        </div>
-        <div class="form-group">
-            <label>Hero-подзаголовок</label>
-            <input type="text" name="hero_subtitle" value="{{ item.hero_subtitle if item else '' }}" placeholder="Например: Работаем с 2010 года">
-            <small class="hint">Дополнительный текст под заголовком</small>
-        </div>
-        
         <h3>Дополнительные настройки</h3>
         <div class="form-group form-check">
             <input type="checkbox" name="is_active" id="is_active" {{ 'checked' if item and item.is_active else 'checked' if not item else '' }}>

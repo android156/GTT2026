@@ -30,6 +30,9 @@ class Page(db.Model):
     seo_description = db.Column(db.String(300), default='')
     h1 = db.Column(db.String(200), default='')
     seo_text_html = db.Column(db.Text, default='')
+    hero_image = db.Column(db.String(300), default='')
+    hero_title = db.Column(db.String(200), default='')
+    hero_subtitle = db.Column(db.String(300), default='')
     is_published = db.Column(db.Boolean, default=True)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -60,6 +63,9 @@ class Category(db.Model):
     seo_description = db.Column(db.String(300), default='')
     h1 = db.Column(db.String(200), default='')
     seo_text_html = db.Column(db.Text, default='')
+    hero_image = db.Column(db.String(300), default='')
+    hero_title = db.Column(db.String(200), default='')
+    hero_subtitle = db.Column(db.String(300), default='')
     sort_order = db.Column(db.Integer, default=0)
     is_active = db.Column(db.Boolean, default=True)
     
@@ -155,6 +161,9 @@ class Service(db.Model):
     seo_description = db.Column(db.String(300), default='')
     h1 = db.Column(db.String(200), default='')
     seo_text_html = db.Column(db.Text, default='')
+    hero_image = db.Column(db.String(300), default='')
+    hero_title = db.Column(db.String(200), default='')
+    hero_subtitle = db.Column(db.String(300), default='')
     sort_order = db.Column(db.Integer, default=0)
     is_active = db.Column(db.Boolean, default=True)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -178,3 +187,19 @@ class Setting(db.Model):
     key = db.Column(db.String(100), unique=True, nullable=False)
     value = db.Column(db.Text, default='')
     description = db.Column(db.String(300), default='')
+
+
+class SiteSection(db.Model):
+    __tablename__ = 'site_sections'
+    id = db.Column(db.Integer, primary_key=True)
+    section_key = db.Column(db.String(50), unique=True, nullable=False)
+    title = db.Column(db.String(200), default='')
+    content_html = db.Column(db.Text, default='')
+    seo_title = db.Column(db.String(200), default='')
+    seo_description = db.Column(db.String(300), default='')
+    h1 = db.Column(db.String(200), default='')
+    seo_text_html = db.Column(db.Text, default='')
+    hero_image = db.Column(db.String(300), default='')
+    hero_title = db.Column(db.String(200), default='')
+    hero_subtitle = db.Column(db.String(300), default='')
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

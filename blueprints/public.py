@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, abort, Response
 from extensions import db
-from models import Page, MenuItem, Category, ProductLine, SizeItem, News, Lead, Setting, Service
+from models import Page, MenuItem, Category, ProductLine, SizeItem, News, Lead, Setting, Service, SiteSection
 from services.seo import get_page_seo, get_canonical_url, get_og_tags
 from services.schema import generate_product_jsonld, generate_breadcrumb_jsonld, generate_organization_jsonld
 from config import RESERVED_SLUGS, Config
@@ -22,6 +22,59 @@ def get_hero_for_url(url):
             'subtitle': menu_item.hero_subtitle
         }
     return None
+
+
+def get_hero_for_section(section_key):
+    section = SiteSection.query.filter_by(section_key=section_key).first()
+    if section and section.hero_image:
+        return {
+            'image': section.hero_image,
+            'title': section.hero_title or section.title,
+            'subtitle': section.hero_subtitle
+        }
+    return None
+
+
+def get_hero_for_page(page):
+    if page and page.hero_image:
+        return {
+            'image': page.hero_image,
+            'title': page.hero_title or page.title,
+            'subtitle': page.hero_subtitle
+        }
+    return get_hero_for_url(page.url_path) if page else None
+
+
+def get_hero_for_category(category):
+    if category and category.hero_image:
+        return {
+            'image': category.hero_image,
+            'title': category.hero_title or category.name,
+            'subtitle': category.hero_subtitle
+        }
+    if category and category.image_path:
+        return {
+            'image': category.image_path,
+            'title': category.hero_title or category.name,
+            'subtitle': category.hero_subtitle
+        }
+    return None
+
+
+def get_hero_for_service(service):
+    if service and service.hero_image:
+        return {
+            'image': service.hero_image,
+            'title': service.hero_title or service.title,
+            'subtitle': service.hero_subtitle
+        }
+    if service and service.image_path:
+        return {
+            'image': service.image_path,
+            'title': service.hero_title or service.title,
+            'subtitle': service.hero_subtitle
+        }
+    return get_hero_for_section('services')
 
 
 @public_bp.context_processor
@@ -64,7 +117,7 @@ def catalog():
         {'name': 'Каталог', 'url': None}
     ]
     
-    hero = get_hero_for_url('/catalog/')
+    hero = get_hero_for_section('catalog') or get_hero_for_url('/catalog/')
     
     return render_template('public/catalog.html',
                          categories=categories,
@@ -89,7 +142,7 @@ def services_list():
         {'name': 'Главная', 'url': '/'},
         {'name': 'Услуги', 'url': None}
     ]
-    hero = get_hero_for_url('/services/')
+    hero = get_hero_for_section('services') or get_hero_for_url('/services/')
     return render_template('public/services.html', 
                          services=services, 
                          seo=seo, 
@@ -108,9 +161,11 @@ def service_detail(slug):
         {'name': 'Услуги', 'url': '/services/'},
         {'name': service.title, 'url': None}
     ]
+    hero = get_hero_for_service(service)
     return render_template('public/service_detail.html',
                          service=service,
                          seo=seo,
+                         hero=hero,
                          breadcrumbs=breadcrumbs,
                          breadcrumbs_jsonld=generate_breadcrumb_jsonld(breadcrumbs),
                          canonical=get_canonical_url(f'/services/{slug}/'),
@@ -131,7 +186,7 @@ def news_list():
         {'name': 'Новости', 'url': None}
     ]
     
-    hero = get_hero_for_url('/news/')
+    hero = get_hero_for_section('news') or get_hero_for_url('/news/')
     
     return render_template('public/news_list.html',
                          news=news,
@@ -178,7 +233,7 @@ def static_page(url_path):
             {'name': page.title, 'url': None}
         ]
         
-        hero = get_hero_for_url(url_path)
+        hero = get_hero_for_page(page) or get_hero_for_url(url_path)
         
         return render_template('public/page.html',
                              page=page,
@@ -234,6 +289,7 @@ def render_category(category):
     ).order_by(ProductLine.sort_order).all()
     
     seo = get_page_seo(category)
+    hero = get_hero_for_category(category)
     
     breadcrumbs = [
         {'name': 'Главная', 'url': '/'},
@@ -245,6 +301,7 @@ def render_category(category):
                          category=category,
                          product_lines=product_lines,
                          seo=seo,
+                         hero=hero,
                          breadcrumbs=breadcrumbs,
                          breadcrumbs_jsonld=generate_breadcrumb_jsonld(breadcrumbs),
                          canonical=get_canonical_url(f'/{category.slug}/'),

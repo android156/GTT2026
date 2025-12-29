@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.utils import secure_filename
 from extensions import db, login_manager
-from models import User, Page, MenuItem, Category, ProductLine, SizeItem, News, DocumentFile, Lead, RedirectRule, Setting, Service
+from models import User, Page, MenuItem, Category, ProductLine, SizeItem, News, DocumentFile, Lead, RedirectRule, Setting, Service, SiteSection
 from services.importers import import_categories_csv, import_product_lines_csv, import_size_items_csv, import_news_csv
 from services.slug import generate_slug, is_reserved_slug, validate_slug
 from services.image_uploader import save_uploaded_image, delete_image
@@ -75,6 +75,47 @@ def dashboard():
     return render_template('admin/dashboard.html', stats=stats, recent_leads=recent_leads)
 
 
+SECTION_TITLES = {
+    'index': 'Главная страница',
+    'news': 'Раздел новостей',
+    'catalog': 'Каталог',
+    'services': 'Раздел услуг'
+}
+
+@admin_bp.route('/sections/<section_key>/', methods=['GET', 'POST'])
+@login_required
+def section_edit(section_key):
+    section = SiteSection.query.filter_by(section_key=section_key).first()
+    if not section:
+        section = SiteSection(section_key=section_key, title=SECTION_TITLES.get(section_key, section_key))
+        db.session.add(section)
+        db.session.commit()
+    
+    if request.method == 'POST':
+        if 'hero_image_file' in request.files:
+            file = request.files['hero_image_file']
+            if file and file.filename:
+                if section.hero_image:
+                    delete_image(section.hero_image)
+                section.hero_image = save_uploaded_image(file, 'sections')
+        if request.form.get('delete_hero_image') == 'on':
+            if section.hero_image:
+                delete_image(section.hero_image)
+            section.hero_image = ''
+        
+        section.title = request.form.get('title', '').strip()
+        section.h1 = request.form.get('h1', '').strip()
+        section.hero_title = request.form.get('hero_title', '').strip()
+        section.hero_subtitle = request.form.get('hero_subtitle', '').strip()
+        section.content_html = sanitize_html(request.form.get('content_html', ''))
+        section.seo_title = request.form.get('seo_title', '')
+        section.seo_description = request.form.get('seo_description', '')
+        section.seo_text_html = sanitize_html(request.form.get('seo_text_html', ''))
+        db.session.commit()
+        flash(f'Раздел "{section.title}" сохранен', 'success')
+        return redirect(url_for('admin.section_edit', section_key=section_key))
+    
+    return render_template('admin/section_form.html', section=section, section_key=section_key)
 
 
 @admin_bp.route('/services/')
@@ -102,6 +143,9 @@ def services_add():
             seo_description=request.form.get('seo_description', ''),
             h1=request.form.get('h1', ''),
             seo_text_html=sanitize_html(request.form.get('seo_text_html', '')),
+            hero_image=request.form.get('hero_image', ''),
+            hero_title=request.form.get('hero_title', ''),
+            hero_subtitle=request.form.get('hero_subtitle', ''),
             sort_order=int(request.form.get('sort_order', 0) or 0),
             is_active=request.form.get('is_active') == 'on'
         )
@@ -131,6 +175,9 @@ def services_edit(id):
         service.seo_description = request.form.get('seo_description', '')
         service.h1 = request.form.get('h1', '')
         service.seo_text_html = sanitize_html(request.form.get('seo_text_html', ''))
+        service.hero_image = request.form.get('hero_image', '')
+        service.hero_title = request.form.get('hero_title', '')
+        service.hero_subtitle = request.form.get('hero_subtitle', '')
         service.sort_order = int(request.form.get('sort_order', 0) or 0)
         service.is_active = request.form.get('is_active') == 'on'
         db.session.commit()
@@ -174,6 +221,9 @@ def pages_add():
             seo_description=request.form.get('seo_description', ''),
             h1=request.form.get('h1', ''),
             seo_text_html=sanitize_html(request.form.get('seo_text_html', '')),
+            hero_image=request.form.get('hero_image', ''),
+            hero_title=request.form.get('hero_title', ''),
+            hero_subtitle=request.form.get('hero_subtitle', ''),
             is_published=request.form.get('is_published') == 'on'
         )
         db.session.add(page)
@@ -203,6 +253,9 @@ def pages_edit(id):
         page.seo_description = request.form.get('seo_description', '')
         page.h1 = request.form.get('h1', '')
         page.seo_text_html = sanitize_html(request.form.get('seo_text_html', ''))
+        page.hero_image = request.form.get('hero_image', '')
+        page.hero_title = request.form.get('hero_title', '')
+        page.hero_subtitle = request.form.get('hero_subtitle', '')
         page.is_published = request.form.get('is_published') == 'on'
         db.session.commit()
         flash('Страница обновлена', 'success')
@@ -334,6 +387,9 @@ def categories_add():
             seo_description=request.form.get('seo_description', ''),
             h1=request.form.get('h1', ''),
             seo_text_html=sanitize_html(request.form.get('seo_text_html', '')),
+            hero_image=request.form.get('hero_image', ''),
+            hero_title=request.form.get('hero_title', ''),
+            hero_subtitle=request.form.get('hero_subtitle', ''),
             sort_order=int(request.form.get('sort_order', 0) or 0),
             is_active=request.form.get('is_active') == 'on'
         )
@@ -376,6 +432,9 @@ def categories_edit(id):
         cat.seo_description = request.form.get('seo_description', '')
         cat.h1 = request.form.get('h1', '')
         cat.seo_text_html = sanitize_html(request.form.get('seo_text_html', ''))
+        cat.hero_image = request.form.get('hero_image', '')
+        cat.hero_title = request.form.get('hero_title', '')
+        cat.hero_subtitle = request.form.get('hero_subtitle', '')
         cat.sort_order = int(request.form.get('sort_order', 0) or 0)
         cat.is_active = request.form.get('is_active') == 'on'
         db.session.commit()

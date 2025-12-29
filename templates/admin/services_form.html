@@ -30,6 +30,24 @@
         <textarea name="content_html" class="form-control" rows="10">{{ service.content_html if service else '' }}</textarea>
     </div>
     <hr>
+    <h3>Hero-изображение</h3>
+    <p class="section-desc">Фоновое изображение в шапке страницы услуги</p>
+    <div class="form-group">
+        <label>URL Hero-изображения</label>
+        <input type="text" name="hero_image" value="{{ service.hero_image if service else '' }}" class="form-control" placeholder="/static/images/hero.jpg">
+        <small class="form-text text-muted">Путь к изображению или внешний URL (если пусто - используется изображение услуги)</small>
+    </div>
+    <div class="form-group">
+        <label>Заголовок в Hero</label>
+        <input type="text" name="hero_title" value="{{ service.hero_title if service else '' }}" class="form-control">
+        <small class="form-text text-muted">Крупный текст поверх изображения</small>
+    </div>
+    <div class="form-group">
+        <label>Подзаголовок в Hero</label>
+        <input type="text" name="hero_subtitle" value="{{ service.hero_subtitle if service else '' }}" class="form-control">
+        <small class="form-text text-muted">Дополнительный текст</small>
+    </div>
+    <hr>
     <h3>SEO настройки</h3>
     <div class="form-group">
         <label>H1 заголовок</label>

@@ -33,6 +33,11 @@
         <div class="stat-value">{{ stats.redirects }}</div>
         <div class="stat-label">Редиректов</div>
     </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ stats.services }}</div>
+        <div class="stat-label">Услуг</div>
+        <p style="margin-top: 10px;"><a href="{{ url_for('admin.services_list') }}">Управление</a></p>
+    </div>
 </div>
 
 {% if recent_leads %}

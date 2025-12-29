@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+<nav class="breadcrumbs">
+    {% for crumb in breadcrumbs %}
+    {% if crumb.url %}<a href="{{ crumb.url }}">{{ crumb.name }}</a> / {% else %}<span>{{ crumb.name }}</span>{% endif %}
+    {% endfor %}
+</nav>
+<h1>{{ service.h1 or service.title }}</h1>
+<div class="service-content">
+    {% if service.image_path %}<img src="{{ service.image_path }}" alt="{{ service.title }}" class="service-main-img">{% endif %}
+    {{ service.content_html|safe }}
+</div>
+{% if service.seo_text_html %}<div class="seo-text">{{ service.seo_text_html|safe }}</div>{% endif %}
+{% endblock %}

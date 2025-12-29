@@ -28,11 +28,14 @@ def create_app():
     csrf.init_app(app)
     
     from blueprints.public import public_bp
+     
     from blueprints.admin import admin_bp
+    from blueprints.public_services import public_services_bp
     from blueprints.redirects import check_redirects
     
     app.register_blueprint(public_bp)
     app.register_blueprint(admin_bp)
+    app.register_blueprint(public_services_bp)
     
     check_redirects(app)
     

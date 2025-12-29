@@ -144,6 +144,22 @@ class Lead(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
+class Service(db.Model):
+    __tablename__ = 'services'
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    slug = db.Column(db.String(100), unique=True, nullable=False)
+    content_html = db.Column(db.Text, default='')
+    image_path = db.Column(db.String(300), default='')
+    seo_title = db.Column(db.String(200), default='')
+    seo_description = db.Column(db.String(300), default='')
+    h1 = db.Column(db.String(200), default='')
+    seo_text_html = db.Column(db.Text, default='')
+    sort_order = db.Column(db.Integer, default=0)
+    is_active = db.Column(db.Boolean, default=True)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
 class RedirectRule(db.Model):
     __tablename__ = 'redirect_rules'
     id = db.Column(db.Integer, primary_key=True)

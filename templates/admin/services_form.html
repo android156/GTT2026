@@ -1,0 +1,62 @@
+{% extends 'admin/base.html' %}
+{% block content %}
+<div class="admin-header">
+    <h1>{{ 'Редактировать услугу' if service else 'Добавить услугу' }}</h1>
+    <a href="{{ url_for('admin.services_list') }}" class="btn btn-secondary">Назад к списку</a>
+</div>
+<form method="POST" enctype="multipart/form-data" class="admin-form">
+    <div class="form-group">
+        <label>Заголовок услуги</label>
+        <input type="text" name="title" value="{{ service.title if service else '' }}" required class="form-control">
+        <small class="form-text text-muted">Например: Доставка труб</small>
+    </div>
+    <div class="form-group">
+        <label>URL Slug</label>
+        <input type="text" name="slug" value="{{ service.slug if service else '' }}" class="form-control">
+        <small class="form-text text-muted">Если оставить пустым, сгенерируется из заголовка. Например: dostavka</small>
+    </div>
+    <div class="form-group">
+        <label>Изображение</label>
+        {% if service and service.image_path %}
+        <div class="current-image">
+            <img src="{{ service.image_path }}" style="max-width: 200px;">
+            <label><input type="checkbox" name="delete_image"> Удалить изображение</label>
+        </div>
+        {% endif %}
+        <input type="file" name="image_file" class="form-control">
+    </div>
+    <div class="form-group">
+        <label>Контент (HTML)</label>
+        <textarea name="content_html" class="form-control" rows="10">{{ service.content_html if service else '' }}</textarea>
+    </div>
+    <hr>
+    <h3>SEO настройки</h3>
+    <div class="form-group">
+        <label>H1 заголовок</label>
+        <input type="text" name="h1" value="{{ service.h1 if service else '' }}" class="form-control">
+    </div>
+    <div class="form-group">
+        <label>SEO Title</label>
+        <input type="text" name="seo_title" value="{{ service.seo_title if service else '' }}" class="form-control">
+    </div>
+    <div class="form-group">
+        <label>SEO Description</label>
+        <textarea name="seo_description" class="form-control">{{ service.seo_description if service else '' }}</textarea>
+    </div>
+    <div class="form-group">
+        <label>SEO Текст (внизу страницы)</label>
+        <textarea name="seo_text_html" class="form-control" rows="5">{{ service.seo_text_html if service else '' }}</textarea>
+    </div>
+    <hr>
+    <div class="form-group">
+        <label>Порядок сортировки</label>
+        <input type="number" name="sort_order" value="{{ service.sort_order if service else 0 }}" class="form-control">
+    </div>
+    <div class="form-group">
+        <label><input type="checkbox" name="is_active" {{ 'checked' if not service or service.is_active }}> Активна</label>
+    </div>
+    <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+    </div>
+</form>
+{% endblock %}

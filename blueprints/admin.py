@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.utils import secure_filename
 from extensions import db, login_manager
-from models import User, Page, MenuItem, Category, ProductLine, SizeItem, News, DocumentFile, Lead, RedirectRule, Setting
+from models import User, Page, MenuItem, Category, ProductLine, SizeItem, News, DocumentFile, Lead, RedirectRule, Setting, Service
 from services.importers import import_categories_csv, import_product_lines_csv, import_size_items_csv, import_news_csv
 from services.slug import generate_slug, is_reserved_slug, validate_slug
 from services.image_uploader import save_uploaded_image, delete_image
@@ -68,10 +68,93 @@ def dashboard():
         'size_items': SizeItem.query.count(),
         'news': News.query.count(),
         'leads': Lead.query.filter_by(status='new').count(),
-        'redirects': RedirectRule.query.filter_by(is_active=True).count()
+        'redirects': RedirectRule.query.filter_by(is_active=True).count(),
+        'services': Service.query.count()
     }
     recent_leads = Lead.query.order_by(Lead.created_at.desc()).limit(5).all()
     return render_template('admin/dashboard.html', stats=stats, recent_leads=recent_leads)
+
+
+
+
+@admin_bp.route('/services/add/', methods=['GET', 'POST'])
+@login_required
+def services_add():
+    if request.method == 'POST':
+        title = request.form.get('title', '').strip()
+        slug = request.form.get('slug', '').strip() or generate_slug(title)
+        
+        image_path = ''
+        if 'image_file' in request.files:
+            file = request.files['image_file']
+            if file and file.filename:
+                image_path = save_uploaded_image(file, 'services')
+        
+        service = Service(
+            title=title,
+            slug=slug,
+            content_html=sanitize_html(request.form.get('content_html', '')),
+            image_path=image_path or request.form.get('image_path', ''),
+            seo_title=request.form.get('seo_title', ''),
+            seo_description=request.form.get('seo_description', ''),
+            h1=request.form.get('h1', ''),
+            seo_text_html=sanitize_html(request.form.get('seo_text_html', '')),
+            sort_order=int(request.form.get('sort_order', 0) or 0),
+            is_active=request.form.get('is_active') == 'on'
+        )
+        db.session.add(service)
+        db.session.commit()
+        flash('Услуга добавлена', 'success')
+        return redirect(url_for('admin.services_list'))
+    
+    return render_template('admin/services_form.html', service=None)
+
+
+@admin_bp.route('/services/<int:id>/edit/', methods=['GET', 'POST'])
+@login_required
+def services_edit(id):
+    service = Service.query.get_or_404(id)
+    
+    if request.method == 'POST':
+        if 'image_file' in request.files:
+            file = request.files['image_file']
+            if file and file.filename:
+                if service.image_path:
+                    delete_image(service.image_path)
+                service.image_path = save_uploaded_image(file, 'services')
+        
+        if request.form.get('delete_image') == 'on':
+            if service.image_path:
+                delete_image(service.image_path)
+            service.image_path = ''
+            
+        service.title = request.form.get('title', '').strip()
+        service.slug = request.form.get('slug', '').strip() or generate_slug(service.title)
+        service.content_html = sanitize_html(request.form.get('content_html', ''))
+        service.seo_title = request.form.get('seo_title', '')
+        service.seo_description = request.form.get('seo_description', '')
+        service.h1 = request.form.get('h1', '')
+        service.seo_text_html = sanitize_html(request.form.get('seo_text_html', ''))
+        service.sort_order = int(request.form.get('sort_order', 0) or 0)
+        service.is_active = request.form.get('is_active') == 'on'
+        
+        db.session.commit()
+        flash('Услуга обновлена', 'success')
+        return redirect(url_for('admin.services_list'))
+    
+    return render_template('admin/services_form.html', service=service)
+
+
+@admin_bp.route('/services/<int:id>/delete/', methods=['POST'])
+@login_required
+def services_delete(id):
+    service = Service.query.get_or_404(id)
+    if service.image_path:
+        delete_image(service.image_path)
+    db.session.delete(service)
+    db.session.commit()
+    flash('Услуга удалена', 'success')
+    return redirect(url_for('admin.services_list'))
 
 
 @admin_bp.route('/pages/')
@@ -806,3 +889,8 @@ def settings_save():
     db.session.commit()
     flash('Настройки сохранены', 'success')
     return redirect(url_for('admin.settings_list'))
+
+
+
+
+

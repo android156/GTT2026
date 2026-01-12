@@ -141,8 +141,8 @@ h3 { font-family: var(--font-heading); font-size: 20px; font-weight: 600; margin
 .news-card { display: block; background: white; border-radius: var(--radius-lg); box-shadow: var(--shadow); overflow: hidden; transition: all 0.3s; border: 1px solid var(--border-color); }
 .news-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-md); }
 .news-card-body { padding: 24px; }
-.news-date { font-size: 13px; color: var(--primary-color); font-weight: 600; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
-.news-card h3 { font-size: 18px; color: var(--text-color); line-height: 1.4; }
+.news-date { font-size: 13px; color: var(--primary-color); font-weight: 700; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
+.news-excerpt { color: #000000; font-size: 15px; line-height: 1.5; }
 .news-detail { max-width: 800px; }
 .news-content { line-height: 1.8; font-size: 16px; }
 .news-content p { margin-bottom: 18px; }

@@ -103,7 +103,7 @@
         <a href="/news/{{ item.slug }}/" class="news-card">
             <div class="news-card-body">
                 <div class="news-date">{{ item.date.strftime('%d.%m.%Y') if item.date else '' }}</div>
-                <h3>{{ item.title }}</h3>
+                <div class="news-excerpt">{{ item.content_html|truncate(100) }}</div>
             </div>
         </a>
         {% endfor %}

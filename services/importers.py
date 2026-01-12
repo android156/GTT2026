@@ -203,55 +203,42 @@ def import_news_csv(file_content):
     
     try:
         stream = io.StringIO(file_content.decode('utf-8'))
-        reader = csv.DictReader(stream)
+        reader = csv.DictReader(stream, delimiter=';')
         
         existing_slugs = [n.slug for n in News.query.all()]
         
         for row_num, row in enumerate(reader, 2):
             try:
-                title = row.get('title', '').strip()
-                slug = row.get('slug', '').strip()
+                content = row.get('content', '').strip()
                 date_str = row.get('date', '').strip()
                 
-                if not title:
-                    results['errors'].append(f"Строка {row_num}: пустой title")
+                if not content:
+                    results['errors'].append(f"Строка {row_num}: пустой контент")
                     continue
                 
-                if not slug:
-                    slug = generate_slug(title)
-                    slug = make_unique_slug(slug, existing_slugs)
+                # Заголовок - первые 50 символов контента
+                title = content[:50] + '...' if len(content) > 50 else content
+                
+                slug = generate_slug(title)
+                slug = make_unique_slug(slug, existing_slugs)
                 
                 try:
                     if date_str:
-                        date = datetime.strptime(date_str, '%Y-%m-%d').date()
+                        date = datetime.strptime(date_str, '%d.%m.%Y').date()
                     else:
                         date = datetime.utcnow().date()
                 except:
                     date = datetime.utcnow().date()
                 
-                existing = News.query.filter_by(slug=slug).first()
-                if existing:
-                    existing.title = title
-                    existing.date = date
-                    existing.content_html = row.get('content_html', '')
-                    existing.seo_title = row.get('seo_title', '')
-                    existing.seo_description = row.get('seo_description', '')
-                    existing.h1 = row.get('h1', '')
-                    existing.seo_text_html = row.get('seo_text_html', '')
-                else:
-                    news = News(
-                        title=title,
-                        slug=slug,
-                        date=date,
-                        content_html=row.get('content_html', ''),
-                        seo_title=row.get('seo_title', ''),
-                        seo_description=row.get('seo_description', ''),
-                        h1=row.get('h1', ''),
-                        seo_text_html=row.get('seo_text_html', ''),
-                        is_published=True
-                    )
-                    db.session.add(news)
-                    existing_slugs.append(slug)
+                news = News(
+                    title=title,
+                    slug=slug,
+                    date=date,
+                    content_html=content,
+                    is_published=True
+                )
+                db.session.add(news)
+                existing_slugs.append(slug)
                 
                 results['success'] += 1
             except Exception as e:

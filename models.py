@@ -117,7 +117,7 @@ class SizeItem(db.Model):
 class News(db.Model):
     __tablename__ = 'news'
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(300), nullable=False)
+    title = db.Column(db.String(300), nullable=True)
     slug = db.Column(db.String(200), unique=True, nullable=False)
     date = db.Column(db.Date, default=datetime.utcnow)
     content_html = db.Column(db.Text, default='')

@@ -13,7 +13,6 @@
 
 <article class="news-detail">
     <div class="news-date">{{ news.date.strftime('%d.%m.%Y') if news.date else '' }}</div>
-    <h1>{{ seo.h1 }}</h1>
     
     <div class="news-content">
         {{ news.content_html|safe }}

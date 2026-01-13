@@ -8,9 +8,9 @@ img { max-width: 100%; height: auto; }
 
 .header { background: var(--bg-dark); padding: 0; position: sticky; top: 0; z-index: 100; }
 .header-top { background: var(--primary-color); padding: 8px 0; }
-.header-top-inner { display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: white; }
-.header-phone { font-weight: 600; }
-.header-phone a { color: white; }
+.header-top-inner { display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: white; font-weight: 700; }
+.header-phone { font-weight: 700; }
+.header-phone a, .header-email a { color: white; }
 .header-main { padding: 12px 0; }
 .header-inner { display: flex; justify-content: space-between; align-items: center; gap: 30px; }
 .logo { display: flex; align-items: center; gap: 12px; }

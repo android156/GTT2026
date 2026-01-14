@@ -59,11 +59,138 @@
     line-height: 1.4;
     background: #f8f8f8;
 }
+
+/* Модальное окно для HTML редактора */
+.html-modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 10000;
+    justify-content: center;
+    align-items: center;
+}
+.html-modal-overlay.active {
+    display: flex;
+}
+.html-modal {
+    background: white;
+    width: 90%;
+    max-width: 900px;
+    max-height: 85vh;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    display: flex;
+    flex-direction: column;
+}
+.html-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid #ddd;
+    background: #f5f5f5;
+    border-radius: 8px 8px 0 0;
+}
+.html-modal-header h3 {
+    margin: 0;
+    font-size: 16px;
+    color: #333;
+}
+.html-modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+    padding: 0;
+    line-height: 1;
+}
+.html-modal-close:hover {
+    color: #d32f2f;
+}
+.html-modal-body {
+    flex: 1;
+    padding: 20px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+.html-modal-textarea {
+    width: 100%;
+    flex: 1;
+    min-height: 400px;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 13px;
+    line-height: 1.5;
+    padding: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    resize: none;
+    background: #1e1e1e;
+    color: #d4d4d4;
+}
+.html-modal-textarea:focus {
+    outline: none;
+    border-color: #d32f2f;
+}
+.html-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 15px 20px;
+    border-top: 1px solid #ddd;
+    background: #f5f5f5;
+    border-radius: 0 0 8px 8px;
+}
+.html-modal-footer button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+.html-modal-save {
+    background: #d32f2f;
+    color: white;
+}
+.html-modal-save:hover {
+    background: #b71c1c;
+}
+.html-modal-cancel {
+    background: #e0e0e0;
+    color: #333;
+}
+.html-modal-cancel:hover {
+    background: #bdbdbd;
+}
 </style>
 {% endmacro %}
 
 {% macro wysiwyg_scripts() %}
+<!-- Модальное окно для редактирования HTML -->
+<div id="htmlEditorModal" class="html-modal-overlay">
+    <div class="html-modal">
+        <div class="html-modal-header">
+            <h3>Редактирование HTML-кода</h3>
+            <button type="button" class="html-modal-close" onclick="closeHtmlModal()">&times;</button>
+        </div>
+        <div class="html-modal-body">
+            <textarea id="htmlModalTextarea" class="html-modal-textarea"></textarea>
+        </div>
+        <div class="html-modal-footer">
+            <button type="button" class="html-modal-cancel" onclick="closeHtmlModal()">Отмена</button>
+            <button type="button" class="html-modal-save" onclick="saveHtmlModal()">Сохранить</button>
+        </div>
+    </div>
+</div>
+
 <script>
+let currentHtmlTargetId = null;
+
 function formatText(textareaId, format) {
     const textarea = document.getElementById(textareaId);
     const start = textarea.selectionStart;
@@ -157,15 +284,57 @@ function insertTable(textareaId) {
 }
 
 function toggleHtmlMode(textareaId) {
+    currentHtmlTargetId = textareaId;
     const textarea = document.getElementById(textareaId);
-    textarea.classList.toggle('html-mode');
+    const modal = document.getElementById('htmlEditorModal');
+    const modalTextarea = document.getElementById('htmlModalTextarea');
     
-    if (textarea.classList.contains('html-mode')) {
-        const formatted = textarea.value
-            .replace(/></g, '>\n<')
-            .replace(/\n\n+/g, '\n');
-        textarea.value = formatted;
-    }
+    // Форматируем HTML для удобного редактирования
+    let html = textarea.value;
+    html = html
+        .replace(/></g, '>\n<')
+        .replace(/\n\n+/g, '\n')
+        .trim();
+    
+    modalTextarea.value = html;
+    modal.classList.add('active');
+    modalTextarea.focus();
 }
+
+function closeHtmlModal() {
+    const modal = document.getElementById('htmlEditorModal');
+    modal.classList.remove('active');
+    currentHtmlTargetId = null;
+}
+
+function saveHtmlModal() {
+    if (!currentHtmlTargetId) return;
+    
+    const textarea = document.getElementById(currentHtmlTargetId);
+    const modalTextarea = document.getElementById('htmlModalTextarea');
+    
+    // Минифицируем HTML обратно (убираем лишние переносы)
+    let html = modalTextarea.value
+        .replace(/\n\s*/g, '')
+        .replace(/>\s+</g, '><')
+        .trim();
+    
+    textarea.value = html;
+    closeHtmlModal();
+}
+
+// Закрытие модального окна по Escape
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeHtmlModal();
+    }
+});
+
+// Закрытие по клику вне окна
+document.getElementById('htmlEditorModal')?.addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeHtmlModal();
+    }
+});
 </script>
 {% endmacro %}

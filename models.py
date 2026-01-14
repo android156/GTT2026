@@ -173,9 +173,30 @@ class Service(db.Model):
     hero_image = db.Column(db.String(300), default='')
     hero_title = db.Column(db.String(200), default='')
     hero_subtitle = db.Column(db.String(300), default='')
+    gallery_interval = db.Column(db.Integer, default=5)
     sort_order = db.Column(db.Integer, default=0)
     is_active = db.Column(db.Boolean, default=True)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    images = db.relationship('ServiceImage', backref='service', lazy='dynamic', cascade='all, delete-orphan', order_by='ServiceImage.sort_order')
+    
+    def get_main_image(self):
+        main = ServiceImage.query.filter_by(service_id=self.id, is_main=True).first()
+        if main:
+            return main.image_path
+        first = ServiceImage.query.filter_by(service_id=self.id).order_by(ServiceImage.sort_order).first()
+        return first.image_path if first else self.image_path
+
+
+class ServiceImage(db.Model):
+    __tablename__ = 'service_images'
+    id = db.Column(db.Integer, primary_key=True)
+    service_id = db.Column(db.Integer, db.ForeignKey('services.id'), nullable=False)
+    image_path = db.Column(db.String(300), nullable=False)
+    alt_text = db.Column(db.String(200), default='')
+    is_main = db.Column(db.Boolean, default=False)
+    sort_order = db.Column(db.Integer, default=0)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
 class RedirectRule(db.Model):

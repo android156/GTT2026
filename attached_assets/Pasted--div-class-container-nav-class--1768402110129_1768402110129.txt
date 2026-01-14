@@ -1,0 +1,51 @@
+<div class="container">
+            
+            
+            
+            
+            
+<nav class="breadcrumbs">
+    
+    
+    <a href="/">Главная</a> /
+    
+    
+    
+    <a href="/services/">Услуги</a> /
+    
+    
+    
+    <span>Монтаж фитингов</span>
+    
+    
+</nav>
+
+<div class="service-detail">
+    
+    <div class="service-image" style="margin-bottom: 40px; text-align: center; background: white; padding: 30px; border-radius: var(--radius-lg); box-shadow: var(--shadow); border: 1px solid var(--border-color);">
+        <img src="/static/uploads/services/2f933eaebc79.jpg" alt="Монтаж фитингов" style="max-width: 100%; max-height: 400px; object-fit: contain;">
+    </div>
+    
+    
+    <div class="content-text" style="font-size: 16px; line-height: 1.8; color: var(--text-color);">
+        <p>Монтаж пресс-фитингов дело достаточно щепетильное. Если Вы этим никогда не занимались, то лучше обратиться к профессионалам по двум причинам:
+
+1. У Вас скорее всего нет профессионального инструмента, который стоит от полумиллиона рублей. А пытаясь сделать что-то подручными средствами, можно получить некачественный стык или переход, который рано или поздно сорвет.
+
+2. Если Вы каким-то образом нашли инструмент, то Ваши исполнители наверняка таких работ ни разу этого не делали. В результате могут также получиться некачественные соединения. Наши же специалисты сертифицированы производителями и имеют огромный опыт именно в этом направлении деятельности. Ниже приводим приблизительные цены без НДС.</p>
+    </div>
+    
+    <div class="service-action" style="text-align: center; margin: 60px 0; padding: 40px; background: var(--bg-light); border-radius: var(--radius-lg); border: 1px solid var(--border-color);">
+        <h3 style="margin-bottom: 20px;">Заинтересовала услуга?</h3>
+        <p style="margin-bottom: 30px; color: var(--text-light);">Оставьте заявку, и наш специалист свяжется с вами для консультации.</p>
+        <a href="#callback" class="btn btn-primary">Оставить заявку</a>
+    </div>
+    
+    
+    <div class="seo-text" style="margin-top: 60px; padding-top: 40px; border-top: 2px solid var(--border-color);">
+        Подготовка к монтажу
+    </div>
+    
+</div>
+
+        </div>

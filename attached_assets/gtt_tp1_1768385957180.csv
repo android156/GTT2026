@@ -1,0 +1,5 @@
+category_slug;product_slug;size_text;sku;price;unit;in_stock;pipe_dxs;pressure;mass_per_m;min_bend_radius;max_len_coil;max_len_drum
+izopeks;tvel-peks-1;20x1,9/90;;;м;1;20x1,9;6 бар;1,01;0,8;420;1500
+izopeks;tvel-peks-1;25x2,3/90;;;м;1;25x2,3;6 бар;1,06;0,8;420;1500
+izopeks;tvel-peks-1;32x2,9/90;;;м;1;32x2,9;6 бар;1,14;0,8;420;1500
+izopeks;tvel-peks-1;40x3,7/90;;;м;1;40x3,7;6 бар;1,27;0,8;420;1500

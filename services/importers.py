@@ -6,11 +6,24 @@ from models import Category, ProductLine, SizeItem, News
 from services.slug import generate_slug, make_unique_slug
 
 
+def decode_csv_content(file_content):
+    """Decode CSV content trying UTF-8 first, then Windows-1251"""
+    try:
+        return file_content.decode('utf-8-sig')
+    except UnicodeDecodeError:
+        pass
+    try:
+        return file_content.decode('cp1251')
+    except UnicodeDecodeError:
+        pass
+    return file_content.decode('utf-8', errors='replace')
+
+
 def import_categories_csv(file_content):
     results = {'success': 0, 'errors': []}
     
     try:
-        stream = io.StringIO(file_content.decode('utf-8'))
+        stream = io.StringIO(decode_csv_content(file_content))
         reader = csv.DictReader(stream, delimiter=';')
         
         for row_num, row in enumerate(reader, 2):
@@ -66,7 +79,7 @@ def import_product_lines_csv(file_content):
     results = {'success': 0, 'errors': []}
     
     try:
-        stream = io.StringIO(file_content.decode('utf-8'))
+        stream = io.StringIO(decode_csv_content(file_content))
         reader = csv.DictReader(stream, delimiter=';')
         
         for row_num, row in enumerate(reader, 2):
@@ -129,7 +142,7 @@ def import_size_items_csv(file_content):
     results = {'success': 0, 'errors': []}
     
     try:
-        stream = io.StringIO(file_content.decode('utf-8'))
+        stream = io.StringIO(decode_csv_content(file_content))
         reader = csv.DictReader(stream, delimiter=';')
         
         for row_num, row in enumerate(reader, 2):
@@ -214,7 +227,7 @@ def import_news_csv(file_content):
     results = {'success': 0, 'errors': []}
     
     try:
-        stream = io.StringIO(file_content.decode('utf-8'))
+        stream = io.StringIO(decode_csv_content(file_content))
         reader = csv.DictReader(stream, delimiter=';')
         
         existing_slugs = [n.slug for n in News.query.all()]

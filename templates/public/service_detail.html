@@ -1,10 +1,14 @@
 {% extends 'base.html' %}
 
 {% block hero %}
-<section class="hero page-hero" style="background-image: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('/static/images/WhatsApp_Image_2019-10-21_at_13.44.44_1766758697538.jpeg');">
+{% set hero_img = service.hero_image or service.image_path or '/static/images/WhatsApp_Image_2019-10-21_at_13.44.44_1766758697538.jpeg' %}
+<section class="hero page-hero" style="background-image: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('{{ hero_img }}');">
     <div class="container">
         <div class="hero-content">
-            <h1>{{ service.h1 or service.title }}</h1>
+            <h1>{{ service.hero_title or service.h1 or service.title }}</h1>
+            {% if service.hero_subtitle %}
+            <p class="hero-desc">{{ service.hero_subtitle }}</p>
+            {% endif %}
         </div>
     </div>
 </section>

@@ -181,11 +181,11 @@ def services_add():
             image_path=image_path or request.form.get('image_path', ''),
             seo_title=request.form.get('seo_title', ''),
             seo_description=request.form.get('seo_description', ''),
-            h1=request.form.get('h1', ''),
+            h1=request.form.get('h1', '').strip(),
             seo_text_html=sanitize_html(request.form.get('seo_text_html', '')),
-            hero_image=request.form.get('hero_image', ''),
-            hero_title=request.form.get('hero_title', ''),
-            hero_subtitle=request.form.get('hero_subtitle', ''),
+            hero_image=request.form.get('hero_image', '').strip(),
+            hero_title=request.form.get('hero_title', '').strip(),
+            hero_subtitle=request.form.get('hero_subtitle', '').strip(),
             sort_order=int(request.form.get('sort_order', 0) or 0),
             is_active=request.form.get('is_active') == 'on'
         )
@@ -213,11 +213,11 @@ def services_edit(id):
         service.content_html = sanitize_html(request.form.get('content_html', ''))
         service.seo_title = request.form.get('seo_title', '')
         service.seo_description = request.form.get('seo_description', '')
-        service.h1 = request.form.get('h1', '')
+        service.h1 = request.form.get('h1', '').strip()
         service.seo_text_html = sanitize_html(request.form.get('seo_text_html', ''))
-        service.hero_image = request.form.get('hero_image', '')
-        service.hero_title = request.form.get('hero_title', '')
-        service.hero_subtitle = request.form.get('hero_subtitle', '')
+        service.hero_image = request.form.get('hero_image', '').strip()
+        service.hero_title = request.form.get('hero_title', '').strip()
+        service.hero_subtitle = request.form.get('hero_subtitle', '').strip()
         service.sort_order = int(request.form.get('sort_order', 0) or 0)
         service.is_active = request.form.get('is_active') == 'on'
         db.session.commit()
@@ -259,11 +259,11 @@ def pages_add():
             content_html=sanitize_html(request.form.get('content_html', '')),
             seo_title=request.form.get('seo_title', ''),
             seo_description=request.form.get('seo_description', ''),
-            h1=request.form.get('h1', ''),
+            h1=request.form.get('h1', '').strip(),
             seo_text_html=sanitize_html(request.form.get('seo_text_html', '')),
-            hero_image=request.form.get('hero_image', ''),
-            hero_title=request.form.get('hero_title', ''),
-            hero_subtitle=request.form.get('hero_subtitle', ''),
+            hero_image=request.form.get('hero_image', '').strip(),
+            hero_title=request.form.get('hero_title', '').strip(),
+            hero_subtitle=request.form.get('hero_subtitle', '').strip(),
             is_published=request.form.get('is_published') == 'on'
         )
         db.session.add(page)
@@ -425,11 +425,11 @@ def categories_add():
             image_path=image_path or request.form.get('image_path', ''),
             seo_title=request.form.get('seo_title', ''),
             seo_description=request.form.get('seo_description', ''),
-            h1=request.form.get('h1', ''),
+            h1=request.form.get('h1', '').strip(),
             seo_text_html=sanitize_html(request.form.get('seo_text_html', '')),
-            hero_image=request.form.get('hero_image', ''),
-            hero_title=request.form.get('hero_title', ''),
-            hero_subtitle=request.form.get('hero_subtitle', ''),
+            hero_image=request.form.get('hero_image', '').strip(),
+            hero_title=request.form.get('hero_title', '').strip(),
+            hero_subtitle=request.form.get('hero_subtitle', '').strip(),
             sort_order=int(request.form.get('sort_order', 0) or 0),
             is_active=request.form.get('is_active') == 'on'
         )

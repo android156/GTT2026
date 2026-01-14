@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, jsonify
+from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, jsonify, Response
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.utils import secure_filename
 from extensions import db, login_manager
@@ -56,6 +56,47 @@ def logout():
     logout_user()
     flash('Вы вышли из системы', 'info')
     return redirect(url_for('admin.login'))
+
+
+@admin_bp.route('/csv-template/<template_type>/')
+@login_required
+def csv_template(template_type):
+    templates = {
+        'categories': {
+            'filename': 'categories_template.csv',
+            'headers': 'name,slug,sort_order,is_active',
+            'example': 'Полиэтиленовые трубы,polietilenovye-truby,1,1'
+        },
+        'product_lines': {
+            'filename': 'product_lines_template.csv',
+            'headers': 'category_slug,name,slug,sort_order,is_active',
+            'example': 'polietilenovye-truby,ПЭ 100 SDR 11,pe-100-sdr-11,1,1'
+        },
+        'size_items': {
+            'filename': 'size_items_template.csv',
+            'headers': 'product_line_slug,size_text,sku,price,unit,in_stock,pipe_dxs,pressure,mass_per_m,min_bend_radius,max_len_coil,max_len_drum',
+            'example': 'pe-100-sdr-11,32x3.0,PE100-32-3,150.00,м,1,32x3.0,1.0 МПа,0.29,0.5,200,500'
+        },
+        'news': {
+            'filename': 'news_template.csv',
+            'headers': 'date;content',
+            'example': '2025-01-15;Компания расширила ассортимент продукции'
+        }
+    }
+    
+    if template_type not in templates:
+        flash('Неизвестный тип шаблона', 'danger')
+        return redirect(url_for('admin.dashboard'))
+    
+    t = templates[template_type]
+    delimiter = ';' if template_type == 'news' else ','
+    content = t['headers'] + '\n' + t['example'] + '\n'
+    
+    return Response(
+        content,
+        mimetype='text/csv',
+        headers={'Content-Disposition': f'attachment; filename={t["filename"]}'}
+    )
 
 
 @admin_bp.route('/')
@@ -468,7 +509,7 @@ def categories_import():
                     flash(err, 'danger')
         return redirect(url_for('admin.categories_list'))
     
-    return render_template('admin/import_csv.html', entity='категории')
+    return render_template('admin/import_csv.html', entity='категории', template_type='categories')
 
 
 @admin_bp.route('/product-lines/')
@@ -571,7 +612,7 @@ def product_lines_import():
                     flash(err, 'danger')
         return redirect(url_for('admin.product_lines_list'))
     
-    return render_template('admin/import_csv.html', entity='линейки')
+    return render_template('admin/import_csv.html', entity='линейки', template_type='product_lines')
 
 
 @admin_bp.route('/size-items/')
@@ -677,7 +718,7 @@ def size_items_import():
                     flash(err, 'danger')
         return redirect(url_for('admin.size_items_list'))
     
-    return render_template('admin/import_csv.html', entity='типоразмеры')
+    return render_template('admin/import_csv.html', entity='типоразмеры', template_type='size_items')
 
 
 @admin_bp.route('/news/')
@@ -772,7 +813,7 @@ def news_import():
                     flash(err, 'danger')
         return redirect(url_for('admin.news_list'))
     
-    return render_template('admin/import_csv.html', entity='новости')
+    return render_template('admin/import_csv.html', entity='новости', template_type='news')
 
 
 @admin_bp.route('/documents/')

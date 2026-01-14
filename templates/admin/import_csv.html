@@ -4,6 +4,12 @@
 
 {% block content %}
 <div class="card">
+    <div style="margin-bottom: 20px;">
+        <a href="{{ url_for('admin.csv_template', template_type=template_type) }}" class="btn btn-secondary">
+            Скачать шаблон CSV
+        </a>
+    </div>
+    
     <form method="POST" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="form-group">
@@ -11,7 +17,11 @@
             <input type="file" name="csv_file" accept=".csv" required>
         </div>
         <p style="margin-bottom: 15px; color: #666;">
+            {% if template_type == 'news' %}
+            Формат: UTF-8, разделитель — точка с запятой (;). Первая строка — заголовки.
+            {% else %}
             Формат: UTF-8, разделитель — запятая. Первая строка — заголовки.
+            {% endif %}
         </p>
         <button type="submit" class="btn btn-primary">Импортировать</button>
         <a href="javascript:history.back()" class="btn btn-secondary">Отмена</a>

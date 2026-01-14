@@ -17,26 +17,62 @@
         <small class="form-text text-muted">Если оставить пустым, сгенерируется из заголовка. Например: dostavka</small>
     </div>
     <div class="form-group">
-        <label>Изображение</label>
-        {% if service and service.image_path %}
-        <div class="current-image">
-            <img src="{{ service.image_path }}" style="max-width: 200px;">
-            <label><input type="checkbox" name="delete_image"> Удалить изображение</label>
-        </div>
-        {% endif %}
-        <input type="file" name="image_file" class="form-control">
-    </div>
-    <div class="form-group">
         <label>Контент (HTML)</label>
-        <textarea name="content_html" class="form-control" rows="10">{{ service.content_html if service else '' }}</textarea>
+        <div class="wysiwyg-toolbar" data-target="content_html">
+            <button type="button" onclick="formatText('content_html', 'bold')" title="Жирный"><b>B</b></button>
+            <button type="button" onclick="formatText('content_html', 'italic')" title="Курсив"><i>I</i></button>
+            <button type="button" onclick="formatText('content_html', 'underline')" title="Подчёркнутый"><u>U</u></button>
+            <button type="button" onclick="insertTag('content_html', 'h2')" title="Заголовок H2">H2</button>
+            <button type="button" onclick="insertTag('content_html', 'h3')" title="Заголовок H3">H3</button>
+            <button type="button" onclick="insertTag('content_html', 'p')" title="Абзац">P</button>
+            <button type="button" onclick="insertTag('content_html', 'ul')" title="Список">UL</button>
+            <button type="button" onclick="insertLink('content_html')" title="Ссылка">🔗</button>
+        </div>
+        <textarea name="content_html" id="content_html" class="form-control wysiwyg-textarea" rows="10">{{ service.content_html if service else '' }}</textarea>
     </div>
+    <hr>
+    <h3>Галерея изображений</h3>
+    <p class="section-desc">Загрузите изображения для галереи. Выберите главное изображение, которое будет отображаться в списке услуг.</p>
+    
+    {% if service and service.images.count() > 0 %}
+    <div class="gallery-manager">
+        <div class="gallery-images">
+            {% for img in service.images.order_by('sort_order').all() %}
+            <div class="gallery-item {% if img.is_main %}is-main{% endif %}">
+                <img src="{{ img.image_path }}" alt="">
+                <div class="gallery-controls">
+                    <label title="Главное изображение">
+                        <input type="radio" name="main_image_id" value="{{ img.id }}" {% if img.is_main %}checked{% endif %}> Главное
+                    </label>
+                    <label title="Удалить">
+                        <input type="checkbox" name="delete_images" value="{{ img.id }}"> Удалить
+                    </label>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="form-group">
+        <label>Добавить изображения в галерею</label>
+        <input type="file" name="gallery_images" multiple accept="image/*" class="form-control">
+        <small class="form-text text-muted">Можно выбрать несколько файлов</small>
+    </div>
+    
+    <div class="form-group">
+        <label>Интервал прокрутки галереи (сек)</label>
+        <input type="number" name="gallery_interval" value="{{ service.gallery_interval if service else 5 }}" min="1" max="60" class="form-control" style="width: 100px;">
+        <small class="form-text text-muted">Скорость автоматической прокрутки галереи на странице услуги</small>
+    </div>
+    
     <hr>
     <h3>Hero-изображение</h3>
     <p class="section-desc">Фоновое изображение в шапке страницы услуги</p>
     <div class="form-group">
         <label>URL Hero-изображения</label>
         <input type="text" name="hero_image" value="{{ service.hero_image if service else '' }}" class="form-control" placeholder="/static/images/hero.jpg">
-        <small class="form-text text-muted">Путь к изображению или внешний URL (если пусто - используется изображение услуги)</small>
+        <small class="form-text text-muted">Путь к изображению или внешний URL (если пусто - используется главное изображение из галереи)</small>
     </div>
     <div class="form-group">
         <label>Заголовок в Hero</label>
@@ -64,7 +100,15 @@
     </div>
     <div class="form-group">
         <label>SEO Текст (внизу страницы)</label>
-        <textarea name="seo_text_html" class="form-control" rows="5">{{ service.seo_text_html if service else '' }}</textarea>
+        <div class="wysiwyg-toolbar" data-target="seo_text_html">
+            <button type="button" onclick="formatText('seo_text_html', 'bold')" title="Жирный"><b>B</b></button>
+            <button type="button" onclick="formatText('seo_text_html', 'italic')" title="Курсив"><i>I</i></button>
+            <button type="button" onclick="insertTag('seo_text_html', 'h2')" title="Заголовок H2">H2</button>
+            <button type="button" onclick="insertTag('seo_text_html', 'h3')" title="Заголовок H3">H3</button>
+            <button type="button" onclick="insertTag('seo_text_html', 'p')" title="Абзац">P</button>
+            <button type="button" onclick="insertLink('seo_text_html')" title="Ссылка">🔗</button>
+        </div>
+        <textarea name="seo_text_html" id="seo_text_html" class="form-control wysiwyg-textarea" rows="5">{{ service.seo_text_html if service else '' }}</textarea>
     </div>
     <hr>
     <div class="form-group">
@@ -78,4 +122,97 @@
         <button type="submit" class="btn btn-primary">Сохранить</button>
     </div>
 </form>
+
+<style>
+.gallery-manager { margin-bottom: 20px; }
+.gallery-images { display: flex; flex-wrap: wrap; gap: 15px; }
+.gallery-item { 
+    border: 2px solid #ddd; 
+    border-radius: 8px; 
+    padding: 10px; 
+    background: #f9f9f9;
+    width: 180px;
+}
+.gallery-item.is-main { border-color: #28a745; background: #e8f5e9; }
+.gallery-item img { width: 100%; height: 120px; object-fit: cover; border-radius: 4px; }
+.gallery-controls { margin-top: 10px; font-size: 12px; }
+.gallery-controls label { display: block; margin: 5px 0; cursor: pointer; }
+
+.wysiwyg-toolbar {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 5px;
+    padding: 8px;
+    background: #f5f5f5;
+    border: 1px solid #ddd;
+    border-bottom: none;
+    border-radius: 4px 4px 0 0;
+}
+.wysiwyg-toolbar button {
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    background: white;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+}
+.wysiwyg-toolbar button:hover { background: #e9e9e9; }
+.wysiwyg-textarea { 
+    border-radius: 0 0 4px 4px !important; 
+    font-family: monospace;
+}
+</style>
+
+<script>
+function formatText(textareaId, format) {
+    const textarea = document.getElementById(textareaId);
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selected = textarea.value.substring(start, end);
+    
+    let tag = '';
+    switch(format) {
+        case 'bold': tag = 'strong'; break;
+        case 'italic': tag = 'em'; break;
+        case 'underline': tag = 'u'; break;
+    }
+    
+    const replacement = `<${tag}>${selected}</${tag}>`;
+    textarea.value = textarea.value.substring(0, start) + replacement + textarea.value.substring(end);
+    textarea.focus();
+    textarea.setSelectionRange(start + tag.length + 2, start + tag.length + 2 + selected.length);
+}
+
+function insertTag(textareaId, tag) {
+    const textarea = document.getElementById(textareaId);
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selected = textarea.value.substring(start, end);
+    
+    let replacement;
+    if (tag === 'ul') {
+        const items = selected ? selected.split('\n').map(line => `  <li>${line}</li>`).join('\n') : '  <li></li>';
+        replacement = `<ul>\n${items}\n</ul>`;
+    } else {
+        replacement = `<${tag}>${selected}</${tag}>`;
+    }
+    
+    textarea.value = textarea.value.substring(0, start) + replacement + textarea.value.substring(end);
+    textarea.focus();
+}
+
+function insertLink(textareaId) {
+    const url = prompt('Введите URL:');
+    if (!url) return;
+    
+    const textarea = document.getElementById(textareaId);
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selected = textarea.value.substring(start, end) || 'Текст ссылки';
+    
+    const replacement = `<a href="${url}">${selected}</a>`;
+    textarea.value = textarea.value.substring(0, start) + replacement + textarea.value.substring(end);
+    textarea.focus();
+}
+</script>
 {% endblock %}

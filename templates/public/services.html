@@ -33,8 +33,9 @@
         {% for service in services %}
         <a href="{{ url_for('public.service_detail', slug=service.slug) }}" class="service-card">
             <div class="service-card-image">
-                {% if service.image_path %}
-                <img src="{{ service.image_path }}" alt="{{ service.title }}">
+                {% set main_img = service.get_main_image() %}
+                {% if main_img %}
+                <img src="{{ main_img }}" alt="{{ service.title }}">
                 {% else %}
                 <div class="image-placeholder"></div>
                 {% endif %}

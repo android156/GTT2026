@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.utils import secure_filename
 from extensions import db, login_manager
-from models import User, Page, MenuItem, Category, ProductLine, SizeItem, News, DocumentFile, Lead, RedirectRule, Setting, Service, SiteSection
+from models import User, Page, MenuItem, Category, ProductLine, SizeItem, News, DocumentFile, Lead, RedirectRule, Setting, Service, SiteSection, ServiceImage
 from services.importers import import_categories_csv, import_product_lines_csv, import_size_items_csv, import_news_csv
 from services.slug import generate_slug, is_reserved_slug, validate_slug
 from services.image_uploader import save_uploaded_image, delete_image
@@ -170,15 +170,10 @@ def services_add():
     if request.method == 'POST':
         title = request.form.get('title', '').strip()
         slug = request.form.get('slug', '').strip() or generate_slug(title)
-        image_path = ''
-        if 'image_file' in request.files:
-            file = request.files['image_file']
-            if file and file.filename:
-                image_path = save_uploaded_image(file, 'services')
         service = Service(
             title=title, slug=slug,
             content_html=sanitize_html(request.form.get('content_html', '')),
-            image_path=image_path or request.form.get('image_path', ''),
+            image_path='',
             seo_title=request.form.get('seo_title', ''),
             seo_description=request.form.get('seo_description', ''),
             h1=request.form.get('h1', '').strip(),
@@ -186,11 +181,28 @@ def services_add():
             hero_image=request.form.get('hero_image', '').strip(),
             hero_title=request.form.get('hero_title', '').strip(),
             hero_subtitle=request.form.get('hero_subtitle', '').strip(),
+            gallery_interval=int(request.form.get('gallery_interval', 5) or 5),
             sort_order=int(request.form.get('sort_order', 0) or 0),
             is_active=request.form.get('is_active') == 'on'
         )
         db.session.add(service)
         db.session.commit()
+        
+        files = request.files.getlist('gallery_images')
+        main_index = int(request.form.get('main_image_index', 0) or 0)
+        for i, file in enumerate(files):
+            if file and file.filename:
+                img_path = save_uploaded_image(file, 'services')
+                if img_path:
+                    simg = ServiceImage(
+                        service_id=service.id,
+                        image_path=img_path,
+                        is_main=(i == main_index),
+                        sort_order=i
+                    )
+                    db.session.add(simg)
+        db.session.commit()
+        
         flash('Услуга добавлена', 'success')
         return redirect(url_for('admin.services_list'))
     return render_template('admin/services_form.html', service=None)
@@ -200,14 +212,6 @@ def services_add():
 def services_edit(id):
     service = Service.query.get_or_404(id)
     if request.method == 'POST':
-        if 'image_file' in request.files:
-            file = request.files['image_file']
-            if file and file.filename:
-                if service.image_path: delete_image(service.image_path)
-                service.image_path = save_uploaded_image(file, 'services')
-        if request.form.get('delete_image') == 'on':
-            if service.image_path: delete_image(service.image_path)
-            service.image_path = ''
         service.title = request.form.get('title', '').strip()
         service.slug = request.form.get('slug', '').strip() or generate_slug(service.title)
         service.content_html = sanitize_html(request.form.get('content_html', ''))
@@ -218,18 +222,49 @@ def services_edit(id):
         service.hero_image = request.form.get('hero_image', '').strip()
         service.hero_title = request.form.get('hero_title', '').strip()
         service.hero_subtitle = request.form.get('hero_subtitle', '').strip()
+        service.gallery_interval = int(request.form.get('gallery_interval', 5) or 5)
         service.sort_order = int(request.form.get('sort_order', 0) or 0)
         service.is_active = request.form.get('is_active') == 'on'
+        
+        main_image_id = request.form.get('main_image_id')
+        if main_image_id:
+            ServiceImage.query.filter_by(service_id=service.id).update({'is_main': False})
+            img = ServiceImage.query.get(int(main_image_id))
+            if img:
+                img.is_main = True
+        
+        delete_ids = request.form.getlist('delete_images')
+        for did in delete_ids:
+            img = ServiceImage.query.get(int(did))
+            if img:
+                delete_image(img.image_path)
+                db.session.delete(img)
+        
+        files = request.files.getlist('gallery_images')
+        max_order = db.session.query(db.func.max(ServiceImage.sort_order)).filter_by(service_id=service.id).scalar() or 0
+        for i, file in enumerate(files):
+            if file and file.filename:
+                img_path = save_uploaded_image(file, 'services')
+                if img_path:
+                    simg = ServiceImage(
+                        service_id=service.id,
+                        image_path=img_path,
+                        is_main=False,
+                        sort_order=max_order + i + 1
+                    )
+                    db.session.add(simg)
+        
         db.session.commit()
         flash('Услуга обновлена', 'success')
-        return redirect(url_for('admin.services_list'))
+        return redirect(url_for('admin.services_edit', id=service.id))
     return render_template('admin/services_form.html', service=service)
 
 @admin_bp.route('/services/<int:id>/delete/', methods=['POST'])
 @login_required
 def services_delete(id):
     service = Service.query.get_or_404(id)
-    if service.image_path: delete_image(service.image_path)
+    for img in service.images.all():
+        delete_image(img.image_path)
     db.session.delete(service)
     db.session.commit()
     flash('Услуга удалена', 'success')

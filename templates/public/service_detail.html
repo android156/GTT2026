@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block hero %}
-{% set hero_img = service.hero_image or service.image_path or '/static/images/WhatsApp_Image_2019-10-21_at_13.44.44_1766758697538.jpeg' %}
+{% set hero_img = service.hero_image or service.get_main_image() or '/static/images/WhatsApp_Image_2019-10-21_at_13.44.44_1766758697538.jpeg' %}
 <section class="hero page-hero" style="background-image: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('{{ hero_img }}');">
     <div class="container">
         <div class="hero-content">
@@ -26,26 +26,204 @@
 </nav>
 
 <div class="service-detail">
-    {% if service.image_path %}
-    <div class="service-image" style="margin-bottom: 40px; text-align: center; background: white; padding: 30px; border-radius: var(--radius-lg); box-shadow: var(--shadow); border: 1px solid var(--border-color);">
-        <img src="{{ service.image_path }}" alt="{{ service.title }}" style="max-width: 100%; max-height: 400px; object-fit: contain;">
-    </div>
-    {% endif %}
-    
-    <div class="content-text" style="font-size: 16px; line-height: 1.8; color: var(--text-color);">
+    <div class="content-text">
         {{ service.content_html|safe }}
     </div>
     
-    <div class="service-action" style="text-align: center; margin: 60px 0; padding: 40px; background: var(--bg-light); border-radius: var(--radius-lg); border: 1px solid var(--border-color);">
-        <h3 style="margin-bottom: 20px;">Заинтересовала услуга?</h3>
-        <p style="margin-bottom: 30px; color: var(--text-light);">Оставьте заявку, и наш специалист свяжется с вами для консультации.</p>
+    {% set images = service.images.order_by('sort_order').all() %}
+    {% if images %}
+    <div class="service-gallery" data-interval="{{ service.gallery_interval * 1000 }}">
+        <div class="gallery-wrapper">
+            <button class="gallery-nav gallery-prev" onclick="slideGallery(-1)" aria-label="Назад">&lsaquo;</button>
+            <div class="gallery-track">
+                {% for img in images %}
+                <div class="gallery-slide">
+                    <img src="{{ img.image_path }}" alt="{{ img.alt_text or service.title }}" loading="lazy">
+                </div>
+                {% endfor %}
+            </div>
+            <button class="gallery-nav gallery-next" onclick="slideGallery(1)" aria-label="Вперёд">&rsaquo;</button>
+        </div>
+        <div class="gallery-dots">
+            {% for img in images %}
+            <button class="gallery-dot {% if loop.first %}active{% endif %}" onclick="goToSlide({{ loop.index0 }})" aria-label="Слайд {{ loop.index }}"></button>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="service-action">
+        <h3>Заинтересовала услуга?</h3>
+        <p>Оставьте заявку, и наш специалист свяжется с вами для консультации.</p>
         <a href="#callback" class="btn btn-primary">Оставить заявку</a>
     </div>
     
     {% if service.seo_text_html %}
-    <div class="seo-text" style="margin-top: 60px; padding-top: 40px; border-top: 2px solid var(--border-color);">
+    <div class="seo-text">
         {{ service.seo_text_html|safe }}
     </div>
     {% endif %}
 </div>
+
+<style>
+.service-detail { max-width: 1000px; margin: 0 auto; }
+.content-text { 
+    font-size: 16px; 
+    line-height: 1.8; 
+    color: var(--text-color);
+    margin-bottom: 40px;
+}
+.content-text p { margin-bottom: 16px; }
+.content-text h2 { margin: 24px 0 16px; }
+.content-text h3 { margin: 20px 0 12px; }
+
+.service-gallery {
+    margin: 40px 0;
+    position: relative;
+}
+.gallery-wrapper {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+    background: #f8f9fa;
+}
+.gallery-track {
+    display: flex;
+    transition: transform 0.5s ease;
+}
+.gallery-slide {
+    flex: 0 0 calc(100% / 3);
+    padding: 10px;
+    box-sizing: border-box;
+}
+.gallery-slide img {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: transform 0.3s;
+}
+.gallery-slide img:hover {
+    transform: scale(1.03);
+}
+.gallery-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 44px;
+    height: 44px;
+    background: rgba(255,255,255,0.9);
+    border: none;
+    border-radius: 50%;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.gallery-nav:hover { background: white; }
+.gallery-prev { left: 10px; }
+.gallery-next { right: 10px; }
+.gallery-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 15px;
+}
+.gallery-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: none;
+    background: #ddd;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+.gallery-dot.active { background: var(--primary-color); }
+
+.service-action {
+    text-align: center;
+    margin: 60px 0;
+    padding: 40px;
+    background: var(--bg-light);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+}
+.service-action h3 { margin-bottom: 20px; }
+.service-action p { margin-bottom: 30px; color: var(--text-light); }
+
+.seo-text {
+    margin-top: 60px;
+    padding-top: 40px;
+    border-top: 2px solid var(--border-color);
+}
+
+@media (max-width: 768px) {
+    .gallery-slide { flex: 0 0 100%; }
+    .gallery-nav { width: 36px; height: 36px; font-size: 20px; }
+}
+</style>
+
+<script>
+(function() {
+    const gallery = document.querySelector('.service-gallery');
+    if (!gallery) return;
+    
+    const track = gallery.querySelector('.gallery-track');
+    const slides = gallery.querySelectorAll('.gallery-slide');
+    const dots = gallery.querySelectorAll('.gallery-dot');
+    const interval = parseInt(gallery.dataset.interval) || 5000;
+    
+    let currentIndex = 0;
+    let slidesPerView = window.innerWidth > 768 ? 3 : 1;
+    let maxIndex = Math.max(0, slides.length - slidesPerView);
+    let autoSlideTimer;
+    
+    function updateSlider() {
+        const slideWidth = 100 / slidesPerView;
+        track.style.transform = `translateX(-${currentIndex * slideWidth}%)`;
+        
+        dots.forEach((dot, i) => {
+            dot.classList.toggle('active', i === currentIndex);
+        });
+    }
+    
+    window.slideGallery = function(direction) {
+        currentIndex += direction;
+        if (currentIndex < 0) currentIndex = maxIndex;
+        if (currentIndex > maxIndex) currentIndex = 0;
+        updateSlider();
+        resetAutoSlide();
+    };
+    
+    window.goToSlide = function(index) {
+        currentIndex = Math.min(index, maxIndex);
+        updateSlider();
+        resetAutoSlide();
+    };
+    
+    function autoSlide() {
+        currentIndex++;
+        if (currentIndex > maxIndex) currentIndex = 0;
+        updateSlider();
+    }
+    
+    function resetAutoSlide() {
+        clearInterval(autoSlideTimer);
+        autoSlideTimer = setInterval(autoSlide, interval);
+    }
+    
+    window.addEventListener('resize', function() {
+        slidesPerView = window.innerWidth > 768 ? 3 : 1;
+        maxIndex = Math.max(0, slides.length - slidesPerView);
+        if (currentIndex > maxIndex) currentIndex = maxIndex;
+        updateSlider();
+    });
+    
+    resetAutoSlide();
+})();
+</script>
 {% endblock %}

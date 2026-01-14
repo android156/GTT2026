@@ -603,7 +603,13 @@ def size_items_add():
             currency=request.form.get('currency', 'RUB'),
             unit=request.form.get('unit', 'шт'),
             in_stock=request.form.get('in_stock') == 'on',
-            image_path=request.form.get('image_path', '')
+            image_path=request.form.get('image_path', ''),
+            pipe_dxs=request.form.get('pipe_dxs', ''),
+            pressure=request.form.get('pressure', ''),
+            mass_per_m=request.form.get('mass_per_m', ''),
+            min_bend_radius=request.form.get('min_bend_radius', ''),
+            max_len_coil=request.form.get('max_len_coil', ''),
+            max_len_drum=request.form.get('max_len_drum', '')
         )
         db.session.add(si)
         db.session.commit()
@@ -634,6 +640,12 @@ def size_items_edit(id):
         si.unit = request.form.get('unit', 'шт')
         si.in_stock = request.form.get('in_stock') == 'on'
         si.image_path = request.form.get('image_path', '')
+        si.pipe_dxs = request.form.get('pipe_dxs', '')
+        si.pressure = request.form.get('pressure', '')
+        si.mass_per_m = request.form.get('mass_per_m', '')
+        si.min_bend_radius = request.form.get('min_bend_radius', '')
+        si.max_len_coil = request.form.get('max_len_coil', '')
+        si.max_len_drum = request.form.get('max_len_drum', '')
         db.session.commit()
         flash('Типоразмер обновлён', 'success')
         return redirect(url_for('admin.size_items_list'))

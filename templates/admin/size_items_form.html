@@ -50,6 +50,30 @@
             <input type="checkbox" name="in_stock" id="in_stock" {{ 'checked' if size_item and size_item.in_stock else 'checked' if not size_item else '' }}>
             <label for="in_stock">В наличии</label>
         </div>
+        <div class="form-group">
+            <label>Напорная труба DxS, мм</label>
+            <input type="text" name="pipe_dxs" value="{{ size_item.pipe_dxs if size_item else '' }}">
+        </div>
+        <div class="form-group">
+            <label>Давление</label>
+            <input type="text" name="pressure" value="{{ size_item.pressure if size_item else '' }}">
+        </div>
+        <div class="form-group">
+            <label>Масса 1м, кг</label>
+            <input type="text" name="mass_per_m" value="{{ size_item.mass_per_m if size_item else '' }}">
+        </div>
+        <div class="form-group">
+            <label>Мин. радиус изгиба, м</label>
+            <input type="text" name="min_bend_radius" value="{{ size_item.min_bend_radius if size_item else '' }}">
+        </div>
+        <div class="form-group">
+            <label>Макс. длина в бухте, м</label>
+            <input type="text" name="max_len_coil" value="{{ size_item.max_len_coil if size_item else '' }}">
+        </div>
+        <div class="form-group">
+            <label>Макс. длина на барабане, м</label>
+            <input type="text" name="max_len_drum" value="{{ size_item.max_len_drum if size_item else '' }}">
+        </div>
         <button type="submit" class="btn btn-primary">Сохранить</button>
         <a href="{{ url_for('admin.size_items_list') }}" class="btn btn-secondary">Отмена</a>
     </form>

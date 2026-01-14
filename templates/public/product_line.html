@@ -27,6 +27,8 @@
     <thead>
         <tr>
             <th>Размер</th>
+            <th>Давление</th>
+            <th>Макс. длина в бухте, м</th>
             <th>Артикул</th>
             <th>Цена</th>
             <th>Наличие</th>
@@ -40,6 +42,8 @@
                     {{ si.size_text }}
                 </a>
             </td>
+            <td>{{ si.pressure or '-' }}</td>
+            <td>{{ si.max_len_coil or '-' }}</td>
             <td>{{ si.sku or '-' }}</td>
             <td>
                 {% if si.price %}

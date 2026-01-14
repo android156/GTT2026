@@ -107,6 +107,15 @@ class SizeItem(db.Model):
     unit = db.Column(db.String(20), default='шт')
     in_stock = db.Column(db.Boolean, default=True)
     image_path = db.Column(db.String(300), default='')
+    
+    # Новые параметры
+    pipe_dxs = db.Column(db.String(100), default='')  # Напорная труба DxS, мм
+    pressure = db.Column(db.String(50), default='')   # Давление
+    mass_per_m = db.Column(db.String(50), default='') # Масса 1м, кг
+    min_bend_radius = db.Column(db.String(50), default='') # Мин. радиус изгиба, м
+    max_len_coil = db.Column(db.String(50), default='')    # Макс. длина в бухте, м
+    max_len_drum = db.Column(db.String(50), default='')    # Макс. длина на барабане, м
+    
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     __table_args__ = (

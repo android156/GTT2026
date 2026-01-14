@@ -27,13 +27,45 @@
         
         <table class="product-specs">
             <tr>
-                <th>Артикул (SKU):</th>
-                <td>{{ size_item.sku or '-' }}</td>
-            </tr>
-            <tr>
                 <th>Размер:</th>
                 <td>{{ size_item.size_text }}</td>
             </tr>
+            {% if size_item.pipe_dxs %}
+            <tr>
+                <th>Напорная труба DxS, мм:</th>
+                <td>{{ size_item.pipe_dxs }}</td>
+            </tr>
+            {% endif %}
+            {% if size_item.pressure %}
+            <tr>
+                <th>Давление:</th>
+                <td>{{ size_item.pressure }}</td>
+            </tr>
+            {% endif %}
+            {% if size_item.mass_per_m %}
+            <tr>
+                <th>Масса 1м, кг:</th>
+                <td>{{ size_item.mass_per_m }}</td>
+            </tr>
+            {% endif %}
+            {% if size_item.min_bend_radius %}
+            <tr>
+                <th>Мин. радиус изгиба, м:</th>
+                <td>{{ size_item.min_bend_radius }}</td>
+            </tr>
+            {% endif %}
+            {% if size_item.max_len_coil %}
+            <tr>
+                <th>Макс. длина в бухте, м:</th>
+                <td>{{ size_item.max_len_coil }}</td>
+            </tr>
+            {% endif %}
+            {% if size_item.max_len_drum %}
+            <tr>
+                <th>Макс. длина на барабане, м:</th>
+                <td>{{ size_item.max_len_drum }}</td>
+            </tr>
+            {% endif %}
             <tr>
                 <th>Цена:</th>
                 <td>

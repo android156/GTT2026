@@ -172,6 +172,12 @@ def import_size_items_csv(file_content):
                     existing.unit = row.get('unit', 'шт')
                     existing.in_stock = row.get('in_stock', '1').lower() in ['1', 'true', 'yes']
                     existing.image_path = row.get('image_path', '')
+                    existing.pipe_dxs = row.get('pipe_dxs', '')
+                    existing.pressure = row.get('pressure', '')
+                    existing.mass_per_m = row.get('mass_per_m', '')
+                    existing.min_bend_radius = row.get('min_bend_radius', '')
+                    existing.max_len_coil = row.get('max_len_coil', '')
+                    existing.max_len_drum = row.get('max_len_drum', '')
                 else:
                     si = SizeItem(
                         product_line_id=product_line.id,
@@ -183,7 +189,13 @@ def import_size_items_csv(file_content):
                         currency=row.get('currency', 'RUB'),
                         unit=row.get('unit', 'шт'),
                         in_stock=row.get('in_stock', '1').lower() in ['1', 'true', 'yes'],
-                        image_path=row.get('image_path', '')
+                        image_path=row.get('image_path', ''),
+                        pipe_dxs = row.get('pipe_dxs', ''),
+                        pressure = row.get('pressure', ''),
+                        mass_per_m = row.get('mass_per_m', ''),
+                        min_bend_radius = row.get('min_bend_radius', ''),
+                        max_len_coil = row.get('max_len_coil', ''),
+                        max_len_drum = row.get('max_len_drum', '')
                     )
                     db.session.add(si)
                 

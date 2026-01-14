@@ -31,10 +31,12 @@
     </div>
     
     {% set images = service.images.order_by('sort_order').all() %}
-    {% if images %}
-    <div class="service-gallery" data-interval="{{ service.gallery_interval * 1000 }}">
+    {% if images|length > 0 %}
+    <div class="service-gallery" data-interval="{{ (service.gallery_interval or 5) * 1000 }}" data-count="{{ images|length }}">
         <div class="gallery-wrapper">
-            <button class="gallery-nav gallery-prev" onclick="slideGallery(-1)" aria-label="Назад">&lsaquo;</button>
+            {% if images|length > 3 %}
+            <button class="gallery-nav gallery-prev" aria-label="Назад">&lsaquo;</button>
+            {% endif %}
             <div class="gallery-track">
                 {% for img in images %}
                 <div class="gallery-slide">
@@ -42,13 +44,21 @@
                 </div>
                 {% endfor %}
             </div>
-            <button class="gallery-nav gallery-next" onclick="slideGallery(1)" aria-label="Вперёд">&rsaquo;</button>
+            {% if images|length > 3 %}
+            <button class="gallery-nav gallery-next" aria-label="Вперёд">&rsaquo;</button>
+            {% endif %}
         </div>
+        {% if images|length > 3 %}
         <div class="gallery-dots">
-            {% for img in images %}
-            <button class="gallery-dot {% if loop.first %}active{% endif %}" onclick="goToSlide({{ loop.index0 }})" aria-label="Слайд {{ loop.index }}"></button>
+            {% for i in range((images|length - 2)|abs) %}
+            <button class="gallery-dot {% if loop.first %}active{% endif %}" data-index="{{ i }}" aria-label="Слайд {{ loop.index }}"></button>
             {% endfor %}
         </div>
+        {% endif %}
+    </div>
+    {% elif service.image_path %}
+    <div class="service-single-image">
+        <img src="{{ service.image_path }}" alt="{{ service.title }}">
     </div>
     {% endif %}
     
@@ -161,6 +171,21 @@
     border-top: 2px solid var(--border-color);
 }
 
+.service-single-image {
+    margin: 40px 0;
+    text-align: center;
+    background: white;
+    padding: 30px;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+}
+.service-single-image img {
+    max-width: 100%;
+    max-height: 400px;
+    object-fit: contain;
+}
+
 @media (max-width: 768px) {
     .gallery-slide { flex: 0 0 100%; }
     .gallery-nav { width: 36px; height: 36px; font-size: 20px; }
@@ -175,15 +200,26 @@
     const track = gallery.querySelector('.gallery-track');
     const slides = gallery.querySelectorAll('.gallery-slide');
     const dots = gallery.querySelectorAll('.gallery-dot');
+    const prevBtn = gallery.querySelector('.gallery-prev');
+    const nextBtn = gallery.querySelector('.gallery-next');
     const interval = parseInt(gallery.dataset.interval) || 5000;
+    const totalSlides = parseInt(gallery.dataset.count) || slides.length;
     
     let currentIndex = 0;
-    let slidesPerView = window.innerWidth > 768 ? 3 : 1;
-    let maxIndex = Math.max(0, slides.length - slidesPerView);
     let autoSlideTimer;
     
+    function getSlidesPerView() {
+        return window.innerWidth > 768 ? Math.min(3, totalSlides) : 1;
+    }
+    
+    function getMaxIndex() {
+        const spv = getSlidesPerView();
+        return Math.max(0, totalSlides - spv);
+    }
+    
     function updateSlider() {
-        const slideWidth = 100 / slidesPerView;
+        const spv = getSlidesPerView();
+        const slideWidth = 100 / spv;
         track.style.transform = `translateX(-${currentIndex * slideWidth}%)`;
         
         dots.forEach((dot, i) => {
@@ -191,38 +227,49 @@
         });
     }
     
-    window.slideGallery = function(direction) {
+    function slide(direction) {
+        const maxIdx = getMaxIndex();
         currentIndex += direction;
-        if (currentIndex < 0) currentIndex = maxIndex;
-        if (currentIndex > maxIndex) currentIndex = 0;
+        if (currentIndex < 0) currentIndex = maxIdx;
+        if (currentIndex > maxIdx) currentIndex = 0;
         updateSlider();
         resetAutoSlide();
-    };
+    }
     
-    window.goToSlide = function(index) {
-        currentIndex = Math.min(index, maxIndex);
+    function goToSlide(index) {
+        currentIndex = Math.min(index, getMaxIndex());
         updateSlider();
         resetAutoSlide();
-    };
+    }
     
     function autoSlide() {
+        const maxIdx = getMaxIndex();
+        if (maxIdx <= 0) return;
         currentIndex++;
-        if (currentIndex > maxIndex) currentIndex = 0;
+        if (currentIndex > maxIdx) currentIndex = 0;
         updateSlider();
     }
     
     function resetAutoSlide() {
         clearInterval(autoSlideTimer);
-        autoSlideTimer = setInterval(autoSlide, interval);
+        if (getMaxIndex() > 0) {
+            autoSlideTimer = setInterval(autoSlide, interval);
+        }
     }
     
+    if (prevBtn) prevBtn.addEventListener('click', () => slide(-1));
+    if (nextBtn) nextBtn.addEventListener('click', () => slide(1));
+    
+    dots.forEach((dot, i) => {
+        dot.addEventListener('click', () => goToSlide(i));
+    });
+    
     window.addEventListener('resize', function() {
-        slidesPerView = window.innerWidth > 768 ? 3 : 1;
-        maxIndex = Math.max(0, slides.length - slidesPerView);
-        if (currentIndex > maxIndex) currentIndex = maxIndex;
+        if (currentIndex > getMaxIndex()) currentIndex = getMaxIndex();
         updateSlider();
     });
     
+    updateSlider();
     resetAutoSlide();
 })();
 </script>

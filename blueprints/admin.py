@@ -233,7 +233,7 @@ def services_edit(id):
             if img:
                 img.is_main = True
         
-        delete_ids = request.form.getlist('delete_images')
+        delete_ids = request.form.getlist('delete_images[]')
         for did in delete_ids:
             img = ServiceImage.query.get(int(did))
             if img:

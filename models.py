@@ -178,14 +178,16 @@ class Service(db.Model):
     is_active = db.Column(db.Boolean, default=True)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
-    images = db.relationship('ServiceImage', backref='service', lazy='dynamic', cascade='all, delete-orphan', order_by='ServiceImage.sort_order')
+    images = db.relationship('ServiceImage', backref='service', lazy='dynamic', cascade='all, delete-orphan')
     
     def get_main_image(self):
         main = ServiceImage.query.filter_by(service_id=self.id, is_main=True).first()
         if main:
             return main.image_path
         first = ServiceImage.query.filter_by(service_id=self.id).order_by(ServiceImage.sort_order).first()
-        return first.image_path if first else self.image_path
+        if first:
+            return first.image_path
+        return self.image_path if self.image_path else ''
 
 
 class ServiceImage(db.Model):

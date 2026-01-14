@@ -45,7 +45,7 @@
                         <input type="radio" name="main_image_id" value="{{ img.id }}" {% if img.is_main %}checked{% endif %}> Главное
                     </label>
                     <label title="Удалить">
-                        <input type="checkbox" name="delete_images" value="{{ img.id }}"> Удалить
+                        <input type="checkbox" name="delete_images[]" value="{{ img.id }}"> Удалить
                     </label>
                 </div>
             </div>

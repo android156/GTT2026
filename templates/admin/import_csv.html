@@ -17,11 +17,7 @@
             <input type="file" name="csv_file" accept=".csv" required>
         </div>
         <p style="margin-bottom: 15px; color: #666;">
-            {% if template_type == 'news' %}
             Формат: UTF-8, разделитель — точка с запятой (;). Первая строка — заголовки.
-            {% else %}
-            Формат: UTF-8, разделитель — запятая. Первая строка — заголовки.
-            {% endif %}
         </p>
         <button type="submit" class="btn btn-primary">Импортировать</button>
         <a href="javascript:history.back()" class="btn btn-secondary">Отмена</a>

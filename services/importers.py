@@ -11,7 +11,7 @@ def import_categories_csv(file_content):
     
     try:
         stream = io.StringIO(file_content.decode('utf-8'))
-        reader = csv.DictReader(stream)
+        reader = csv.DictReader(stream, delimiter=';')
         
         for row_num, row in enumerate(reader, 2):
             try:
@@ -67,7 +67,7 @@ def import_product_lines_csv(file_content):
     
     try:
         stream = io.StringIO(file_content.decode('utf-8'))
-        reader = csv.DictReader(stream)
+        reader = csv.DictReader(stream, delimiter=';')
         
         for row_num, row in enumerate(reader, 2):
             try:
@@ -130,7 +130,7 @@ def import_size_items_csv(file_content):
     
     try:
         stream = io.StringIO(file_content.decode('utf-8'))
-        reader = csv.DictReader(stream)
+        reader = csv.DictReader(stream, delimiter=';')
         
         for row_num, row in enumerate(reader, 2):
             try:

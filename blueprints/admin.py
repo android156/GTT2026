@@ -64,23 +64,23 @@ def csv_template(template_type):
     templates = {
         'categories': {
             'filename': 'categories_template.csv',
-            'headers': 'name,slug,sort_order,is_active',
-            'example': 'Полиэтиленовые трубы,polietilenovye-truby,1,1'
+            'headers': 'name;slug;sort_order;is_active',
+            'example': 'Полиэтиленовые трубы;polietilenovye-truby;1;1'
         },
         'product_lines': {
             'filename': 'product_lines_template.csv',
-            'headers': 'category_slug,name,slug,sort_order,is_active',
-            'example': 'polietilenovye-truby,ПЭ 100 SDR 11,pe-100-sdr-11,1,1'
+            'headers': 'category_slug;name;slug;sort_order;is_active',
+            'example': 'polietilenovye-truby;ПЭ 100 SDR 11;pe-100-sdr-11;1;1'
         },
         'size_items': {
             'filename': 'size_items_template.csv',
-            'headers': 'product_line_slug,size_text,sku,price,unit,in_stock,pipe_dxs,pressure,mass_per_m,min_bend_radius,max_len_coil,max_len_drum',
-            'example': 'pe-100-sdr-11,32x3.0,PE100-32-3,150.00,м,1,32x3.0,1.0 МПа,0.29,0.5,200,500'
+            'headers': 'category_slug;product_slug;size_text;sku;price;unit;in_stock;pipe_dxs;pressure;mass_per_m;min_bend_radius;max_len_coil;max_len_drum',
+            'example': 'polietilenovye-truby;pe-100-sdr-11;32x3.0;PE100-32-3;150.00;м;1;32x3.0;1.0 МПа;0.29;0.5;200;500'
         },
         'news': {
             'filename': 'news_template.csv',
             'headers': 'date;content',
-            'example': '2025-01-15;Компания расширила ассортимент продукции'
+            'example': '15.01.2025;Компания расширила ассортимент продукции'
         }
     }
     
@@ -89,7 +89,6 @@ def csv_template(template_type):
         return redirect(url_for('admin.dashboard'))
     
     t = templates[template_type]
-    delimiter = ';' if template_type == 'news' else ','
     content = t['headers'] + '\n' + t['example'] + '\n'
     
     return Response(

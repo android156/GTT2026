@@ -1,4 +1,5 @@
 {% extends 'admin/base.html' %}
+{% from 'admin/_wysiwyg.html' import wysiwyg_toolbar, wysiwyg_styles, wysiwyg_scripts %}
 {% block title %}{{ 'Редактировать' if news else 'Добавить' }} новость{% endblock %}
 {% block page_title %}{{ 'Редактировать' if news else 'Добавить' }} новость{% endblock %}
 
@@ -20,7 +21,8 @@
         </div>
         <div class="form-group">
             <label>Контент (HTML)</label>
-            <textarea name="content_html">{{ news.content_html if news else '' }}</textarea>
+            {{ wysiwyg_toolbar('content_html') }}
+            <textarea name="content_html" id="content_html" class="wysiwyg-textarea" rows="10">{{ news.content_html if news else '' }}</textarea>
         </div>
         <div class="form-group">
             <label>SEO Title</label>
@@ -36,7 +38,8 @@
         </div>
         <div class="form-group">
             <label>SEO текст (HTML)</label>
-            <textarea name="seo_text_html">{{ news.seo_text_html if news else '' }}</textarea>
+            {{ wysiwyg_toolbar('seo_text_html') }}
+            <textarea name="seo_text_html" id="seo_text_html" class="wysiwyg-textarea" rows="5">{{ news.seo_text_html if news else '' }}</textarea>
         </div>
         <div class="form-group form-check">
             <input type="checkbox" name="is_published" id="is_published" {{ 'checked' if news and news.is_published else 'checked' if not news else '' }}>
@@ -46,4 +49,7 @@
         <a href="{{ url_for('admin.news_list') }}" class="btn btn-secondary">Отмена</a>
     </form>
 </div>
+
+{{ wysiwyg_styles() }}
+{{ wysiwyg_scripts() }}
 {% endblock %}

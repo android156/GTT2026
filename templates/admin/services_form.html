@@ -5,6 +5,7 @@
     <a href="{{ url_for('admin.services_list') }}" class="btn btn-secondary">Назад к списку</a>
 </div>
 <form method="POST" enctype="multipart/form-data" class="admin-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <div class="form-group">
         <label>Заголовок услуги</label>
         <input type="text" name="title" value="{{ service.title if service else '' }}" required class="form-control">

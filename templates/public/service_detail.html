@@ -40,7 +40,7 @@
             <div class="gallery-track">
                 {% for img in images %}
                 <div class="gallery-slide">
-                    <img src="{{ img.image_path }}" alt="{{ img.alt_text or service.title }}" loading="lazy">
+                    <img src="{{ img.image_path }}" alt="{{ img.alt_text or service.title }}" loading="lazy" style="{% if img.rotation %}transform: rotate({{ img.rotation }}deg);{% endif %}">
                 </div>
                 {% endfor %}
             </div>

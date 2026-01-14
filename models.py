@@ -198,6 +198,7 @@ class ServiceImage(db.Model):
     alt_text = db.Column(db.String(200), default='')
     is_main = db.Column(db.Boolean, default=False)
     sort_order = db.Column(db.Integer, default=0)
+    rotation = db.Column(db.Integer, default=0)  # 0, 90, 180, 270 degrees
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 

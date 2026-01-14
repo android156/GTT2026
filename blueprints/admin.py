@@ -269,6 +269,24 @@ def services_delete(id):
     db.session.commit()
     flash('Услуга удалена', 'success')
     return redirect(url_for('admin.services_list'))
+
+
+@admin_bp.route('/service-image/<int:image_id>/rotate/', methods=['POST'])
+@login_required
+def rotate_service_image(image_id):
+    from flask import jsonify
+    img = ServiceImage.query.get_or_404(image_id)
+    data = request.get_json() or {}
+    degrees = data.get('degrees', 90)
+    
+    current = img.rotation or 0
+    new_rotation = (current + degrees) % 360
+    img.rotation = new_rotation
+    db.session.commit()
+    
+    return jsonify({'success': True, 'rotation': new_rotation})
+
+
 @admin_bp.route('/pages/')
 @login_required
 def pages_list():

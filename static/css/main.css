@@ -116,6 +116,7 @@ h3 { font-family: var(--font-heading); font-size: 20px; font-weight: 600; margin
 .product-gallery { background: var(--bg-light); border-radius: var(--radius-lg); overflow: hidden; }
 .product-img { width: 100%; min-height: 400px; object-fit: cover; }
 .product-info h1 { font-size: 32px; margin-bottom: 16px; }
+.product-title { font-size: 32px; font-weight: 700; margin-bottom: 16px; color: var(--text-color); }
 .product-specs { width: 100%; margin: 24px 0; }
 .product-specs th, .product-specs td { padding: 12px 0; border-bottom: 1px solid var(--border-color); font-size: 15px; }
 .product-specs th { width: 45%; color: var(--text-light); font-weight: 500; }

@@ -1,5 +1,17 @@
 {% extends 'base.html' %}
 
+{% block hero %}
+<h1 class="visually-hidden">{{ seo.h1 }}</h1>
+{% set hero_img = size_item.image_path or product_line.image_path or category.image_path or '/static/images/WhatsApp_Image_2019-10-21_at_13.44.44_1766758697538.jpeg' %}
+<section class="hero page-hero" style="background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('{{ hero_img }}');">
+    <div class="container">
+        <div class="hero-content">
+            <div class="hero-main-title">{{ size_item.size_text }}</div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
 {% block content %}
 <nav class="breadcrumbs">
     {% for crumb in breadcrumbs %}
@@ -23,7 +35,7 @@
     </div>
     
     <div class="product-info">
-        <h1>{{ seo.h1 }}</h1>
+        <div class="product-title">{{ size_item.size_text }}</div>
         
         <table class="product-specs">
             <tr>

@@ -1,11 +1,12 @@
 {% extends 'base.html' %}
 
 {% block hero %}
+<h1 class="visually-hidden">{{ seo.h1 }}</h1>
 {% if hero %}
 <section class="hero page-hero" style="background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('{{ url_for('static', filename=hero.image.replace('static/', '')) }}');">
     <div class="container">
         <div class="hero-content">
-            <h1>{{ hero.title }}</h1>
+            <div class="hero-main-title">{{ hero.title }}</div>
             {% if hero.subtitle %}<p class="hero-desc">{{ hero.subtitle }}</p>{% endif %}
         </div>
     </div>
@@ -23,10 +24,6 @@
     {% endif %}
     {% endfor %}
 </nav>
-
-{% if not hero %}
-<h1>{{ seo.h1 }}</h1>
-{% endif %}
 
 <div class="services-page">
     <div class="services-grid">

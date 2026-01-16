@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
 
 {% block hero %}
-<section class="hero">
+<section class="hero"{% if section and section.hero_image %} style="background-image: url('{{ section.hero_image }}');"{% endif %}>
     <div class="container">
         <div class="hero-content">
-            <h1>ГЛАВНЫЙ <span>ПО ГИБКИМ ТРУБАМ</span></h1>
-            <p class="hero-desc">Поставки предизолированных гибких труб для отопления, ГВС и ХВС. Работаем напрямую с производителями: ИЗОПРОФЛЕКС, ИЗОКОМ, ТВЭЛ-ПЭКС, UPONOR.</p>
+            <h1>{{ section.hero_title if section and section.hero_title else 'ГЛАВНЫЙ ПО ГИБКИМ ТРУБАМ' }}</h1>
+            <p class="hero-desc">{{ section.hero_subtitle if section and section.hero_subtitle else 'Поставки предизолированных гибких труб для отопления, ГВС и ХВС.' }}</p>
             <div class="hero-actions">
                 <a href="/catalog/" class="btn btn-primary">Каталог продукции</a>
                 <a href="/contacts/" class="btn btn-secondary">Связаться с нами</a>

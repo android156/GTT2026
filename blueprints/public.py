@@ -86,16 +86,18 @@ def inject_menu():
 def index():
     news = News.query.filter_by(is_published=True).order_by(News.date.desc()).limit(5).all()
     categories = Category.query.filter_by(is_active=True).order_by(Category.sort_order).all()
+    section = SiteSection.query.filter_by(section_key='index').first()
     
     seo = {
-        'title': f'{Config.SITE_NAME} — трубы, изоляция, комплектующие',
-        'description': f'{Config.SITE_NAME} — продажа труб, изоляционных материалов и комплектующих. Доставка по России.',
-        'h1': f'Добро пожаловать в {Config.SITE_NAME}'
+        'title': section.seo_title if section and section.seo_title else f'{Config.SITE_NAME} — трубы, изоляция, комплектующие',
+        'description': section.seo_description if section and section.seo_description else f'{Config.SITE_NAME} — продажа труб, изоляционных материалов и комплектующих. Доставка по России.',
+        'h1': section.h1 if section and section.h1 else f'Добро пожаловать в {Config.SITE_NAME}'
     }
     
     return render_template('public/index.html',
                          news=news,
                          categories=categories,
+                         section=section,
                          seo=seo,
                          canonical=get_canonical_url('/'),
                          og=get_og_tags(seo['title'], seo['description']),

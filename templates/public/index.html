@@ -129,12 +129,20 @@
     </div>
 </section>
 
+{% if gallery_images %}
+<div class="gallery">
+    {% for img in gallery_images %}
+    <img src="{{ img.image_path }}" alt="{{ img.alt_text or 'Галерея' }}" style="{% if img.rotation %}transform: rotate({{ img.rotation }}deg);{% endif %}">
+    {% endfor %}
+</div>
+{% else %}
 <div class="gallery">
     <img src="{{ url_for('static', filename='images/WhatsApp_Image_2019-10-21_at_13.44.44_1766758697538.jpeg') }}" alt="Трубы ГПИ">
     <img src="{{ url_for('static', filename='images/WhatsApp_Image_2019-05-16_at_17.51.50_1766758697538.jpeg') }}" alt="Монтаж труб">
     <img src="{{ url_for('static', filename='images/WhatsApp_Image_2020-03-04_at_20.54.14_(4)_1766758697538.jpeg') }}" alt="Прокладка трубопровода">
     <img src="{{ url_for('static', filename='images/WhatsApp_Image_2019-10-21_at_13.49.58_1766758697538.jpeg') }}" alt="Доставка труб">
 </div>
+{% endif %}
 
 {% if news %}
 <section class="section">

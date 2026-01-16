@@ -202,6 +202,16 @@ class ServiceImage(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
+class HomeGalleryImage(db.Model):
+    __tablename__ = 'home_gallery_images'
+    id = db.Column(db.Integer, primary_key=True)
+    image_path = db.Column(db.String(300), nullable=False)
+    alt_text = db.Column(db.String(200), default='')
+    sort_order = db.Column(db.Integer, default=0)
+    rotation = db.Column(db.Integer, default=0)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
 class RedirectRule(db.Model):
     __tablename__ = 'redirect_rules'
     id = db.Column(db.Integer, primary_key=True)

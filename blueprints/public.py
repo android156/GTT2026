@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, abort, Response
 from extensions import db
-from models import Page, MenuItem, Category, ProductLine, SizeItem, News, Lead, Setting, Service, SiteSection
+from models import Page, MenuItem, Category, ProductLine, SizeItem, News, Lead, Setting, Service, SiteSection, HomeGalleryImage
 from services.seo import get_page_seo, get_canonical_url, get_og_tags
 from services.schema import generate_product_jsonld, generate_breadcrumb_jsonld, generate_organization_jsonld
 from config import RESERVED_SLUGS, Config
@@ -88,6 +88,7 @@ def index():
     categories = Category.query.filter_by(is_active=True).order_by(Category.sort_order).all()
     services = Service.query.filter_by(is_active=True).order_by(Service.sort_order).limit(4).all()
     section = SiteSection.query.filter_by(section_key='index').first()
+    gallery_images = HomeGalleryImage.query.order_by(HomeGalleryImage.sort_order).all()
     
     seo = {
         'title': section.seo_title if section and section.seo_title else f'{Config.SITE_NAME} — трубы, изоляция, комплектующие',
@@ -100,6 +101,7 @@ def index():
                          categories=categories,
                          services=services,
                          section=section,
+                         gallery_images=gallery_images,
                          seo=seo,
                          canonical=get_canonical_url('/'),
                          og=get_og_tags(seo['title'], seo['description']),

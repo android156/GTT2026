@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.utils import secure_filename
 from extensions import db, login_manager
-from models import User, Page, MenuItem, Category, ProductLine, SizeItem, News, DocumentFile, Lead, RedirectRule, Setting, Service, SiteSection, ServiceImage
+from models import User, Page, MenuItem, Category, ProductLine, SizeItem, News, DocumentFile, Lead, RedirectRule, Setting, Service, SiteSection, ServiceImage, HomeGalleryImage
 from services.importers import import_categories_csv, import_product_lines_csv, import_size_items_csv, import_news_csv
 from services.slug import generate_slug, is_reserved_slug, validate_slug
 from services.image_uploader import save_uploaded_image, delete_image
@@ -151,11 +151,36 @@ def section_edit(section_key):
         section.seo_title = request.form.get('seo_title', '')
         section.seo_description = request.form.get('seo_description', '')
         section.seo_text_html = sanitize_html(request.form.get('seo_text_html', ''))
+        
+        if section_key == 'index':
+            delete_ids = request.form.getlist('delete_gallery[]')
+            for del_id in delete_ids:
+                img = HomeGalleryImage.query.get(int(del_id))
+                if img:
+                    delete_image(img.image_path)
+                    db.session.delete(img)
+            
+            files = request.files.getlist('gallery_images')
+            max_order = db.session.query(db.func.max(HomeGalleryImage.sort_order)).scalar() or 0
+            for i, file in enumerate(files):
+                if file and file.filename:
+                    img_path = save_uploaded_image(file, 'gallery')
+                    if img_path:
+                        gimg = HomeGalleryImage(
+                            image_path=img_path,
+                            sort_order=max_order + i + 1
+                        )
+                        db.session.add(gimg)
+        
         db.session.commit()
         flash(f'Раздел "{section.title}" сохранен', 'success')
         return redirect(url_for('admin.section_edit', section_key=section_key))
     
-    return render_template('admin/section_form.html', section=section, section_key=section_key)
+    gallery_images = []
+    if section_key == 'index':
+        gallery_images = HomeGalleryImage.query.order_by(HomeGalleryImage.sort_order).all()
+    
+    return render_template('admin/section_form.html', section=section, section_key=section_key, gallery_images=gallery_images)
 
 
 @admin_bp.route('/services/')
@@ -276,6 +301,21 @@ def services_delete(id):
 def rotate_service_image(image_id):
     from flask import jsonify
     img = ServiceImage.query.get_or_404(image_id)
+    data = request.get_json() or {}
+    degrees = data.get('degrees', 90)
+    
+    current = img.rotation or 0
+    new_rotation = (current + degrees) % 360
+    img.rotation = new_rotation
+    db.session.commit()
+    
+    return jsonify({'success': True, 'rotation': new_rotation})
+
+
+@admin_bp.route('/gallery/rotate/<int:image_id>/', methods=['POST'])
+@login_required
+def rotate_gallery_image(image_id):
+    img = HomeGalleryImage.query.get_or_404(image_id)
     data = request.get_json() or {}
     degrees = data.get('degrees', 90)
     

@@ -36,14 +36,6 @@
             <small class="hint">Рекомендуемый размер: 600x400 px. JPG, PNG, WebP. Автоматически сжимается до 85% качества</small>
         </div>
         
-        <h3>Контент</h3>
-        <div class="form-group">
-            <label>Описание</label>
-            {{ wysiwyg_toolbar('description_html') }}
-            <textarea name="description_html" id="description_html" rows="5" class="wysiwyg-textarea" placeholder="Краткое описание категории...">{{ category.description_html if category else '' }}</textarea>
-            <small class="hint">Текст отображается на странице категории. Можно использовать HTML-теги</small>
-        </div>
-        
         <h3>SEO настройки</h3>
         <div class="form-group">
             <label>SEO Title</label>
@@ -51,38 +43,20 @@
             <small class="hint">Заголовок страницы в браузере и поисковиках. Рекомендуется 50-70 символов</small>
         </div>
         <div class="form-group">
-            <label>SEO Description</label>
-            <textarea name="seo_description" rows="2" placeholder="Описание для поисковых систем...">{{ category.seo_description if category else '' }}</textarea>
-            <small class="hint">Описание в результатах поиска. Рекомендуется 150-160 символов</small>
+            <label>Краткое описание</label>
+            <textarea name="seo_description" rows="2" placeholder="Краткое описание категории...">{{ category.seo_description if category else '' }}</textarea>
+            <small class="hint">Отображается на странице категории и в результатах поиска. 150-160 символов</small>
         </div>
         <div class="form-group">
             <label>H1 заголовок</label>
             <input type="text" name="h1" value="{{ category.h1 if category else '' }}" placeholder="Например: Трубы ИЗОКОМ">
-            <small class="hint">Главный заголовок на странице. Если пусто — используется название категории</small>
+            <small class="hint">Заголовок в Hero-блоке и H1 для SEO. Если пусто — используется название категории</small>
         </div>
         <div class="form-group">
             <label>SEO текст</label>
             {{ wysiwyg_toolbar('seo_text_html') }}
             <textarea name="seo_text_html" id="seo_text_html" rows="4" class="wysiwyg-textarea" placeholder="Дополнительный текст для SEO внизу страницы...">{{ category.seo_text_html if category else '' }}</textarea>
             <small class="hint">Текст внизу страницы для поисковой оптимизации</small>
-        </div>
-        
-        <h3>Hero-изображение</h3>
-        <p class="section-desc">Фоновое изображение в шапке страницы категории</p>
-        <div class="form-group">
-            <label>URL Hero-изображения</label>
-            <input type="text" name="hero_image" value="{{ category.hero_image if category else '' }}" placeholder="/static/images/hero.jpg">
-            <small class="hint">Путь к изображению или внешний URL (если пусто - используется изображение категории)</small>
-        </div>
-        <div class="form-group">
-            <label>Заголовок в Hero</label>
-            <input type="text" name="hero_title" value="{{ category.hero_title if category else '' }}">
-            <small class="hint">Крупный текст поверх изображения (если пусто - название категории)</small>
-        </div>
-        <div class="form-group">
-            <label>Подзаголовок в Hero</label>
-            <input type="text" name="hero_subtitle" value="{{ category.hero_subtitle if category else '' }}">
-            <small class="hint">Дополнительный текст</small>
         </div>
         
         <h3>Настройки отображения</h3>

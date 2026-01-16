@@ -27,7 +27,7 @@ img { max-width: 100%; height: auto; }
 .hero::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: url('/static/images/WhatsApp_Image_2019-10-21_at_13.44.44_1766758697538.jpeg') center/cover no-repeat; opacity: 0.25; }
 .page-hero { min-height: 350px; background-size: cover !important; background-position: center !important; }
 .page-hero::before { display: none; }
-.page-hero h1 { font-size: 42px; }
+.page-hero h1 { font-size: 42px; color: white; }
 .hero-content { position: relative; z-index: 2; max-width: 700px; }
 .hero-main-title { color: white; font-size: 48px; font-weight: 700; line-height: 1.2; margin-bottom: 20px; text-transform: uppercase; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }

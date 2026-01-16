@@ -129,18 +129,43 @@
     </div>
 </section>
 
-{% if gallery_images %}
-<div class="gallery">
-    {% for img in gallery_images %}
-    <img src="{{ img.image_path }}" alt="{{ img.alt_text or 'Галерея' }}" style="{% if img.rotation %}transform: rotate({{ img.rotation }}deg);{% endif %}">
-    {% endfor %}
+{% set gallery_list = gallery_images if gallery_images else [] %}
+{% set gallery_count = gallery_list|length %}
+{% if gallery_count > 0 %}
+<div class="home-gallery" data-interval="{{ ((section.gallery_interval if section else 5) or 5) * 1000 }}" data-count="{{ gallery_count }}">
+    <div class="gallery-wrapper">
+        {% if gallery_count > 4 %}
+        <button class="gallery-nav gallery-prev" aria-label="Назад">&lsaquo;</button>
+        {% endif %}
+        <div class="gallery-track">
+            {% for img in gallery_list %}
+            <div class="gallery-slide">
+                <img src="{{ img.image_path }}" alt="{{ img.alt_text or 'Галерея' }}" loading="lazy" style="{% if img.rotation %}transform: rotate({{ img.rotation }}deg);{% endif %}">
+            </div>
+            {% endfor %}
+        </div>
+        {% if gallery_count > 4 %}
+        <button class="gallery-nav gallery-next" aria-label="Вперёд">&rsaquo;</button>
+        {% endif %}
+    </div>
+    {% if gallery_count > 4 %}
+    <div class="gallery-dots">
+        {% for i in range((gallery_count - 3)|abs) %}
+        <button class="gallery-dot {% if loop.first %}active{% endif %}" data-index="{{ i }}" aria-label="Слайд {{ loop.index }}"></button>
+        {% endfor %}
+    </div>
+    {% endif %}
 </div>
 {% else %}
-<div class="gallery">
-    <img src="{{ url_for('static', filename='images/WhatsApp_Image_2019-10-21_at_13.44.44_1766758697538.jpeg') }}" alt="Трубы ГПИ">
-    <img src="{{ url_for('static', filename='images/WhatsApp_Image_2019-05-16_at_17.51.50_1766758697538.jpeg') }}" alt="Монтаж труб">
-    <img src="{{ url_for('static', filename='images/WhatsApp_Image_2020-03-04_at_20.54.14_(4)_1766758697538.jpeg') }}" alt="Прокладка трубопровода">
-    <img src="{{ url_for('static', filename='images/WhatsApp_Image_2019-10-21_at_13.49.58_1766758697538.jpeg') }}" alt="Доставка труб">
+<div class="home-gallery" data-interval="5000" data-count="4">
+    <div class="gallery-wrapper">
+        <div class="gallery-track">
+            <div class="gallery-slide"><img src="{{ url_for('static', filename='images/WhatsApp_Image_2019-10-21_at_13.44.44_1766758697538.jpeg') }}" alt="Трубы ГПИ"></div>
+            <div class="gallery-slide"><img src="{{ url_for('static', filename='images/WhatsApp_Image_2019-05-16_at_17.51.50_1766758697538.jpeg') }}" alt="Монтаж труб"></div>
+            <div class="gallery-slide"><img src="{{ url_for('static', filename='images/WhatsApp_Image_2020-03-04_at_20.54.14_(4)_1766758697538.jpeg') }}" alt="Прокладка трубопровода"></div>
+            <div class="gallery-slide"><img src="{{ url_for('static', filename='images/WhatsApp_Image_2019-10-21_at_13.49.58_1766758697538.jpeg') }}" alt="Доставка труб"></div>
+        </div>
+    </div>
 </div>
 {% endif %}
 
@@ -198,4 +223,173 @@
     </div>
 </section>
 {% endif %}
+{% endblock %}
+
+{% block extra_head %}
+<style>
+.home-gallery {
+    margin: 40px 0;
+    position: relative;
+}
+.home-gallery .gallery-wrapper {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+    background: #f8f9fa;
+}
+.home-gallery .gallery-track {
+    display: flex;
+    transition: transform 0.5s ease;
+}
+.home-gallery .gallery-slide {
+    flex: 0 0 25%;
+    padding: 10px;
+    box-sizing: border-box;
+}
+.home-gallery .gallery-slide img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: transform 0.3s;
+}
+.home-gallery .gallery-slide img:hover {
+    transform: scale(1.03);
+}
+.home-gallery .gallery-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 44px;
+    height: 44px;
+    background: rgba(255,255,255,0.9);
+    border: none;
+    border-radius: 50%;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.home-gallery .gallery-nav:hover { background: white; }
+.home-gallery .gallery-prev { left: 10px; }
+.home-gallery .gallery-next { right: 10px; }
+.home-gallery .gallery-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 15px;
+}
+.home-gallery .gallery-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: none;
+    background: #ddd;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+.home-gallery .gallery-dot.active { background: var(--primary-color); }
+
+@media (max-width: 992px) {
+    .home-gallery .gallery-slide { flex: 0 0 33.33%; }
+}
+@media (max-width: 768px) {
+    .home-gallery .gallery-slide { flex: 0 0 50%; }
+    .home-gallery .gallery-nav { width: 36px; height: 36px; font-size: 20px; }
+}
+@media (max-width: 480px) {
+    .home-gallery .gallery-slide { flex: 0 0 100%; }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+    const gallery = document.querySelector('.home-gallery');
+    if (!gallery) return;
+    
+    const track = gallery.querySelector('.gallery-track');
+    const slides = gallery.querySelectorAll('.gallery-slide');
+    const dots = gallery.querySelectorAll('.gallery-dot');
+    const prevBtn = gallery.querySelector('.gallery-prev');
+    const nextBtn = gallery.querySelector('.gallery-next');
+    const interval = parseInt(gallery.dataset.interval) || 5000;
+    const totalSlides = parseInt(gallery.dataset.count) || slides.length;
+    
+    let currentIndex = 0;
+    let autoSlideTimer;
+    
+    function getSlidesPerView() {
+        if (window.innerWidth <= 480) return 1;
+        if (window.innerWidth <= 768) return 2;
+        if (window.innerWidth <= 992) return 3;
+        return Math.min(4, totalSlides);
+    }
+    
+    function getMaxIndex() {
+        const spv = getSlidesPerView();
+        return Math.max(0, totalSlides - spv);
+    }
+    
+    function updateSlider() {
+        const spv = getSlidesPerView();
+        const slideWidth = 100 / spv;
+        track.style.transform = `translateX(-${currentIndex * slideWidth}%)`;
+        
+        dots.forEach((dot, i) => {
+            dot.classList.toggle('active', i === currentIndex);
+        });
+    }
+    
+    function slide(direction) {
+        const maxIdx = getMaxIndex();
+        currentIndex += direction;
+        if (currentIndex < 0) currentIndex = maxIdx;
+        if (currentIndex > maxIdx) currentIndex = 0;
+        updateSlider();
+        resetAutoSlide();
+    }
+    
+    function goToSlide(index) {
+        currentIndex = Math.min(index, getMaxIndex());
+        updateSlider();
+        resetAutoSlide();
+    }
+    
+    function autoSlide() {
+        const maxIdx = getMaxIndex();
+        if (maxIdx <= 0) return;
+        currentIndex++;
+        if (currentIndex > maxIdx) currentIndex = 0;
+        updateSlider();
+    }
+    
+    function resetAutoSlide() {
+        clearInterval(autoSlideTimer);
+        if (getMaxIndex() > 0) {
+            autoSlideTimer = setInterval(autoSlide, interval);
+        }
+    }
+    
+    if (prevBtn) prevBtn.addEventListener('click', () => slide(-1));
+    if (nextBtn) nextBtn.addEventListener('click', () => slide(1));
+    
+    dots.forEach((dot, i) => {
+        dot.addEventListener('click', () => goToSlide(i));
+    });
+    
+    window.addEventListener('resize', function() {
+        if (currentIndex > getMaxIndex()) currentIndex = getMaxIndex();
+        updateSlider();
+    });
+    
+    updateSlider();
+    resetAutoSlide();
+})();
+</script>
 {% endblock %}

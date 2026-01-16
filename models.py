@@ -245,4 +245,5 @@ class SiteSection(db.Model):
     hero_image = db.Column(db.String(300), default='')
     hero_title = db.Column(db.String(200), default='')
     hero_subtitle = db.Column(db.String(300), default='')
+    gallery_interval = db.Column(db.Integer, default=5)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

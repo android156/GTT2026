@@ -151,6 +151,7 @@ def section_edit(section_key):
         section.seo_title = request.form.get('seo_title', '')
         section.seo_description = request.form.get('seo_description', '')
         section.seo_text_html = sanitize_html(request.form.get('seo_text_html', ''))
+        section.gallery_interval = int(request.form.get('gallery_interval', 5) or 5)
         
         if section_key == 'index':
             delete_ids = request.form.getlist('delete_gallery[]')

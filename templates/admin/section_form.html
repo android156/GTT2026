@@ -1,4 +1,5 @@
 {% extends "admin/base.html" %}
+{% from 'admin/_wysiwyg.html' import wysiwyg_toolbar, wysiwyg_styles, wysiwyg_scripts %}
 
 {% block title %}{{ section.title or 'Редактирование раздела' }}{% endblock %}
 
@@ -25,7 +26,8 @@
         {% if section_key == 'index' %}
         <div class="form-group">
             <label>Контент главной страницы</label>
-            <textarea name="content_html" rows="10">{{ section.content_html or '' }}</textarea>
+            {{ wysiwyg_toolbar('content_html') }}
+            <textarea name="content_html" id="content_html" class="wysiwyg-textarea" rows="10">{{ section.content_html or '' }}</textarea>
             <span class="hint">HTML-контент страницы (опционально)</span>
         </div>
         {% endif %}
@@ -77,7 +79,8 @@
         
         <div class="form-group">
             <label>SEO-текст</label>
-            <textarea name="seo_text_html" rows="6">{{ section.seo_text_html or '' }}</textarea>
+            {{ wysiwyg_toolbar('seo_text_html') }}
+            <textarea name="seo_text_html" id="seo_text_html" class="wysiwyg-textarea" rows="6">{{ section.seo_text_html or '' }}</textarea>
             <span class="hint">Текстовый блок в нижней части страницы</span>
         </div>
         
@@ -87,4 +90,7 @@
         </div>
     </form>
 </div>
+
+{{ wysiwyg_styles() }}
+{{ wysiwyg_scripts() }}
 {% endblock %}

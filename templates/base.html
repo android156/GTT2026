@@ -55,6 +55,7 @@
     </header>
 
     <main class="main">
+        {% block seo_h1 %}{% endblock %}
         {% block hero %}{% endblock %}
         <div class="container">
             {% with messages = get_flashed_messages(with_categories=true) %}

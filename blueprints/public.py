@@ -84,8 +84,9 @@ def inject_menu():
 
 @public_bp.route('/')
 def index():
-    news = News.query.filter_by(is_published=True).order_by(News.date.desc()).limit(5).all()
+    news = News.query.filter_by(is_published=True).order_by(News.date.desc()).limit(6).all()
     categories = Category.query.filter_by(is_active=True).order_by(Category.sort_order).all()
+    services = Service.query.filter_by(is_active=True).order_by(Service.sort_order).limit(4).all()
     section = SiteSection.query.filter_by(section_key='index').first()
     
     seo = {
@@ -97,6 +98,7 @@ def index():
     return render_template('public/index.html',
                          news=news,
                          categories=categories,
+                         services=services,
                          section=section,
                          seo=seo,
                          canonical=get_canonical_url('/'),

@@ -1,10 +1,14 @@
 {% extends 'base.html' %}
 
+{% block seo_h1 %}
+<h1 class="visually-hidden">{{ seo.h1 }}</h1>
+{% endblock %}
+
 {% block hero %}
 <section class="hero"{% if section and section.hero_image %} style="background-image: url('{{ section.hero_image }}');"{% endif %}>
     <div class="container">
         <div class="hero-content">
-            <h1>{{ section.hero_title if section and section.hero_title else 'ГЛАВНЫЙ ПО ГИБКИМ ТРУБАМ' }}</h1>
+            <div class="hero-main-title">{{ section.hero_title if section and section.hero_title else 'ГЛАВНЫЙ ПО ГИБКИМ ТРУБАМ' }}</div>
             <p class="hero-desc">{{ section.hero_subtitle if section and section.hero_subtitle else 'Поставки предизолированных гибких труб для отопления, ГВС и ХВС.' }}</p>
             <div class="hero-actions">
                 <a href="/catalog/" class="btn btn-primary">Каталог продукции</a>
@@ -58,6 +62,35 @@
     </div>
     {% endif %}
 </section>
+
+{% if services %}
+<section class="section services-section">
+    <div class="section-header">
+        <h2>Услуги</h2>
+        <p>Комплексные решения для вашего проекта</p>
+    </div>
+    <div class="services-grid">
+        {% for service in services %}
+        <a href="/services/{{ service.slug }}/" class="service-card">
+            {% if service.image_path %}
+            <img src="{{ service.image_path }}" alt="{{ service.title }}" class="service-img">
+            {% else %}
+            <div class="service-img placeholder"></div>
+            {% endif %}
+            <div class="service-body">
+                <h3>{{ service.title }}</h3>
+                {% if service.short_description %}
+                <p>{{ service.short_description[:100] }}{% if service.short_description|length > 100 %}...{% endif %}</p>
+                {% endif %}
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    <div class="section-more">
+        <a href="/services/" class="btn btn-outline">Все услуги</a>
+    </div>
+</section>
+{% endif %}
 
 <section class="features-section section-dark">
     <div class="container">

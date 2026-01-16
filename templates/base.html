@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}{{ seo.title if seo else site_name }}{% endblock %}</title>
-    <meta name="description" content="{% block description %}{{ seo.description if seo else '' }}{% endblock %}">
+    <title>{% block title %}{{ seo.title if seo else (section.seo_title if section and section.seo_title else site_name) }}{% endblock %}</title>
+    <meta name="description" content="{% block description %}{{ seo.description if seo else (section.seo_description if section and section.seo_description else '') }}{% endblock %}">
     {% if canonical %}<link rel="canonical" href="{{ canonical }}">{% endif %}
     {% if og %}
     <meta property="og:title" content="{{ og['og:title'] }}">

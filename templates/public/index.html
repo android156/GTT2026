@@ -170,4 +170,14 @@
         </form>
     </div>
 </section>
+
+{% if section and section.seo_text_html %}
+<section class="section seo-text-section">
+    <div class="container">
+        <div class="seo-text-content">
+            {{ section.seo_text_html|safe }}
+        </div>
+    </div>
+</section>
+{% endif %}
 {% endblock %}

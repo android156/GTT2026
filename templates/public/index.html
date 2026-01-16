@@ -92,6 +92,16 @@
 </section>
 {% endif %}
 
+{% if section and section.content_html %}
+<section class="section main-content-section">
+    <div class="container">
+        <div class="main-content">
+            {{ section.content_html|safe }}
+        </div>
+    </div>
+</section>
+{% endif %}
+
 <section class="features-section section-dark">
     <div class="container">
         <div class="features">

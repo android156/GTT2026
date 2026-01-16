@@ -111,11 +111,12 @@ def index():
 @public_bp.route('/catalog/')
 def catalog():
     categories = Category.query.filter_by(is_active=True).order_by(Category.sort_order).all()
+    section = SiteSection.query.filter_by(section_key='catalog').first()
     
     seo = {
-        'title': f'Каталог продукции — {Config.SITE_NAME}',
-        'description': f'Каталог продукции {Config.SITE_NAME}. Трубы, изоляция, комплектующие.',
-        'h1': 'Каталог продукции'
+        'title': section.seo_title if section and section.seo_title else f'Каталог продукции — {Config.SITE_NAME}',
+        'description': section.seo_description if section and section.seo_description else f'Каталог продукции {Config.SITE_NAME}. Трубы, изоляция, комплектующие.',
+        'h1': section.h1 if section and section.h1 else 'Каталог продукции'
     }
     
     breadcrumbs = [
@@ -127,6 +128,7 @@ def catalog():
     
     return render_template('public/catalog.html',
                          categories=categories,
+                         section=section,
                          seo=seo,
                          hero=hero,
                          breadcrumbs=breadcrumbs,

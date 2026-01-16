@@ -25,6 +25,10 @@
     {% endfor %}
 </nav>
 
+{% if section and section.content_html %}
+<div class="section-content">{{ section.content_html|safe }}</div>
+{% endif %}
+
 {% if categories %}
 <div class="categories-grid">
     {% for cat in categories %}
@@ -45,5 +49,9 @@
 </div>
 {% else %}
 <p>Каталог пуст</p>
+{% endif %}
+
+{% if section and section.seo_text_html %}
+<div class="seo-text">{{ section.seo_text_html|safe }}</div>
 {% endif %}
 {% endblock %}

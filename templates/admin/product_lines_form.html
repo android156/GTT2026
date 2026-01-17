@@ -29,51 +29,113 @@
             <small class="hint">Часть URL. Только латиница, цифры, дефис. Пример: сайт.ру/izokom/izokom-a-pe-xa/</small>
         </div>
         
-        <h3>Изображение</h3>
-        <div class="form-group">
-            <label>Загрузить изображение</label>
-            {% if product_line and product_line.image_path %}
-            <div class="current-image">
-                <img src="{{ product_line.image_path }}" alt="Текущее изображение" style="max-width: 200px; max-height: 150px;">
-                <div class="form-check" style="margin-top: 10px;">
-                    <input type="checkbox" name="delete_image" id="delete_image">
-                    <label for="delete_image">Удалить изображение</label>
+        {% if product_line %}
+        <hr>
+        <h3>Галерея изображений</h3>
+        <p class="section-desc">Загрузите изображения для галереи. Выберите главное изображение для отображения в списке.</p>
+        
+        {% if product_line.images.count() > 0 %}
+        <div class="gallery-manager">
+            <div class="gallery-images">
+                {% for img in product_line.images.order_by('sort_order').all() %}
+                <div class="gallery-item {% if img.is_main %}is-main{% endif %}" data-id="{{ img.id }}">
+                    <div class="gallery-img-wrap">
+                        <img src="{{ img.image_path }}" alt="" style="transform: rotate({{ img.rotation or 0 }}deg);">
+                    </div>
+                    <div class="gallery-rotate">
+                        <button type="button" class="btn-rotate" onclick="rotateImage({{ img.id }}, -90)" title="Повернуть влево">↺</button>
+                        <span class="rotation-deg">{{ img.rotation or 0 }}°</span>
+                        <button type="button" class="btn-rotate" onclick="rotateImage({{ img.id }}, 90)" title="Повернуть вправо">↻</button>
+                    </div>
+                    <div class="gallery-controls">
+                        <label title="Главное изображение">
+                            <input type="radio" name="main_image_id" value="{{ img.id }}" {% if img.is_main %}checked{% endif %}> Главное
+                        </label>
+                        <label title="Удалить">
+                            <input type="checkbox" name="delete_images[]" value="{{ img.id }}"> Удалить
+                        </label>
+                    </div>
                 </div>
+                {% endfor %}
             </div>
-            {% endif %}
-            <input type="file" name="image_file" accept="image/*">
-            <small class="hint">Рекомендуемый размер: 600x400 px. JPG, PNG, WebP. Автоматически сжимается</small>
         </div>
+        {% endif %}
         
-        <h3>Контент</h3>
         <div class="form-group">
-            <label>Описание</label>
-            <textarea name="description_html" rows="5" placeholder="Описание линейки товаров...">{{ product_line.description_html if product_line else '' }}</textarea>
-            <small class="hint">Текст отображается на странице линейки. Можно использовать HTML</small>
+            <label>Добавить изображения в галерею</label>
+            <input type="file" name="gallery_images" multiple accept="image/*">
+            <small class="hint">Можно выбрать несколько файлов</small>
         </div>
         
+        <div class="form-group">
+            <label>Интервал прокрутки галереи (сек)</label>
+            <input type="number" name="gallery_interval" value="{{ product_line.gallery_interval if product_line else 5 }}" min="1" max="60" style="width: 100px;">
+            <small class="hint">Скорость автоматической прокрутки галереи на странице</small>
+        </div>
+        {% endif %}
+        
+        <hr>
+        <h3>Hero-изображение</h3>
+        <p class="section-desc">Фоновое изображение в шапке страницы линейки</p>
+        <div class="form-group">
+            <label>URL Hero-изображения</label>
+            <input type="text" name="hero_image" value="{{ product_line.hero_image if product_line else '' }}" placeholder="/static/images/hero.jpg">
+            <small class="hint">Путь к изображению (если пусто — используется главное из галереи или изображение категории)</small>
+        </div>
+        <div class="form-group">
+            <label>Заголовок в Hero</label>
+            <input type="text" name="hero_title" value="{{ product_line.hero_title if product_line else '' }}">
+            <small class="hint">Крупный текст поверх изображения (если пусто — название линейки)</small>
+        </div>
+        <div class="form-group">
+            <label>Подзаголовок в Hero</label>
+            <input type="text" name="hero_subtitle" value="{{ product_line.hero_subtitle if product_line else '' }}">
+            <small class="hint">Дополнительный текст</small>
+        </div>
+        
+        <hr>
         <h3>SEO настройки</h3>
+        <div class="form-group">
+            <label>H1 заголовок</label>
+            <input type="text" name="h1" value="{{ product_line.h1 if product_line else '' }}" placeholder="Например: Труба ИЗОКОМ-А PE-Xa">
+            <small class="hint">Главный заголовок страницы (скрытый для SEO)</small>
+        </div>
         <div class="form-group">
             <label>SEO Title</label>
             <input type="text" name="seo_title" value="{{ product_line.seo_title if product_line else '' }}" placeholder="Например: ИЗОКОМ-А PE-Xa — купить | ГлавТрубТорг">
             <small class="hint">Заголовок страницы для поисковиков. 50-70 символов</small>
         </div>
         <div class="form-group">
-            <label>SEO Description</label>
+            <label>Краткое описание (seo_description)</label>
             <textarea name="seo_description" rows="2" placeholder="Описание для поисковых систем...">{{ product_line.seo_description if product_line else '' }}</textarea>
-            <small class="hint">Описание в результатах поиска. 150-160 символов</small>
+            <small class="hint">Отображается в результатах поиска и как описание на странице. 150-160 символов</small>
         </div>
         <div class="form-group">
-            <label>H1 заголовок</label>
-            <input type="text" name="h1" value="{{ product_line.h1 if product_line else '' }}" placeholder="Например: Труба ИЗОКОМ-А PE-Xa">
-            <small class="hint">Главный заголовок на странице</small>
-        </div>
-        <div class="form-group">
-            <label>SEO текст</label>
-            <textarea name="seo_text_html" rows="4" placeholder="Дополнительный текст для SEO...">{{ product_line.seo_text_html if product_line else '' }}</textarea>
+            <label>SEO текст (внизу страницы)</label>
+            <div class="wysiwyg-toolbar" data-target="seo_text_html">
+                <button type="button" onclick="formatText('seo_text_html', 'bold')" title="Жирный"><b>B</b></button>
+                <button type="button" onclick="formatText('seo_text_html', 'italic')" title="Курсив"><i>I</i></button>
+                <button type="button" onclick="formatText('seo_text_html', 'underline')" title="Подчёркнутый"><u>U</u></button>
+                <span class="toolbar-sep"></span>
+                <button type="button" onclick="insertTag('seo_text_html', 'h2')" title="Заголовок H2">H2</button>
+                <button type="button" onclick="insertTag('seo_text_html', 'h3')" title="Заголовок H3">H3</button>
+                <button type="button" onclick="insertTag('seo_text_html', 'p')" title="Абзац">P</button>
+                <button type="button" onclick="insertTag('seo_text_html', 'ul')" title="Список">UL</button>
+                <span class="toolbar-sep"></span>
+                <button type="button" onclick="alignText('seo_text_html', 'left')" title="По левому краю">⬱</button>
+                <button type="button" onclick="alignText('seo_text_html', 'center')" title="По центру">⬌</button>
+                <button type="button" onclick="alignText('seo_text_html', 'right')" title="По правому краю">⬲</button>
+                <button type="button" onclick="alignText('seo_text_html', 'justify')" title="По ширине">☰</button>
+                <span class="toolbar-sep"></span>
+                <button type="button" onclick="insertLink('seo_text_html')" title="Ссылка">🔗</button>
+                <button type="button" onclick="insertTable('seo_text_html')" title="Таблица">⊞</button>
+                <button type="button" onclick="toggleHtmlMode('seo_text_html')" title="HTML код">&lt;/&gt;</button>
+            </div>
+            <textarea name="seo_text_html" id="seo_text_html" rows="6" class="wysiwyg-textarea">{{ product_line.seo_text_html if product_line else '' }}</textarea>
             <small class="hint">Текст внизу страницы для SEO</small>
         </div>
         
+        <hr>
         <h3>Настройки</h3>
         <div class="form-group">
             <label>Порядок сортировки</label>
@@ -89,7 +151,243 @@
         <div class="form-actions">
             <button type="submit" class="btn btn-primary">Сохранить</button>
             <a href="{{ url_for('admin.product_lines_list') }}" class="btn btn-secondary">Отмена</a>
+            {% if product_line %}
+            <a href="{{ url_for('admin.accessory_blocks_list', pl_id=product_line.id) }}" class="btn btn-info" style="margin-left: auto;">Комплектующие</a>
+            {% endif %}
         </div>
     </form>
 </div>
+
+<style>
+.gallery-manager { margin-bottom: 20px; }
+.gallery-images { display: flex; flex-wrap: wrap; gap: 15px; }
+.gallery-item { 
+    border: 2px solid #ddd; 
+    border-radius: 8px; 
+    padding: 10px; 
+    background: #f9f9f9;
+    width: 180px;
+}
+.gallery-item.is-main { border-color: #28a745; background: #e8f5e9; }
+.gallery-img-wrap { 
+    width: 100%; 
+    height: 120px; 
+    overflow: hidden; 
+    border-radius: 4px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    background: #eee;
+}
+.gallery-item img { 
+    max-width: 100%; 
+    max-height: 120px; 
+    object-fit: contain;
+    transition: transform 0.3s;
+}
+.gallery-rotate {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 8px;
+    padding: 5px;
+    background: #e9ecef;
+    border-radius: 4px;
+}
+.btn-rotate {
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: #fff;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.btn-rotate:hover { background: #dee2e6; }
+.rotation-deg { font-size: 11px; color: #666; min-width: 30px; text-align: center; }
+.gallery-controls { margin-top: 8px; font-size: 12px; }
+.gallery-controls label { display: block; margin: 5px 0; cursor: pointer; }
+
+.wysiwyg-toolbar {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    margin-bottom: 5px;
+    padding: 8px;
+    background: #f5f5f5;
+    border: 1px solid #ddd;
+    border-bottom: none;
+    border-radius: 4px 4px 0 0;
+}
+.wysiwyg-toolbar button {
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    background: white;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+    min-width: 30px;
+}
+.wysiwyg-toolbar button:hover { background: #e9e9e9; }
+.toolbar-sep {
+    width: 1px;
+    background: #ccc;
+    margin: 0 4px;
+    align-self: stretch;
+}
+.wysiwyg-textarea { 
+    border-radius: 0 0 4px 4px !important; 
+    font-family: monospace;
+    width: 100%;
+}
+.wysiwyg-textarea.html-mode {
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    line-height: 1.4;
+    background: #f8f8f8;
+}
+.btn-info {
+    background: #17a2b8;
+    color: white;
+}
+.btn-info:hover {
+    background: #138496;
+}
+</style>
+
+<script>
+function formatText(textareaId, format) {
+    const textarea = document.getElementById(textareaId);
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selected = textarea.value.substring(start, end);
+    
+    let tag = '';
+    switch(format) {
+        case 'bold': tag = 'strong'; break;
+        case 'italic': tag = 'em'; break;
+        case 'underline': tag = 'u'; break;
+    }
+    
+    const replacement = `<${tag}>${selected}</${tag}>`;
+    textarea.value = textarea.value.substring(0, start) + replacement + textarea.value.substring(end);
+    textarea.focus();
+    textarea.setSelectionRange(start + tag.length + 2, start + tag.length + 2 + selected.length);
+}
+
+function insertTag(textareaId, tag) {
+    const textarea = document.getElementById(textareaId);
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selected = textarea.value.substring(start, end);
+    
+    let replacement;
+    if (tag === 'ul') {
+        const items = selected ? selected.split('\n').map(line => `  <li>${line}</li>`).join('\n') : '  <li></li>';
+        replacement = `<ul>\n${items}\n</ul>`;
+    } else {
+        replacement = `<${tag}>${selected}</${tag}>`;
+    }
+    
+    textarea.value = textarea.value.substring(0, start) + replacement + textarea.value.substring(end);
+    textarea.focus();
+}
+
+function insertLink(textareaId) {
+    const url = prompt('Введите URL:');
+    if (!url) return;
+    
+    const textarea = document.getElementById(textareaId);
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selected = textarea.value.substring(start, end) || 'Текст ссылки';
+    
+    const replacement = `<a href="${url}">${selected}</a>`;
+    textarea.value = textarea.value.substring(0, start) + replacement + textarea.value.substring(end);
+    textarea.focus();
+}
+
+function alignText(textareaId, alignment) {
+    const textarea = document.getElementById(textareaId);
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selected = textarea.value.substring(start, end);
+    
+    const replacement = `<p style="text-align: ${alignment};">${selected}</p>`;
+    textarea.value = textarea.value.substring(0, start) + replacement + textarea.value.substring(end);
+    textarea.focus();
+}
+
+function insertTable(textareaId) {
+    const rows = prompt('Количество строк:', '3');
+    if (!rows) return;
+    const cols = prompt('Количество столбцов:', '3');
+    if (!cols) return;
+    
+    const numRows = parseInt(rows) || 3;
+    const numCols = parseInt(cols) || 3;
+    
+    let table = '<table class="content-table">\n';
+    table += '  <thead>\n    <tr>\n';
+    for (let c = 0; c < numCols; c++) {
+        table += `      <th>Заголовок ${c + 1}</th>\n`;
+    }
+    table += '    </tr>\n  </thead>\n  <tbody>\n';
+    for (let r = 0; r < numRows - 1; r++) {
+        table += '    <tr>\n';
+        for (let c = 0; c < numCols; c++) {
+            table += '      <td></td>\n';
+        }
+        table += '    </tr>\n';
+    }
+    table += '  </tbody>\n</table>';
+    
+    const textarea = document.getElementById(textareaId);
+    const pos = textarea.selectionStart;
+    textarea.value = textarea.value.substring(0, pos) + table + textarea.value.substring(pos);
+    textarea.focus();
+}
+
+function toggleHtmlMode(textareaId) {
+    const textarea = document.getElementById(textareaId);
+    textarea.classList.toggle('html-mode');
+    
+    if (textarea.classList.contains('html-mode')) {
+        const formatted = textarea.value
+            .replace(/></g, '>\n<')
+            .replace(/\n\n+/g, '\n');
+        textarea.value = formatted;
+    }
+}
+
+{% if product_line %}
+function rotateImage(imageId, degrees) {
+    fetch(`{{ url_for('admin.rotate_product_line_image', image_id=0) }}`.replace('0', imageId), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token() }}'
+        },
+        body: JSON.stringify({ degrees: degrees })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const item = document.querySelector(`.gallery-item[data-id="${imageId}"]`);
+            const img = item.querySelector('img');
+            const degSpan = item.querySelector('.rotation-deg');
+            img.style.transform = `rotate(${data.rotation}deg)`;
+            degSpan.textContent = data.rotation + '°';
+        } else {
+            alert('Ошибка: ' + data.error);
+        }
+    })
+    .catch(err => alert('Ошибка сети'));
+}
+{% endif %}
+</script>
 {% endblock %}

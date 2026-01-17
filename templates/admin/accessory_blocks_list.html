@@ -1,0 +1,51 @@
+{% extends 'admin/base.html' %}
+{% block title %}Комплектующие: {{ product_line.name }}{% endblock %}
+{% block page_title %}Комплектующие: {{ product_line.name }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="list-header">
+        <a href="{{ url_for('admin.product_lines_edit', id=product_line.id) }}" class="btn btn-secondary">Назад к линейке</a>
+        <a href="{{ url_for('admin.accessory_blocks_add', pl_id=product_line.id) }}" class="btn btn-primary">Добавить блок</a>
+    </div>
+    
+    {% if blocks %}
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Порядок</th>
+                <th>Название</th>
+                <th>Изображение</th>
+                <th>Активен</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for block in blocks %}
+            <tr>
+                <td>{{ block.sort_order }}</td>
+                <td>{{ block.name }}</td>
+                <td>
+                    {% if block.image_path %}
+                    <img src="{{ block.image_path }}" alt="" style="max-width: 60px; max-height: 40px;">
+                    {% else %}
+                    —
+                    {% endif %}
+                </td>
+                <td>{{ 'Да' if block.is_active else 'Нет' }}</td>
+                <td>
+                    <a href="{{ url_for('admin.accessory_blocks_edit', id=block.id) }}" class="btn btn-sm btn-secondary">Редактировать</a>
+                    <form method="POST" action="{{ url_for('admin.accessory_blocks_delete', id=block.id) }}" style="display: inline;" onsubmit="return confirm('Удалить блок?')">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-sm btn-danger">Удалить</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="empty-msg">Блоки комплектующих не добавлены</p>
+    {% endif %}
+</div>
+{% endblock %}

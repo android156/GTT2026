@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, abort, Response
 from extensions import db
-from models import Page, MenuItem, Category, ProductLine, SizeItem, News, Lead, Setting, Service, SiteSection, HomeGalleryImage
+from models import Page, MenuItem, Category, ProductLine, SizeItem, News, Lead, Setting, Service, SiteSection, HomeGalleryImage, ProductLineImage, AccessoryBlock
 from services.seo import get_page_seo, get_canonical_url, get_og_tags
 from services.schema import generate_product_jsonld, generate_breadcrumb_jsonld, generate_organization_jsonld
 from config import RESERVED_SLUGS, Config
@@ -321,6 +321,15 @@ def render_product_line(category, product_line):
         product_line_id=product_line.id
     ).order_by(SizeItem.size_text).all()
     
+    gallery_images = ProductLineImage.query.filter_by(
+        product_line_id=product_line.id
+    ).order_by(ProductLineImage.sort_order).all()
+    
+    accessory_blocks = AccessoryBlock.query.filter_by(
+        product_line_id=product_line.id,
+        is_active=True
+    ).order_by(AccessoryBlock.sort_order).all()
+    
     seo = get_page_seo(product_line)
     
     breadcrumbs = [
@@ -334,6 +343,8 @@ def render_product_line(category, product_line):
                          category=category,
                          product_line=product_line,
                          size_items=size_items,
+                         gallery_images=gallery_images,
+                         accessory_blocks=accessory_blocks,
                          seo=seo,
                          breadcrumbs=breadcrumbs,
                          breadcrumbs_jsonld=generate_breadcrumb_jsonld(breadcrumbs),

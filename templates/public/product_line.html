@@ -2,7 +2,7 @@
 
 {% block hero %}
 <h1 class="visually-hidden">{{ seo.h1 }}</h1>
-{% set hero_img = product_line.hero_image or product_line.image_path or category.hero_image or category.image_path or '/static/images/WhatsApp_Image_2019-10-21_at_13.44.44_1766758697538.jpeg' %}
+{% set hero_img = product_line.hero_image or product_line.get_main_image() or category.hero_image or category.image_path or '/static/images/WhatsApp_Image_2019-10-21_at_13.44.44_1766758697538.jpeg' %}
 <section class="hero page-hero" style="background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('{{ hero_img }}');">
     <div class="container">
         <div class="hero-content">
@@ -24,11 +24,30 @@
     {% endfor %}
 </nav>
 
-{% if product_line.description_html %}
-<div class="description">{{ product_line.description_html|safe }}</div>
+{% if product_line.seo_description %}
+<div class="description">{{ product_line.seo_description }}</div>
 {% endif %}
 
-{% if product_line.image_path %}
+{% if gallery_images %}
+<div class="product-gallery" data-interval="{{ product_line.gallery_interval or 5 }}">
+    <div class="gallery-track">
+        {% for img in gallery_images %}
+        <div class="gallery-slide {% if loop.first %}active{% endif %}">
+            <img src="{{ img.image_path }}" alt="{{ img.alt_text or product_line.name }}" style="{% if img.rotation %}transform: rotate({{ img.rotation }}deg);{% endif %}">
+        </div>
+        {% endfor %}
+    </div>
+    {% if gallery_images|length > 1 %}
+    <button class="gallery-btn gallery-prev" aria-label="Предыдущее">&lsaquo;</button>
+    <button class="gallery-btn gallery-next" aria-label="Следующее">&rsaquo;</button>
+    <div class="gallery-dots">
+        {% for img in gallery_images %}
+        <span class="gallery-dot {% if loop.first %}active{% endif %}" data-index="{{ loop.index0 }}"></span>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% elif product_line.image_path %}
 <img src="{{ product_line.image_path }}" alt="{{ product_line.name }}" class="product-line-main-img">
 {% endif %}
 
@@ -78,7 +97,197 @@
 <p>Типоразмеры не добавлены</p>
 {% endif %}
 
+{% if accessory_blocks %}
+<div class="accessories-section">
+    <h2>Комплектующие</h2>
+    {% for block in accessory_blocks %}
+    <div class="accessory-block">
+        <h3>{{ block.name }}</h3>
+        {% if block.description_html %}
+        <div class="accessory-desc">{{ block.description_html|safe }}</div>
+        {% endif %}
+        {% if block.image_path %}
+        <img src="{{ block.image_path }}" alt="{{ block.name }}" class="accessory-img">
+        {% endif %}
+        {% if block.table_html %}
+        <div class="accessory-table">{{ block.table_html|safe }}</div>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
 {% if seo.seo_text %}
 <div class="seo-text">{{ seo.seo_text|safe }}</div>
 {% endif %}
+
+<style>
+.product-gallery {
+    position: relative;
+    max-width: 600px;
+    margin: 20px auto;
+    overflow: hidden;
+    border-radius: 8px;
+    background: #f5f5f5;
+}
+.gallery-track {
+    display: flex;
+    transition: transform 0.4s ease;
+}
+.gallery-slide {
+    min-width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+.gallery-slide img {
+    max-width: 100%;
+    max-height: 400px;
+    object-fit: contain;
+}
+.gallery-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0,0,0,0.5);
+    color: white;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 10;
+}
+.gallery-btn:hover {
+    background: rgba(0,0,0,0.7);
+}
+.gallery-prev { left: 10px; }
+.gallery-next { right: 10px; }
+.gallery-dots {
+    position: absolute;
+    bottom: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+}
+.gallery-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.5);
+    cursor: pointer;
+}
+.gallery-dot.active {
+    background: white;
+}
+
+.accessories-section {
+    margin: 40px 0;
+}
+.accessory-block {
+    margin-bottom: 30px;
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 8px;
+}
+.accessory-block h3 {
+    margin-top: 0;
+    color: #333;
+}
+.accessory-desc {
+    margin-bottom: 15px;
+}
+.accessory-img {
+    max-width: 100%;
+    max-height: 300px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+}
+.accessory-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.accessory-table th,
+.accessory-table td {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+.accessory-table thead {
+    background: #e9ecef;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const gallery = document.querySelector('.product-gallery');
+    if (!gallery) return;
+    
+    const track = gallery.querySelector('.gallery-track');
+    const slides = gallery.querySelectorAll('.gallery-slide');
+    const prevBtn = gallery.querySelector('.gallery-prev');
+    const nextBtn = gallery.querySelector('.gallery-next');
+    const dots = gallery.querySelectorAll('.gallery-dot');
+    const interval = parseInt(gallery.dataset.interval) * 1000 || 5000;
+    
+    if (slides.length <= 1) return;
+    
+    let currentIndex = 0;
+    let autoplayTimer;
+    
+    function goToSlide(index) {
+        if (index < 0) index = slides.length - 1;
+        if (index >= slides.length) index = 0;
+        
+        currentIndex = index;
+        track.style.transform = `translateX(-${currentIndex * 100}%)`;
+        
+        dots.forEach((dot, i) => {
+            dot.classList.toggle('active', i === currentIndex);
+        });
+    }
+    
+    function startAutoplay() {
+        stopAutoplay();
+        autoplayTimer = setInterval(() => {
+            goToSlide(currentIndex + 1);
+        }, interval);
+    }
+    
+    function stopAutoplay() {
+        if (autoplayTimer) {
+            clearInterval(autoplayTimer);
+        }
+    }
+    
+    if (prevBtn) {
+        prevBtn.addEventListener('click', () => {
+            goToSlide(currentIndex - 1);
+            startAutoplay();
+        });
+    }
+    
+    if (nextBtn) {
+        nextBtn.addEventListener('click', () => {
+            goToSlide(currentIndex + 1);
+            startAutoplay();
+        });
+    }
+    
+    dots.forEach((dot, i) => {
+        dot.addEventListener('click', () => {
+            goToSlide(i);
+            startAutoplay();
+        });
+    });
+    
+    startAutoplay();
+    
+    gallery.addEventListener('mouseenter', stopAutoplay);
+    gallery.addEventListener('mouseleave', startAutoplay);
+});
+</script>
 {% endblock %}

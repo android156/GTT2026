@@ -84,10 +84,25 @@ class ProductLine(db.Model):
     seo_description = db.Column(db.String(300), default='')
     h1 = db.Column(db.String(200), default='')
     seo_text_html = db.Column(db.Text, default='')
+    hero_image = db.Column(db.String(300), default='')
+    hero_title = db.Column(db.String(200), default='')
+    hero_subtitle = db.Column(db.String(300), default='')
+    gallery_interval = db.Column(db.Integer, default=5)
     sort_order = db.Column(db.Integer, default=0)
     is_active = db.Column(db.Boolean, default=True)
     
     size_items = db.relationship('SizeItem', backref='product_line', lazy='dynamic', cascade='all, delete-orphan')
+    images = db.relationship('ProductLineImage', backref='product_line', lazy='dynamic', cascade='all, delete-orphan')
+    accessory_blocks = db.relationship('AccessoryBlock', backref='product_line', lazy='dynamic', cascade='all, delete-orphan')
+    
+    def get_main_image(self):
+        images_list = self.images.order_by('sort_order').all()
+        for img in images_list:
+            if img.is_main:
+                return img.image_path
+        if images_list:
+            return images_list[0].image_path
+        return self.image_path if self.image_path else ''
     
     __table_args__ = (
         db.UniqueConstraint('category_id', 'slug', name='uq_productline_category_slug'),
@@ -247,3 +262,28 @@ class SiteSection(db.Model):
     hero_subtitle = db.Column(db.String(300), default='')
     gallery_interval = db.Column(db.Integer, default=5)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class ProductLineImage(db.Model):
+    __tablename__ = 'product_line_images'
+    id = db.Column(db.Integer, primary_key=True)
+    product_line_id = db.Column(db.Integer, db.ForeignKey('product_lines.id'), nullable=False)
+    image_path = db.Column(db.String(300), nullable=False)
+    alt_text = db.Column(db.String(200), default='')
+    is_main = db.Column(db.Boolean, default=False)
+    sort_order = db.Column(db.Integer, default=0)
+    rotation = db.Column(db.Integer, default=0)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+class AccessoryBlock(db.Model):
+    __tablename__ = 'accessory_blocks'
+    id = db.Column(db.Integer, primary_key=True)
+    product_line_id = db.Column(db.Integer, db.ForeignKey('product_lines.id'), nullable=False)
+    name = db.Column(db.String(200), nullable=False)
+    description_html = db.Column(db.Text, default='')
+    image_path = db.Column(db.String(300), default='')
+    table_html = db.Column(db.Text, default='')
+    sort_order = db.Column(db.Integer, default=0)
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)

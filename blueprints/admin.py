@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.utils import secure_filename
 from extensions import db, login_manager
-from models import User, Page, MenuItem, Category, ProductLine, SizeItem, News, DocumentFile, Lead, RedirectRule, Setting, Service, SiteSection, ServiceImage, HomeGalleryImage
+from models import User, Page, MenuItem, Category, ProductLine, SizeItem, News, DocumentFile, Lead, RedirectRule, Setting, Service, SiteSection, ServiceImage, HomeGalleryImage, ProductLineImage, AccessoryBlock
 from services.importers import import_categories_csv, import_product_lines_csv, import_size_items_csv, import_news_csv
 from services.slug import generate_slug, is_reserved_slug, validate_slug
 from services.image_uploader import save_uploaded_image, delete_image
@@ -746,19 +746,22 @@ def product_lines_add():
             category_id=int(request.form.get('category_id')),
             name=request.form.get('name', ''),
             slug=request.form.get('slug', '').strip(),
-            description_html=sanitize_html(request.form.get('description_html', '')),
             image_path=image_path or request.form.get('image_path', ''),
             seo_title=request.form.get('seo_title', ''),
             seo_description=request.form.get('seo_description', ''),
             h1=request.form.get('h1', ''),
             seo_text_html=sanitize_html(request.form.get('seo_text_html', '')),
+            hero_image=request.form.get('hero_image', '').strip(),
+            hero_title=request.form.get('hero_title', '').strip(),
+            hero_subtitle=request.form.get('hero_subtitle', '').strip(),
+            gallery_interval=int(request.form.get('gallery_interval', 5) or 5),
             sort_order=int(request.form.get('sort_order', 0) or 0),
             is_active=request.form.get('is_active') == 'on'
         )
         db.session.add(pl)
         db.session.commit()
-        flash('Линейка создана', 'success')
-        return redirect(url_for('admin.product_lines_list'))
+        flash('Линейка создана. Теперь вы можете добавить изображения в галерею.', 'success')
+        return redirect(url_for('admin.product_lines_edit', id=pl.id))
     
     return render_template('admin/product_lines_form.html', product_line=None, categories=categories)
 
@@ -785,16 +788,48 @@ def product_lines_edit(id):
         pl.category_id = int(request.form.get('category_id'))
         pl.name = request.form.get('name', '')
         pl.slug = request.form.get('slug', '').strip()
-        pl.description_html = sanitize_html(request.form.get('description_html', ''))
         pl.seo_title = request.form.get('seo_title', '')
         pl.seo_description = request.form.get('seo_description', '')
         pl.h1 = request.form.get('h1', '')
         pl.seo_text_html = sanitize_html(request.form.get('seo_text_html', ''))
+        pl.hero_image = request.form.get('hero_image', '').strip()
+        pl.hero_title = request.form.get('hero_title', '').strip()
+        pl.hero_subtitle = request.form.get('hero_subtitle', '').strip()
+        pl.gallery_interval = int(request.form.get('gallery_interval', 5) or 5)
         pl.sort_order = int(request.form.get('sort_order', 0) or 0)
         pl.is_active = request.form.get('is_active') == 'on'
+        
+        main_image_id = request.form.get('main_image_id')
+        if main_image_id:
+            ProductLineImage.query.filter_by(product_line_id=pl.id).update({'is_main': False})
+            img = ProductLineImage.query.get(int(main_image_id))
+            if img:
+                img.is_main = True
+        
+        delete_ids = request.form.getlist('delete_images[]')
+        for did in delete_ids:
+            img = ProductLineImage.query.get(int(did))
+            if img:
+                delete_image(img.image_path)
+                db.session.delete(img)
+        
+        files = request.files.getlist('gallery_images')
+        max_order = db.session.query(db.func.max(ProductLineImage.sort_order)).filter_by(product_line_id=pl.id).scalar() or 0
+        for i, file in enumerate(files):
+            if file and file.filename:
+                img_path = save_uploaded_image(file, 'products')
+                if img_path:
+                    pimg = ProductLineImage(
+                        product_line_id=pl.id,
+                        image_path=img_path,
+                        is_main=False,
+                        sort_order=max_order + i + 1
+                    )
+                    db.session.add(pimg)
+        
         db.session.commit()
         flash('Линейка обновлена', 'success')
-        return redirect(url_for('admin.product_lines_list'))
+        return redirect(url_for('admin.product_lines_edit', id=pl.id))
     
     return render_template('admin/product_lines_form.html', product_line=pl, categories=categories)
 
@@ -824,6 +859,98 @@ def product_lines_import():
         return redirect(url_for('admin.product_lines_list'))
     
     return render_template('admin/import_csv.html', entity='линейки', template_type='product_lines')
+
+
+@admin_bp.route('/product-line-image/<int:image_id>/rotate/', methods=['POST'])
+@login_required
+def rotate_product_line_image(image_id):
+    img = ProductLineImage.query.get_or_404(image_id)
+    data = request.get_json() or {}
+    degrees = data.get('degrees', 90)
+    img.rotation = (img.rotation + degrees) % 360
+    db.session.commit()
+    return jsonify({'success': True, 'rotation': img.rotation})
+
+
+@admin_bp.route('/product-lines/<int:pl_id>/accessories/')
+@login_required
+def accessory_blocks_list(pl_id):
+    pl = ProductLine.query.get_or_404(pl_id)
+    blocks = AccessoryBlock.query.filter_by(product_line_id=pl_id).order_by(AccessoryBlock.sort_order).all()
+    return render_template('admin/accessory_blocks_list.html', product_line=pl, blocks=blocks)
+
+
+@admin_bp.route('/product-lines/<int:pl_id>/accessories/add/', methods=['GET', 'POST'])
+@login_required
+def accessory_blocks_add(pl_id):
+    pl = ProductLine.query.get_or_404(pl_id)
+    
+    if request.method == 'POST':
+        block = AccessoryBlock(
+            product_line_id=pl_id,
+            name=request.form.get('name', '').strip(),
+            description_html=sanitize_html(request.form.get('description_html', '')),
+            table_html=sanitize_html(request.form.get('table_html', '')),
+            sort_order=int(request.form.get('sort_order', 0) or 0),
+            is_active=request.form.get('is_active') == 'on'
+        )
+        
+        if 'image_file' in request.files:
+            file = request.files['image_file']
+            if file and file.filename:
+                block.image_path = save_uploaded_image(file, 'accessories')
+        
+        db.session.add(block)
+        db.session.commit()
+        flash('Блок комплектующих добавлен', 'success')
+        return redirect(url_for('admin.accessory_blocks_list', pl_id=pl_id))
+    
+    return render_template('admin/accessory_blocks_form.html', product_line=pl, block=None)
+
+
+@admin_bp.route('/accessories/<int:id>/edit/', methods=['GET', 'POST'])
+@login_required
+def accessory_blocks_edit(id):
+    block = AccessoryBlock.query.get_or_404(id)
+    pl = block.product_line
+    
+    if request.method == 'POST':
+        block.name = request.form.get('name', '').strip()
+        block.description_html = sanitize_html(request.form.get('description_html', ''))
+        block.table_html = sanitize_html(request.form.get('table_html', ''))
+        block.sort_order = int(request.form.get('sort_order', 0) or 0)
+        block.is_active = request.form.get('is_active') == 'on'
+        
+        if request.form.get('delete_image') == 'on':
+            if block.image_path:
+                delete_image(block.image_path)
+            block.image_path = ''
+        
+        if 'image_file' in request.files:
+            file = request.files['image_file']
+            if file and file.filename:
+                if block.image_path:
+                    delete_image(block.image_path)
+                block.image_path = save_uploaded_image(file, 'accessories')
+        
+        db.session.commit()
+        flash('Блок комплектующих обновлен', 'success')
+        return redirect(url_for('admin.accessory_blocks_list', pl_id=pl.id))
+    
+    return render_template('admin/accessory_blocks_form.html', product_line=pl, block=block)
+
+
+@admin_bp.route('/accessories/<int:id>/delete/', methods=['POST'])
+@login_required
+def accessory_blocks_delete(id):
+    block = AccessoryBlock.query.get_or_404(id)
+    pl_id = block.product_line_id
+    if block.image_path:
+        delete_image(block.image_path)
+    db.session.delete(block)
+    db.session.commit()
+    flash('Блок комплектующих удален', 'success')
+    return redirect(url_for('admin.accessory_blocks_list', pl_id=pl_id))
 
 
 @admin_bp.route('/size-items/')

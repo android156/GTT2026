@@ -726,8 +726,30 @@ def categories_import():
 @admin_bp.route('/product-lines/')
 @login_required
 def product_lines_list():
-    pls = ProductLine.query.join(Category).order_by(Category.name, ProductLine.sort_order).all()
-    return render_template('admin/product_lines_list.html', product_lines=pls)
+    categories = Category.query.order_by(Category.name).all()
+    
+    category_id = request.args.get('category_id', '', type=str)
+    search = request.args.get('search', '', type=str).strip().lower()
+    
+    query = ProductLine.query.join(Category)
+    
+    if category_id:
+        query = query.filter(ProductLine.category_id == int(category_id))
+    
+    if search:
+        query = query.filter(
+            db.or_(
+                Category.name.ilike(f'%{search}%'),
+                ProductLine.name.ilike(f'%{search}%')
+            )
+        )
+    
+    pls = query.order_by(Category.name, ProductLine.sort_order).all()
+    return render_template('admin/product_lines_list.html', 
+                           product_lines=pls, 
+                           categories=categories,
+                           selected_category=category_id,
+                           search=request.args.get('search', ''))
 
 
 @admin_bp.route('/product-lines/add/', methods=['GET', 'POST'])
@@ -956,10 +978,38 @@ def accessory_blocks_delete(id):
 @admin_bp.route('/size-items/')
 @login_required
 def size_items_list():
-    items = SizeItem.query.join(ProductLine).join(Category).order_by(
-        Category.name, ProductLine.name, SizeItem.size_text
-    ).all()
-    return render_template('admin/size_items_list.html', size_items=items)
+    categories = Category.query.order_by(Category.name).all()
+    product_lines = ProductLine.query.join(Category).order_by(Category.name, ProductLine.name).all()
+    
+    category_id = request.args.get('category_id', '', type=str)
+    product_line_id = request.args.get('product_line_id', '', type=str)
+    search = request.args.get('search', '', type=str).strip().lower()
+    
+    query = SizeItem.query.join(ProductLine).join(Category)
+    
+    if category_id:
+        query = query.filter(ProductLine.category_id == int(category_id))
+    
+    if product_line_id:
+        query = query.filter(SizeItem.product_line_id == int(product_line_id))
+    
+    if search:
+        query = query.filter(
+            db.or_(
+                Category.name.ilike(f'%{search}%'),
+                ProductLine.name.ilike(f'%{search}%'),
+                SizeItem.size_text.ilike(f'%{search}%')
+            )
+        )
+    
+    items = query.order_by(Category.name, ProductLine.name, SizeItem.size_text).all()
+    return render_template('admin/size_items_list.html', 
+                           size_items=items,
+                           categories=categories,
+                           product_lines=product_lines,
+                           selected_category=category_id,
+                           selected_product_line=product_line_id,
+                           search=request.args.get('search', ''))
 
 
 @admin_bp.route('/size-items/add/', methods=['GET', 'POST'])

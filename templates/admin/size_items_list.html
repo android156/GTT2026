@@ -4,11 +4,45 @@
 
 {% block content %}
 <div class="card">
-    <p style="margin-bottom: 15px;">
-        <a href="{{ url_for('admin.size_items_add') }}" class="btn btn-success">Добавить типоразмер</a>
-        <a href="{{ url_for('admin.size_items_import') }}" class="btn btn-secondary">Импорт CSV</a>
-        <a href="{{ url_for('admin.csv_export_size_items') }}" class="btn btn-outline">Скачать CSV</a>
-    </p>
+    <div class="list-toolbar">
+        <div class="toolbar-actions">
+            <a href="{{ url_for('admin.size_items_add') }}" class="btn btn-success">Добавить типоразмер</a>
+            <a href="{{ url_for('admin.size_items_import') }}" class="btn btn-secondary">Импорт CSV</a>
+            <a href="{{ url_for('admin.csv_export_size_items') }}" class="btn btn-outline">Скачать CSV</a>
+        </div>
+        <div class="toolbar-search">
+            <form method="GET" class="search-form">
+                <input type="text" name="search" value="{{ search }}" placeholder="Поиск по категории, линейке, размеру..." class="search-input">
+                <button type="submit" class="btn btn-primary btn-sm">Найти</button>
+                {% if search or selected_category or selected_product_line %}
+                <a href="{{ url_for('admin.size_items_list') }}" class="btn btn-outline btn-sm">Сбросить</a>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+    
+    <div class="filters-row">
+        <form method="GET" class="filter-form" id="filterForm">
+            <input type="hidden" name="search" value="{{ search }}">
+            <label>Категория:
+                <select name="category_id" id="categoryFilter" onchange="filterByCategory()">
+                    <option value="">Все категории</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat.id }}" {{ 'selected' if selected_category|string == cat.id|string }}>{{ cat.name }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label>Линейка:
+                <select name="product_line_id" id="productLineFilter" onchange="this.form.submit()">
+                    <option value="">Все линейки</option>
+                    {% for pl in product_lines %}
+                    <option value="{{ pl.id }}" data-category="{{ pl.category_id }}" {{ 'selected' if selected_product_line|string == pl.id|string }}>{{ pl.category.name }} / {{ pl.name }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+        </form>
+    </div>
+    
     <table>
         <thead>
             <tr><th>Категория</th><th>Линейка</th><th>Размер</th><th>Цена</th><th>В наличии</th><th>Действия</th></tr>
@@ -29,8 +63,45 @@
                     </form>
                 </td>
             </tr>
+            {% else %}
+            <tr><td colspan="6" style="text-align:center;color:#888;">Нет типоразмеров</td></tr>
             {% endfor %}
         </tbody>
     </table>
+    <p style="margin-top:10px;color:#666;">Найдено: {{ size_items|length }}</p>
 </div>
+
+<script>
+function filterByCategory() {
+    const categoryId = document.getElementById('categoryFilter').value;
+    filterProductLines(categoryId);
+    document.getElementById('filterForm').submit();
+}
+
+function filterProductLines(categoryId) {
+    const plSelect = document.getElementById('productLineFilter');
+    const options = plSelect.querySelectorAll('option');
+    
+    options.forEach(opt => {
+        if (!opt.value) {
+            opt.style.display = '';
+        } else if (!categoryId || opt.dataset.category === categoryId) {
+            opt.style.display = '';
+        } else {
+            opt.style.display = 'none';
+        }
+    });
+    
+    if (plSelect.selectedOptions[0] && plSelect.selectedOptions[0].style.display === 'none') {
+        plSelect.value = '';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const categoryId = document.getElementById('categoryFilter').value;
+    if (categoryId) {
+        filterProductLines(categoryId);
+    }
+});
+</script>
 {% endblock %}

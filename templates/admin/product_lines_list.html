@@ -4,11 +4,37 @@
 
 {% block content %}
 <div class="card">
-    <p style="margin-bottom: 15px;">
-        <a href="{{ url_for('admin.product_lines_add') }}" class="btn btn-success">Добавить линейку</a>
-        <a href="{{ url_for('admin.product_lines_import') }}" class="btn btn-secondary">Импорт CSV</a>
-        <a href="{{ url_for('admin.csv_export_product_lines') }}" class="btn btn-outline">Скачать CSV</a>
-    </p>
+    <div class="list-toolbar">
+        <div class="toolbar-actions">
+            <a href="{{ url_for('admin.product_lines_add') }}" class="btn btn-success">Добавить линейку</a>
+            <a href="{{ url_for('admin.product_lines_import') }}" class="btn btn-secondary">Импорт CSV</a>
+            <a href="{{ url_for('admin.csv_export_product_lines') }}" class="btn btn-outline">Скачать CSV</a>
+        </div>
+        <div class="toolbar-search">
+            <form method="GET" class="search-form">
+                <input type="text" name="search" value="{{ search }}" placeholder="Поиск по категории и названию..." class="search-input">
+                <button type="submit" class="btn btn-primary btn-sm">Найти</button>
+                {% if search or selected_category %}
+                <a href="{{ url_for('admin.product_lines_list') }}" class="btn btn-outline btn-sm">Сбросить</a>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+    
+    <div class="filters-row">
+        <form method="GET" class="filter-form">
+            <input type="hidden" name="search" value="{{ search }}">
+            <label>Категория:
+                <select name="category_id" onchange="this.form.submit()">
+                    <option value="">Все категории</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat.id }}" {{ 'selected' if selected_category|string == cat.id|string }}>{{ cat.name }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+        </form>
+    </div>
+    
     <table>
         <thead>
             <tr><th>Категория</th><th>Название</th><th>Slug</th><th>Активна</th><th>Действия</th></tr>
@@ -28,8 +54,11 @@
                     </form>
                 </td>
             </tr>
+            {% else %}
+            <tr><td colspan="5" style="text-align:center;color:#888;">Нет линеек</td></tr>
             {% endfor %}
         </tbody>
     </table>
+    <p style="margin-top:10px;color:#666;">Найдено: {{ product_lines|length }}</p>
 </div>
 {% endblock %}

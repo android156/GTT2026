@@ -64,13 +64,13 @@ def csv_template(template_type):
     templates = {
         'categories': {
             'filename': 'categories_template.csv',
-            'headers': 'name;slug;sort_order;is_active',
-            'example': 'Полиэтиленовые трубы;polietilenovye-truby;1;1'
+            'headers': 'name;slug;sort_order;is_active;seo_title;seo_description;h1;seo_text_html',
+            'example': 'Полиэтиленовые трубы;polietilenovye-truby;1;1;Трубы — купить;;Полиэтиленовые трубы;'
         },
         'product_lines': {
             'filename': 'product_lines_template.csv',
-            'headers': 'category_slug;name;slug;sort_order;is_active',
-            'example': 'polietilenovye-truby;ПЭ 100 SDR 11;pe-100-sdr-11;1;1'
+            'headers': 'category_slug;name;slug;sort_order;is_active;seo_title;seo_description;h1;seo_text_html',
+            'example': 'polietilenovye-truby;ПЭ 100 SDR 11;pe-100-sdr-11;1;1;;;ПЭ 100 SDR 11;'
         },
         'size_items': {
             'filename': 'size_items_template.csv',
@@ -79,8 +79,8 @@ def csv_template(template_type):
         },
         'news': {
             'filename': 'news_template.csv',
-            'headers': 'date;content',
-            'example': '15.01.2025;Компания расширила ассортимент продукции'
+            'headers': 'date;title;slug;content;seo_title;seo_description;h1;is_published',
+            'example': '15.01.2025;Новость о расширении ассортимента;novost-o-rasshirenii;Компания расширила ассортимент продукции;;;;1'
         }
     }
     
@@ -95,6 +95,124 @@ def csv_template(template_type):
         content,
         mimetype='text/csv',
         headers={'Content-Disposition': f'attachment; filename={t["filename"]}'}
+    )
+
+
+def escape_csv_field(value):
+    if value is None:
+        return ''
+    s = str(value)
+    if ';' in s or '"' in s or '\n' in s:
+        return '"' + s.replace('"', '""') + '"'
+    return s
+
+
+@admin_bp.route('/csv-export/categories/')
+@login_required
+def csv_export_categories():
+    categories = Category.query.order_by(Category.sort_order).all()
+    lines = ['name;slug;sort_order;is_active;seo_title;seo_description;h1;seo_text_html']
+    for c in categories:
+        row = ';'.join([
+            escape_csv_field(c.name),
+            escape_csv_field(c.slug),
+            str(c.sort_order or 0),
+            '1' if c.is_active else '0',
+            escape_csv_field(c.seo_title),
+            escape_csv_field(c.seo_description),
+            escape_csv_field(c.h1),
+            escape_csv_field(c.seo_text_html)
+        ])
+        lines.append(row)
+    content = '\n'.join(lines) + '\n'
+    return Response(
+        content,
+        mimetype='text/csv; charset=utf-8',
+        headers={'Content-Disposition': 'attachment; filename=categories_export.csv'}
+    )
+
+
+@admin_bp.route('/csv-export/product-lines/')
+@login_required
+def csv_export_product_lines():
+    product_lines = ProductLine.query.join(Category).order_by(Category.sort_order, ProductLine.sort_order).all()
+    lines = ['category_slug;name;slug;sort_order;is_active;seo_title;seo_description;h1;seo_text_html']
+    for pl in product_lines:
+        row = ';'.join([
+            escape_csv_field(pl.category.slug),
+            escape_csv_field(pl.name),
+            escape_csv_field(pl.slug),
+            str(pl.sort_order or 0),
+            '1' if pl.is_active else '0',
+            escape_csv_field(pl.seo_title),
+            escape_csv_field(pl.seo_description),
+            escape_csv_field(pl.h1),
+            escape_csv_field(pl.seo_text_html)
+        ])
+        lines.append(row)
+    content = '\n'.join(lines) + '\n'
+    return Response(
+        content,
+        mimetype='text/csv; charset=utf-8',
+        headers={'Content-Disposition': 'attachment; filename=product_lines_export.csv'}
+    )
+
+
+@admin_bp.route('/csv-export/size-items/')
+@login_required
+def csv_export_size_items():
+    size_items = SizeItem.query.join(ProductLine).join(Category).order_by(
+        Category.sort_order, ProductLine.sort_order, SizeItem.size_text
+    ).all()
+    lines = ['category_slug;product_slug;size_text;sku;price;unit;in_stock;pipe_dxs;pressure;mass_per_m;min_bend_radius;max_len_coil;max_len_drum']
+    for si in size_items:
+        row = ';'.join([
+            escape_csv_field(si.product_line.category.slug),
+            escape_csv_field(si.product_line.slug),
+            escape_csv_field(si.size_text),
+            escape_csv_field(si.sku),
+            str(si.price or 0),
+            escape_csv_field(si.unit),
+            '1' if si.in_stock else '0',
+            escape_csv_field(si.pipe_dxs),
+            escape_csv_field(si.pressure),
+            escape_csv_field(si.mass_per_m),
+            escape_csv_field(si.min_bend_radius),
+            escape_csv_field(si.max_len_coil),
+            escape_csv_field(si.max_len_drum)
+        ])
+        lines.append(row)
+    content = '\n'.join(lines) + '\n'
+    return Response(
+        content,
+        mimetype='text/csv; charset=utf-8',
+        headers={'Content-Disposition': 'attachment; filename=size_items_export.csv'}
+    )
+
+
+@admin_bp.route('/csv-export/news/')
+@login_required
+def csv_export_news():
+    news_list = News.query.order_by(News.date.desc()).all()
+    lines = ['date;title;slug;content;seo_title;seo_description;h1;is_published']
+    for n in news_list:
+        date_str = n.date.strftime('%d.%m.%Y') if n.date else ''
+        row = ';'.join([
+            date_str,
+            escape_csv_field(n.title),
+            escape_csv_field(n.slug),
+            escape_csv_field(n.content_html),
+            escape_csv_field(n.seo_title),
+            escape_csv_field(n.seo_description),
+            escape_csv_field(n.h1),
+            '1' if n.is_published else '0'
+        ])
+        lines.append(row)
+    content = '\n'.join(lines) + '\n'
+    return Response(
+        content,
+        mimetype='text/csv; charset=utf-8',
+        headers={'Content-Disposition': 'attachment; filename=news_export.csv'}
     )
 
 

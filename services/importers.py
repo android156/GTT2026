@@ -236,16 +236,19 @@ def import_news_csv(file_content):
             try:
                 content = row.get('content', '').strip()
                 date_str = row.get('date', '').strip()
+                title = row.get('title', '').strip()
+                slug = row.get('slug', '').strip()
                 
                 if not content:
                     results['errors'].append(f"Строка {row_num}: пустой контент")
                     continue
                 
-                # Заголовок - первые 50 символов контента
-                title = content[:50] + '...' if len(content) > 50 else content
+                if not title:
+                    title = content[:50] + '...' if len(content) > 50 else content
                 
-                slug = generate_slug(title)
-                slug = make_unique_slug(slug, existing_slugs)
+                if not slug:
+                    slug = generate_slug(title)
+                    slug = make_unique_slug(slug, existing_slugs)
                 
                 try:
                     if date_str:
@@ -255,15 +258,28 @@ def import_news_csv(file_content):
                 except:
                     date = datetime.utcnow().date()
                 
-                news = News(
-                    title=title,
-                    slug=slug,
-                    date=date,
-                    content_html=content,
-                    is_published=True
-                )
-                db.session.add(news)
-                existing_slugs.append(slug)
+                existing = News.query.filter_by(slug=slug).first()
+                if existing:
+                    existing.title = title
+                    existing.date = date
+                    existing.content_html = content
+                    existing.seo_title = row.get('seo_title', '')
+                    existing.seo_description = row.get('seo_description', '')
+                    existing.h1 = row.get('h1', '')
+                    existing.is_published = row.get('is_published', '1').lower() in ['1', 'true', 'yes']
+                else:
+                    news = News(
+                        title=title,
+                        slug=slug,
+                        date=date,
+                        content_html=content,
+                        seo_title=row.get('seo_title', ''),
+                        seo_description=row.get('seo_description', ''),
+                        h1=row.get('h1', ''),
+                        is_published=row.get('is_published', '1').lower() in ['1', 'true', 'yes']
+                    )
+                    db.session.add(news)
+                    existing_slugs.append(slug)
                 
                 results['success'] += 1
             except Exception as e:

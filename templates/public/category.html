@@ -37,7 +37,12 @@
         {% else %}
         <div class="product-line-img placeholder"></div>
         {% endif %}
-        <h3>{{ pl.name }}</h3>
+        <div class="product-line-info">
+            <h3>{{ pl.hero_title if pl.hero_title else pl.name }}</h3>
+            {% if pl.hero_subtitle %}
+            <h5>{{ pl.hero_subtitle }}</h5>
+            {% endif %}
+        </div>
     </a>
     {% endfor %}
 </div>

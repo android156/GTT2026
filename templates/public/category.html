@@ -31,7 +31,10 @@
 <div class="product-lines-grid">
     {% for pl in product_lines %}
     <a href="/{{ category.slug }}/{{ pl.slug }}/" class="product-line-card">
-        {% if pl.image_path %}
+        {% set main_img = pl.get_main_image() %}
+        {% if main_img %}
+        <img src="{{ main_img.image_path }}" alt="{{ pl.name }}" class="product-line-img">
+        {% elif pl.image_path %}
         <img src="{{ pl.image_path }}" alt="{{ pl.name }}" class="product-line-img">
         {% else %}
         <div class="product-line-img placeholder"></div>

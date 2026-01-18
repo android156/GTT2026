@@ -316,10 +316,19 @@ def render_category(category):
                          og=get_og_tags(seo['title'], seo['description']))
 
 
+def get_size_sort_key(size_item):
+    """Extract first number from size_text for numeric sorting (e.g., '110/145' -> 110)"""
+    try:
+        first_part = size_item.size_text.split('/')[0]
+        return int(''.join(c for c in first_part if c.isdigit()) or 0)
+    except (ValueError, AttributeError):
+        return 0
+
 def render_product_line(category, product_line):
     size_items = SizeItem.query.filter_by(
         product_line_id=product_line.id
-    ).order_by(SizeItem.size_text).all()
+    ).all()
+    size_items.sort(key=get_size_sort_key)
     
     gallery_images = ProductLineImage.query.filter_by(
         product_line_id=product_line.id

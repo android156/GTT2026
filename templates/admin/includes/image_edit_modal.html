@@ -323,4 +323,22 @@ document.getElementById('imageEditModal').addEventListener('click', function(e) 
         closeImageModal();
     }
 });
+
+function toggleWatermark(imageId, imageType, noWatermark) {
+    fetch(`/admin/api/image/${imageType}/${imageId}/toggle-watermark/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value
+        },
+        body: JSON.stringify({ no_watermark: noWatermark })
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (!result.success) {
+            alert('Ошибка: ' + result.error);
+        }
+    })
+    .catch(err => alert('Ошибка сохранения'));
+}
 </script>

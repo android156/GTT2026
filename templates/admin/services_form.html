@@ -61,6 +61,9 @@
                     <label title="Главное изображение">
                         <input type="radio" name="main_image_id" value="{{ img.id }}" {% if img.is_main %}checked{% endif %}> Главное
                     </label>
+                    <label title="Без водяного знака" class="watermark-toggle">
+                        <input type="checkbox" onchange="toggleWatermark({{ img.id }}, 'service', this.checked)" {% if img.no_watermark %}checked{% endif %}> Без водяного знака
+                    </label>
                     <label title="Удалить">
                         <input type="checkbox" name="delete_images[]" value="{{ img.id }}"> Удалить
                     </label>

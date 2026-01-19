@@ -82,6 +82,9 @@
                     </div>
                     <div class="gallery-controls">
                         <button type="button" class="btn-edit-image" onclick="openImageEditModal({{ img.id }}, 'home')">SEO / Оптимизация</button>
+                        <label title="Без водяного знака" class="watermark-toggle">
+                            <input type="checkbox" onchange="toggleWatermark({{ img.id }}, 'home', this.checked)" {% if img.no_watermark %}checked{% endif %}> Без водяного знака
+                        </label>
                         <label title="Удалить">
                             <input type="checkbox" name="delete_gallery[]" value="{{ img.id }}"> Удалить
                         </label>

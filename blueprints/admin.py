@@ -1580,3 +1580,30 @@ def api_image_optimize(image_type, image_id):
     info = get_image_info(new_path)
     return jsonify({'success': True, 'new_path': new_path, 'info': info})
 
+
+@admin_bp.route('/api/image/<image_type>/<int:image_id>/toggle-watermark/', methods=['POST'])
+@login_required
+def api_image_toggle_watermark(image_type, image_id):
+    """Toggle no_watermark flag for image."""
+    model_map = {
+        'home': HomeGalleryImage,
+        'service': ServiceImage,
+        'product_line': ProductLineImage
+    }
+    
+    model = model_map.get(image_type)
+    if not model:
+        return jsonify({'error': 'Invalid image type'}), 400
+    
+    img = model.query.get_or_404(image_id)
+    
+    data = request.get_json() if request.is_json else request.form
+    no_watermark = data.get('no_watermark', False)
+    if isinstance(no_watermark, str):
+        no_watermark = no_watermark.lower() in ('true', '1', 'on')
+    
+    img.no_watermark = no_watermark
+    db.session.commit()
+    
+    return jsonify({'success': True, 'no_watermark': img.no_watermark})
+

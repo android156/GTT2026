@@ -115,3 +115,121 @@ def rename_image_file(image_path, new_name):
         return '/' + new_path, None
     except Exception as e:
         return None, str(e)
+
+
+def apply_watermark(image_path, watermark_path, position='center', opacity=0.7, scale=0.3):
+    """
+    Apply watermark to image and return watermarked image bytes.
+    
+    Args:
+        image_path: Path to the original image
+        watermark_path: Path to the watermark image (PNG with transparency recommended)
+        position: Position of watermark - 'center', 'bottom-right', 'bottom-left', 'top-right', 'top-left'
+        opacity: Opacity of the watermark (0.0 - 1.0)
+        scale: Scale factor for watermark relative to image width (0.1 - 1.0)
+    
+    Returns:
+        PIL Image object with watermark applied, or None on error
+    """
+    if not image_path or not watermark_path:
+        return None
+    
+    img_full_path = image_path.lstrip('/')
+    wm_full_path = watermark_path.lstrip('/')
+    
+    if not os.path.exists(img_full_path) or not os.path.exists(wm_full_path):
+        return None
+    
+    try:
+        base_image = Image.open(img_full_path)
+        watermark = Image.open(wm_full_path)
+        
+        if base_image.mode != 'RGBA':
+            base_image = base_image.convert('RGBA')
+        if watermark.mode != 'RGBA':
+            watermark = watermark.convert('RGBA')
+        
+        img_width, img_height = base_image.size
+        wm_width, wm_height = watermark.size
+        
+        target_width = int(img_width * scale)
+        ratio = target_width / wm_width
+        target_height = int(wm_height * ratio)
+        watermark = watermark.resize((target_width, target_height), Image.LANCZOS)
+        wm_width, wm_height = watermark.size
+        
+        if opacity < 1.0:
+            alpha = watermark.split()[3]
+            alpha = alpha.point(lambda p: int(p * opacity))
+            watermark.putalpha(alpha)
+        
+        if position == 'center':
+            x = (img_width - wm_width) // 2
+            y = (img_height - wm_height) // 2
+        elif position == 'bottom-right':
+            x = img_width - wm_width - 20
+            y = img_height - wm_height - 20
+        elif position == 'bottom-left':
+            x = 20
+            y = img_height - wm_height - 20
+        elif position == 'top-right':
+            x = img_width - wm_width - 20
+            y = 20
+        elif position == 'top-left':
+            x = 20
+            y = 20
+        else:
+            x = (img_width - wm_width) // 2
+            y = (img_height - wm_height) // 2
+        
+        transparent_layer = Image.new('RGBA', base_image.size, (0, 0, 0, 0))
+        transparent_layer.paste(watermark, (x, y))
+        result = Image.alpha_composite(base_image, transparent_layer)
+        
+        return result
+    except Exception:
+        return None
+
+
+def get_watermarked_image_bytes(image_path, watermark_path, output_format='JPEG'):
+    """
+    Get watermarked image as bytes for serving via Flask.
+    
+    Args:
+        image_path: Path to the original image
+        watermark_path: Path to the watermark image
+        output_format: Output format ('JPEG', 'PNG', 'WEBP')
+    
+    Returns:
+        Tuple of (bytes, content_type) or (None, None) on error
+    """
+    import io
+    
+    result = apply_watermark(image_path, watermark_path)
+    if result is None:
+        return None, None
+    
+    try:
+        output = io.BytesIO()
+        
+        if output_format.upper() == 'JPEG':
+            if result.mode == 'RGBA':
+                result = result.convert('RGB')
+            result.save(output, 'JPEG', quality=90, optimize=True)
+            content_type = 'image/jpeg'
+        elif output_format.upper() == 'PNG':
+            result.save(output, 'PNG', optimize=True)
+            content_type = 'image/png'
+        elif output_format.upper() == 'WEBP':
+            result.save(output, 'WEBP', quality=90, optimize=True)
+            content_type = 'image/webp'
+        else:
+            if result.mode == 'RGBA':
+                result = result.convert('RGB')
+            result.save(output, 'JPEG', quality=90)
+            content_type = 'image/jpeg'
+        
+        output.seek(0)
+        return output.getvalue(), content_type
+    except Exception:
+        return None, None

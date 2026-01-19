@@ -1381,6 +1381,142 @@ def settings_save():
     return redirect(url_for('admin.settings_list'))
 
 
+from services.image_utils import get_image_info, optimize_image, rename_image_file
 
 
+@admin_bp.route('/api/image/<image_type>/<int:image_id>/info/')
+@login_required
+def api_image_info(image_type, image_id):
+    """Get image info including dimensions and file size."""
+    model_map = {
+        'home': HomeGalleryImage,
+        'service': ServiceImage,
+        'product_line': ProductLineImage
+    }
+    
+    model = model_map.get(image_type)
+    if not model:
+        return jsonify({'error': 'Invalid image type'}), 400
+    
+    img = model.query.get_or_404(image_id)
+    info = get_image_info(img.image_path)
+    
+    return jsonify({
+        'id': img.id,
+        'image_path': img.image_path,
+        'alt_text': img.alt_text or '',
+        'title_text': img.title_text or '',
+        'caption': img.caption or '',
+        'info': info
+    })
+
+
+@admin_bp.route('/api/image/<image_type>/<int:image_id>/update/', methods=['POST'])
+@login_required
+def api_image_update(image_type, image_id):
+    """Update image SEO fields."""
+    model_map = {
+        'home': HomeGalleryImage,
+        'service': ServiceImage,
+        'product_line': ProductLineImage
+    }
+    
+    model = model_map.get(image_type)
+    if not model:
+        return jsonify({'error': 'Invalid image type'}), 400
+    
+    img = model.query.get_or_404(image_id)
+    
+    data = request.get_json() if request.is_json else request.form
+    
+    if 'alt_text' in data:
+        img.alt_text = data['alt_text']
+    if 'title_text' in data:
+        img.title_text = data['title_text']
+    if 'caption' in data:
+        img.caption = data['caption']
+    
+    db.session.commit()
+    return jsonify({'success': True})
+
+
+@admin_bp.route('/api/image/<image_type>/<int:image_id>/rename/', methods=['POST'])
+@login_required
+def api_image_rename(image_type, image_id):
+    """Rename image file."""
+    model_map = {
+        'home': HomeGalleryImage,
+        'service': ServiceImage,
+        'product_line': ProductLineImage
+    }
+    
+    model = model_map.get(image_type)
+    if not model:
+        return jsonify({'error': 'Invalid image type'}), 400
+    
+    img = model.query.get_or_404(image_id)
+    
+    data = request.get_json() if request.is_json else request.form
+    new_name = data.get('new_name', '').strip()
+    
+    if not new_name:
+        return jsonify({'error': 'New name is required'}), 400
+    
+    new_path, error = rename_image_file(img.image_path, new_name)
+    if error:
+        return jsonify({'error': error}), 400
+    
+    img.image_path = new_path
+    db.session.commit()
+    
+    return jsonify({'success': True, 'new_path': new_path})
+
+
+@admin_bp.route('/api/image/<image_type>/<int:image_id>/optimize/', methods=['POST'])
+@login_required
+def api_image_optimize(image_type, image_id):
+    """Optimize image (compress and/or resize)."""
+    model_map = {
+        'home': HomeGalleryImage,
+        'service': ServiceImage,
+        'product_line': ProductLineImage
+    }
+    
+    model = model_map.get(image_type)
+    if not model:
+        return jsonify({'error': 'Invalid image type'}), 400
+    
+    img = model.query.get_or_404(image_id)
+    
+    data = request.get_json() if request.is_json else request.form
+    quality = int(data.get('quality', 85))
+    max_width = int(data.get('max_width', 1920))
+    max_height = int(data.get('max_height', 1920))
+    convert_to_webp = data.get('convert_to_webp', False)
+    if isinstance(convert_to_webp, str):
+        convert_to_webp = convert_to_webp.lower() in ('true', '1', 'on')
+    
+    new_path, error = optimize_image(
+        img.image_path,
+        quality=quality,
+        max_width=max_width,
+        max_height=max_height,
+        convert_to_webp=convert_to_webp
+    )
+    
+    if error:
+        return jsonify({'error': error}), 400
+    
+    if new_path != img.image_path:
+        old_path = img.image_path.lstrip('/')
+        img.image_path = new_path
+        db.session.commit()
+        if os.path.exists(old_path) and new_path.lstrip('/') != old_path:
+            try:
+                os.remove(old_path)
+            except Exception:
+                pass
+    
+    info = get_image_info(new_path)
+    return jsonify({'success': True, 'new_path': new_path, 'info': info})
 

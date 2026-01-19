@@ -57,6 +57,7 @@
                     <button type="button" class="btn-rotate" onclick="rotateImage({{ img.id }}, 90)" title="Повернуть вправо">↻</button>
                 </div>
                 <div class="gallery-controls">
+                    <button type="button" class="btn-edit-image" onclick="openImageEditModal({{ img.id }}, 'service')">SEO / Оптимизация</button>
                     <label title="Главное изображение">
                         <input type="radio" name="main_image_id" value="{{ img.id }}" {% if img.is_main %}checked{% endif %}> Главное
                     </label>
@@ -203,6 +204,18 @@
 .rotation-deg { font-size: 11px; color: #666; min-width: 30px; text-align: center; }
 .gallery-controls { margin-top: 8px; font-size: 12px; }
 .gallery-controls label { display: block; margin: 5px 0; cursor: pointer; }
+.btn-edit-image {
+    padding: 4px 8px;
+    font-size: 11px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    margin-bottom: 5px;
+    width: 100%;
+}
+.btn-edit-image:hover { background: #0056b3; }
 
 .wysiwyg-toolbar {
     display: flex;
@@ -372,4 +385,6 @@ function rotateImage(imageId, degrees) {
     .catch(err => alert('Ошибка сети'));
 }
 </script>
+
+{% include 'admin/includes/image_edit_modal.html' %}
 {% endblock %}

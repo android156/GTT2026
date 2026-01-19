@@ -81,6 +81,7 @@
                         <button type="button" class="btn-rotate" onclick="rotateGalleryImage({{ img.id }}, 90)" title="Повернуть вправо">↻</button>
                     </div>
                     <div class="gallery-controls">
+                        <button type="button" class="btn-edit-image" onclick="openImageEditModal({{ img.id }}, 'home')">SEO / Оптимизация</button>
                         <label title="Удалить">
                             <input type="checkbox" name="delete_gallery[]" value="{{ img.id }}"> Удалить
                         </label>
@@ -188,6 +189,18 @@
 .rotation-deg { font-size: 11px; color: #666; min-width: 30px; text-align: center; }
 .gallery-controls { margin-top: 8px; font-size: 12px; }
 .gallery-controls label { display: block; margin: 5px 0; cursor: pointer; }
+.btn-edit-image {
+    padding: 4px 8px;
+    font-size: 11px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    margin-bottom: 5px;
+    width: 100%;
+}
+.btn-edit-image:hover { background: #0056b3; }
 </style>
 
 <script>
@@ -215,5 +228,7 @@ function rotateGalleryImage(imageId, degrees) {
     .catch(err => alert('Ошибка сети'));
 }
 </script>
+
+{% include 'admin/includes/image_edit_modal.html' %}
 {% endif %}
 {% endblock %}

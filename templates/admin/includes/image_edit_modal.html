@@ -1,0 +1,326 @@
+<div id="imageEditModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Редактирование изображения</h3>
+            <button type="button" class="modal-close" onclick="closeImageModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="image-preview-section">
+                <img id="modalImagePreview" src="" alt="">
+                <div class="image-info" id="modalImageInfo">
+                    <span id="modalDimensions"></span>
+                    <span id="modalFileSize"></span>
+                    <span id="modalFormat"></span>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Alt текст (для SEO)</label>
+                <input type="text" id="modalAltText" class="form-control" placeholder="Описание изображения для поисковиков">
+                <small class="form-text text-muted">Важно для SEO - опишите, что изображено на картинке</small>
+            </div>
+            
+            <div class="form-group">
+                <label>Title (при наведении)</label>
+                <input type="text" id="modalTitleText" class="form-control" placeholder="Текст при наведении курсора">
+            </div>
+            
+            <div class="form-group">
+                <label>Подпись (caption)</label>
+                <textarea id="modalCaption" class="form-control" rows="2" placeholder="Подпись к изображению"></textarea>
+            </div>
+            
+            <hr>
+            <h4>Переименование файла</h4>
+            <div class="form-group">
+                <label>Новое имя файла (без расширения)</label>
+                <div class="input-with-btn">
+                    <input type="text" id="modalNewFilename" class="form-control" placeholder="seo-friendly-name">
+                    <button type="button" class="btn btn-secondary" onclick="renameImageFile()">Переименовать</button>
+                </div>
+                <small class="form-text text-muted">Текущий файл: <span id="modalCurrentFilename"></span></small>
+            </div>
+            
+            <hr>
+            <h4>Оптимизация изображения</h4>
+            <div class="optimize-controls">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Качество (%)</label>
+                        <input type="number" id="modalQuality" class="form-control" value="85" min="10" max="100">
+                    </div>
+                    <div class="form-group">
+                        <label>Макс. ширина (px)</label>
+                        <input type="number" id="modalMaxWidth" class="form-control" value="1920" min="100">
+                    </div>
+                    <div class="form-group">
+                        <label>Макс. высота (px)</label>
+                        <input type="number" id="modalMaxHeight" class="form-control" value="1920" min="100">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label><input type="checkbox" id="modalConvertWebp"> Конвертировать в WebP</label>
+                    <small class="form-text text-muted">WebP обычно на 25-35% меньше JPEG при том же качестве</small>
+                </div>
+                <button type="button" class="btn btn-warning" onclick="optimizeImage()">Оптимизировать</button>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeImageModal()">Отмена</button>
+            <button type="button" class="btn btn-primary" onclick="saveImageData()">Сохранить</button>
+        </div>
+    </div>
+</div>
+
+<style>
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.6);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.modal-content {
+    background: white;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+}
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid #eee;
+    background: #f8f9fa;
+}
+.modal-header h3 { margin: 0; font-size: 18px; }
+.modal-close {
+    border: none;
+    background: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+    line-height: 1;
+}
+.modal-close:hover { color: #333; }
+.modal-body { padding: 20px; }
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 15px 20px;
+    border-top: 1px solid #eee;
+    background: #f8f9fa;
+}
+.image-preview-section {
+    text-align: center;
+    margin-bottom: 20px;
+}
+.image-preview-section img {
+    max-width: 100%;
+    max-height: 200px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+}
+.image-info {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 10px;
+    font-size: 13px;
+    color: #666;
+}
+.image-info span {
+    background: #f0f0f0;
+    padding: 3px 8px;
+    border-radius: 3px;
+}
+.input-with-btn {
+    display: flex;
+    gap: 10px;
+}
+.input-with-btn input { flex: 1; }
+.optimize-controls .form-row {
+    display: flex;
+    gap: 15px;
+}
+.optimize-controls .form-row .form-group {
+    flex: 1;
+}
+.btn-edit-image {
+    padding: 3px 8px;
+    font-size: 11px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    margin-top: 5px;
+}
+.btn-edit-image:hover { background: #0056b3; }
+.gallery-item .image-meta {
+    font-size: 10px;
+    color: #888;
+    margin-top: 5px;
+    text-align: center;
+}
+</style>
+
+<script>
+let currentImageId = null;
+let currentImageType = null;
+
+function openImageEditModal(imageId, imageType) {
+    currentImageId = imageId;
+    currentImageType = imageType;
+    
+    document.getElementById('imageEditModal').style.display = 'flex';
+    
+    fetch(`/admin/api/image/${imageType}/${imageId}/info/`)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('modalImagePreview').src = data.image_path;
+            document.getElementById('modalAltText').value = data.alt_text || '';
+            document.getElementById('modalTitleText').value = data.title_text || '';
+            document.getElementById('modalCaption').value = data.caption || '';
+            
+            const filename = data.image_path.split('/').pop();
+            document.getElementById('modalCurrentFilename').textContent = filename;
+            document.getElementById('modalNewFilename').value = filename.replace(/\.[^.]+$/, '');
+            
+            if (data.info) {
+                document.getElementById('modalDimensions').textContent = data.info.dimensions;
+                document.getElementById('modalFileSize').textContent = data.info.file_size_str;
+                document.getElementById('modalFormat').textContent = data.info.format;
+            } else {
+                document.getElementById('modalDimensions').textContent = '';
+                document.getElementById('modalFileSize').textContent = '';
+                document.getElementById('modalFormat').textContent = '';
+            }
+        })
+        .catch(err => {
+            alert('Ошибка загрузки данных изображения');
+            closeImageModal();
+        });
+}
+
+function closeImageModal() {
+    document.getElementById('imageEditModal').style.display = 'none';
+    currentImageId = null;
+    currentImageType = null;
+}
+
+function saveImageData() {
+    if (!currentImageId || !currentImageType) return;
+    
+    const data = {
+        alt_text: document.getElementById('modalAltText').value,
+        title_text: document.getElementById('modalTitleText').value,
+        caption: document.getElementById('modalCaption').value
+    };
+    
+    fetch(`/admin/api/image/${currentImageType}/${currentImageId}/update/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            closeImageModal();
+            alert('Данные сохранены');
+        } else {
+            alert('Ошибка: ' + result.error);
+        }
+    })
+    .catch(err => alert('Ошибка сохранения'));
+}
+
+function renameImageFile() {
+    if (!currentImageId || !currentImageType) return;
+    
+    const newName = document.getElementById('modalNewFilename').value.trim();
+    if (!newName) {
+        alert('Введите новое имя файла');
+        return;
+    }
+    
+    fetch(`/admin/api/image/${currentImageType}/${currentImageId}/rename/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value
+        },
+        body: JSON.stringify({ new_name: newName })
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            document.getElementById('modalImagePreview').src = result.new_path;
+            const filename = result.new_path.split('/').pop();
+            document.getElementById('modalCurrentFilename').textContent = filename;
+            alert('Файл переименован');
+            location.reload();
+        } else {
+            alert('Ошибка: ' + result.error);
+        }
+    })
+    .catch(err => alert('Ошибка переименования'));
+}
+
+function optimizeImage() {
+    if (!currentImageId || !currentImageType) return;
+    
+    const data = {
+        quality: parseInt(document.getElementById('modalQuality').value) || 85,
+        max_width: parseInt(document.getElementById('modalMaxWidth').value) || 1920,
+        max_height: parseInt(document.getElementById('modalMaxHeight').value) || 1920,
+        convert_to_webp: document.getElementById('modalConvertWebp').checked
+    };
+    
+    fetch(`/admin/api/image/${currentImageType}/${currentImageId}/optimize/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            document.getElementById('modalImagePreview').src = result.new_path + '?t=' + Date.now();
+            if (result.info) {
+                document.getElementById('modalDimensions').textContent = result.info.dimensions;
+                document.getElementById('modalFileSize').textContent = result.info.file_size_str;
+                document.getElementById('modalFormat').textContent = result.info.format;
+            }
+            const filename = result.new_path.split('/').pop();
+            document.getElementById('modalCurrentFilename').textContent = filename;
+            document.getElementById('modalNewFilename').value = filename.replace(/\.[^.]+$/, '');
+            alert('Изображение оптимизировано');
+        } else {
+            alert('Ошибка: ' + result.error);
+        }
+    })
+    .catch(err => alert('Ошибка оптимизации'));
+}
+
+document.getElementById('imageEditModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeImageModal();
+    }
+});
+</script>

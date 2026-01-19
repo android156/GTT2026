@@ -317,12 +317,14 @@ def render_category(category):
 
 
 def get_size_sort_key(size_item):
-    """Extract first number from size_text for numeric sorting (e.g., '110/145' -> 110)"""
+    """Extract numbers from size_text for numeric sorting (e.g., '110/145' -> (110, 145))"""
     try:
-        first_part = size_item.size_text.split('/')[0]
-        return int(''.join(c for c in first_part if c.isdigit()) or 0)
-    except (ValueError, AttributeError):
-        return 0
+        parts = size_item.size_text.split('/')
+        first = int(''.join(c for c in parts[0] if c.isdigit()) or 0)
+        second = int(''.join(c for c in parts[1] if c.isdigit()) or 0) if len(parts) > 1 else 0
+        return (first, second)
+    except (ValueError, AttributeError, IndexError):
+        return (0, 0)
 
 def render_product_line(category, product_line):
     size_items = SizeItem.query.filter_by(

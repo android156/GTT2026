@@ -1,10 +1,13 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, abort, Response
+from flask import Blueprint, render_template, request, redirect, url_for, flash, abort, Response, send_file, make_response
 from extensions import db
-from models import Page, MenuItem, Category, ProductLine, SizeItem, News, Lead, Setting, Service, SiteSection, HomeGalleryImage, ProductLineImage, AccessoryBlock
+from models import Page, MenuItem, Category, ProductLine, SizeItem, News, Lead, Setting, Service, SiteSection, HomeGalleryImage, ProductLineImage, AccessoryBlock, ServiceImage
 from services.seo import get_page_seo, get_canonical_url, get_og_tags
 from services.schema import generate_product_jsonld, generate_breadcrumb_jsonld, generate_organization_jsonld
+from services.image_utils import get_watermarked_image_bytes
 from config import RESERVED_SLUGS, Config
 from datetime import datetime
+import os
+import io
 
 public_bp = Blueprint('public', __name__)
 
@@ -485,3 +488,61 @@ Disallow: /logout/
 Sitemap: {get_absolute_url('/sitemap.xml')}
 """
     return Response(robots_txt, mimetype='text/plain')
+
+
+@public_bp.route('/wm/<image_type>/<int:image_id>/')
+def watermarked_image(image_type, image_id):
+    """Serve gallery image with watermark applied."""
+    model_map = {
+        'home': HomeGalleryImage,
+        'service': ServiceImage,
+        'product_line': ProductLineImage
+    }
+    
+    model = model_map.get(image_type)
+    if not model:
+        abort(404)
+    
+    img = model.query.get(image_id)
+    if not img:
+        abort(404)
+    
+    if img.no_watermark:
+        full_path = img.image_path.lstrip('/')
+        if os.path.exists(full_path):
+            return send_file(full_path)
+        abort(404)
+    
+    watermark_setting = Setting.query.filter_by(key='WATERMARK_IMAGE').first()
+    if not watermark_setting or not watermark_setting.value:
+        full_path = img.image_path.lstrip('/')
+        if os.path.exists(full_path):
+            return send_file(full_path)
+        abort(404)
+    
+    ext = os.path.splitext(img.image_path)[1].lower()
+    if ext in ('.jpg', '.jpeg'):
+        output_format = 'JPEG'
+    elif ext == '.png':
+        output_format = 'PNG'
+    elif ext == '.webp':
+        output_format = 'WEBP'
+    else:
+        output_format = 'JPEG'
+    
+    image_bytes, content_type = get_watermarked_image_bytes(
+        img.image_path, 
+        watermark_setting.value, 
+        output_format
+    )
+    
+    if image_bytes:
+        response = make_response(image_bytes)
+        response.headers['Content-Type'] = content_type
+        response.headers['Cache-Control'] = 'public, max-age=86400'
+        return response
+    
+    full_path = img.image_path.lstrip('/')
+    if os.path.exists(full_path):
+        return send_file(full_path)
+    abort(404)

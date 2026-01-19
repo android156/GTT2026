@@ -17,6 +17,9 @@ def create_app():
     
     @app.after_request
     def add_header(response):
+        from flask import request
+        if request.path.startswith('/wm/') or request.path.startswith('/static/'):
+            return response
         response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
         response.headers['Pragma'] = 'no-cache'
         response.headers['Expires'] = '0'
@@ -42,6 +45,11 @@ def create_app():
     @app.context_processor
     def inject_now():
         return {'now': datetime.utcnow}
+    
+    @app.template_global()
+    def watermark_url(image_type, image_id):
+        """Generate URL for watermarked gallery image."""
+        return f'/wm/{image_type}/{image_id}/'
     
     @app.errorhandler(404)
     def not_found(e):

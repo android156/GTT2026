@@ -140,7 +140,7 @@
         <div class="gallery-track">
             {% for img in gallery_list %}
             <div class="gallery-slide">
-                <img src="{{ img.image_path }}" alt="{{ img.alt_text or 'Галерея' }}" loading="lazy" style="{% if img.rotation %}transform: rotate({{ img.rotation }}deg);{% endif %}">
+                <img src="{{ watermark_url('home', img.id) }}" alt="{{ img.alt_text or 'Галерея' }}" loading="lazy" style="{% if img.rotation %}transform: rotate({{ img.rotation }}deg);{% endif %}">
             </div>
             {% endfor %}
         </div>

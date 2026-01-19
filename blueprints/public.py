@@ -520,6 +520,9 @@ def watermarked_image(image_type, image_id):
             return send_file(full_path)
         abort(404)
     
+    opacity_setting = Setting.query.filter_by(key='WATERMARK_OPACITY').first()
+    opacity = float(opacity_setting.value) if opacity_setting and opacity_setting.value else 1.0
+    
     ext = os.path.splitext(img.image_path)[1].lower()
     if ext in ('.jpg', '.jpeg'):
         output_format = 'JPEG'
@@ -533,7 +536,8 @@ def watermarked_image(image_type, image_id):
     image_bytes, content_type = get_watermarked_image_bytes(
         img.image_path, 
         watermark_setting.value, 
-        output_format
+        output_format,
+        opacity
     )
     
     if image_bytes:

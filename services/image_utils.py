@@ -188,7 +188,7 @@ def apply_watermark(image_path, watermark_path, opacity=0.4, scale=0.15):
         return None
 
 
-def get_watermarked_image_bytes(image_path, watermark_path, output_format='JPEG'):
+def get_watermarked_image_bytes(image_path, watermark_path, output_format='JPEG', opacity=1.0):
     """
     Get watermarked image as bytes for serving via Flask.
     
@@ -196,13 +196,14 @@ def get_watermarked_image_bytes(image_path, watermark_path, output_format='JPEG'
         image_path: Path to the original image
         watermark_path: Path to the watermark image
         output_format: Output format ('JPEG', 'PNG', 'WEBP')
+        opacity: Opacity of the watermark (0.1 - 1.0)
     
     Returns:
         Tuple of (bytes, content_type) or (None, None) on error
     """
     import io
     
-    result = apply_watermark(image_path, watermark_path)
+    result = apply_watermark(image_path, watermark_path, opacity=opacity)
     if result is None:
         return None, None
     

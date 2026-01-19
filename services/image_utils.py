@@ -117,16 +117,15 @@ def rename_image_file(image_path, new_name):
         return None, str(e)
 
 
-def apply_watermark(image_path, watermark_path, position='center', opacity=0.7, scale=0.3):
+def apply_watermark(image_path, watermark_path, opacity=0.4, scale=0.15):
     """
-    Apply watermark to image and return watermarked image bytes.
+    Apply tiled watermark pattern to image with diagonal offset.
     
     Args:
         image_path: Path to the original image
         watermark_path: Path to the watermark image (PNG with transparency recommended)
-        position: Position of watermark - 'center', 'bottom-right', 'bottom-left', 'top-right', 'top-left'
         opacity: Opacity of the watermark (0.0 - 1.0)
-        scale: Scale factor for watermark relative to image width (0.1 - 1.0)
+        scale: Scale factor for watermark relative to image width (0.1 - 0.5)
     
     Returns:
         PIL Image object with watermark applied, or None on error
@@ -153,6 +152,8 @@ def apply_watermark(image_path, watermark_path, position='center', opacity=0.7, 
         wm_width, wm_height = watermark.size
         
         target_width = int(img_width * scale)
+        if target_width < 50:
+            target_width = 50
         ratio = target_width / wm_width
         target_height = int(wm_height * ratio)
         watermark = watermark.resize((target_width, target_height), Image.LANCZOS)
@@ -163,27 +164,23 @@ def apply_watermark(image_path, watermark_path, position='center', opacity=0.7, 
             alpha = alpha.point(lambda p: int(p * opacity))
             watermark.putalpha(alpha)
         
-        if position == 'center':
-            x = (img_width - wm_width) // 2
-            y = (img_height - wm_height) // 2
-        elif position == 'bottom-right':
-            x = img_width - wm_width - 20
-            y = img_height - wm_height - 20
-        elif position == 'bottom-left':
-            x = 20
-            y = img_height - wm_height - 20
-        elif position == 'top-right':
-            x = img_width - wm_width - 20
-            y = 20
-        elif position == 'top-left':
-            x = 20
-            y = 20
-        else:
-            x = (img_width - wm_width) // 2
-            y = (img_height - wm_height) // 2
-        
         transparent_layer = Image.new('RGBA', base_image.size, (0, 0, 0, 0))
-        transparent_layer.paste(watermark, (x, y))
+        
+        spacing_x = int(wm_width * 1.5)
+        spacing_y = int(wm_height * 1.5)
+        offset_x = int(wm_width * 0.5)
+        
+        row = 0
+        y = -wm_height // 2
+        while y < img_height + wm_height:
+            x_start = (offset_x if row % 2 == 1 else 0) - wm_width // 2
+            x = x_start
+            while x < img_width + wm_width:
+                transparent_layer.paste(watermark, (x, y), watermark)
+                x += spacing_x
+            y += spacing_y
+            row += 1
+        
         result = Image.alpha_composite(base_image, transparent_layer)
         
         return result

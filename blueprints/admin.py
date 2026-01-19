@@ -1381,6 +1381,66 @@ def settings_save():
     return redirect(url_for('admin.settings_list'))
 
 
+@admin_bp.route('/settings/watermark/upload/', methods=['POST'])
+@login_required
+def watermark_upload():
+    file = request.files.get('watermark')
+    if not file or file.filename == '':
+        flash('Файл не выбран', 'error')
+        return redirect(url_for('admin.settings_list'))
+    
+    import os
+    from werkzeug.utils import secure_filename
+    
+    upload_dir = os.path.join('static', 'uploads', 'watermark')
+    os.makedirs(upload_dir, exist_ok=True)
+    
+    ext = os.path.splitext(file.filename)[1].lower()
+    if ext not in ['.png', '.jpg', '.jpeg', '.webp']:
+        flash('Неподдерживаемый формат. Используйте PNG, JPG или WebP', 'error')
+        return redirect(url_for('admin.settings_list'))
+    
+    filename = 'watermark' + ext
+    filepath = os.path.join(upload_dir, filename)
+    
+    old_setting = Setting.query.filter_by(key='WATERMARK_IMAGE').first()
+    if old_setting and old_setting.value:
+        old_path = old_setting.value
+        if os.path.exists(old_path):
+            os.remove(old_path)
+    
+    file.save(filepath)
+    
+    setting = Setting.query.filter_by(key='WATERMARK_IMAGE').first()
+    if setting:
+        setting.value = filepath
+    else:
+        setting = Setting(key='WATERMARK_IMAGE', value=filepath)
+        db.session.add(setting)
+    
+    db.session.commit()
+    flash('Водяной знак загружен', 'success')
+    return redirect(url_for('admin.settings_list'))
+
+
+@admin_bp.route('/settings/watermark/delete/', methods=['POST'])
+@login_required
+def watermark_delete():
+    import os
+    
+    setting = Setting.query.filter_by(key='WATERMARK_IMAGE').first()
+    if setting and setting.value:
+        if os.path.exists(setting.value):
+            os.remove(setting.value)
+        setting.value = ''
+        db.session.commit()
+        flash('Водяной знак удалён', 'success')
+    else:
+        flash('Водяной знак не найден', 'error')
+    
+    return redirect(url_for('admin.settings_list'))
+
+
 from services.image_utils import get_image_info, optimize_image, rename_image_file
 
 

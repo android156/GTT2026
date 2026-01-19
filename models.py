@@ -216,6 +216,7 @@ class ServiceImage(db.Model):
     is_main = db.Column(db.Boolean, default=False)
     sort_order = db.Column(db.Integer, default=0)
     rotation = db.Column(db.Integer, default=0)  # 0, 90, 180, 270 degrees
+    no_watermark = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
@@ -228,6 +229,7 @@ class HomeGalleryImage(db.Model):
     caption = db.Column(db.String(500), default='')
     sort_order = db.Column(db.Integer, default=0)
     rotation = db.Column(db.Integer, default=0)
+    no_watermark = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
@@ -279,6 +281,7 @@ class ProductLineImage(db.Model):
     is_main = db.Column(db.Boolean, default=False)
     sort_order = db.Column(db.Integer, default=0)
     rotation = db.Column(db.Integer, default=0)
+    no_watermark = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 

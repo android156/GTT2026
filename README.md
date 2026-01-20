@@ -1,6 +1,6 @@
 # ГлавТрубТорг - Flask Website
 
-Сайт компании ГлавТрубТорг на Flask с 4-уровневым каталогом, админкой, SEO-оптимизацией и Telegram-ботом.
+Корпоративный сайт компании ГлавТрубТорг на Flask с 4-уровневым каталогом продукции, админкой с полным CRUD, SEO-оптимизацией и Telegram-ботом.
 
 ## Запуск
 
@@ -10,139 +10,289 @@ python app.py
 
 Сайт будет доступен по адресу: http://localhost:5000
 
-## Структура проекта
+## Основные возможности
 
-```
-├── app.py              # Точка входа
-├── config.py           # Конфигурация
-├── extensions.py       # Flask расширения
-├── models.py           # Модели БД
-├── blueprints/
-│   ├── public.py       # Публичные маршруты
-│   ├── admin.py        # Админка
-│   └── redirects.py    # Редиректы
-├── services/
-│   ├── seo.py          # SEO сервисы
-│   ├── schema.py       # JSON-LD микроразметка
-│   ├── slug.py         # Работа со слагами
-│   ├── importers.py    # CSV импорт
-│   └── rag_service.py  # Заглушка RAG
-├── templates/
-│   ├── base.html
-│   ├── public/         # Публичные шаблоны
-│   └── admin/          # Шаблоны админки
-├── static/
-│   └── css/
-├── telegram_bot.py     # Telegram бот (MVP)
-└── tools/
-    └── check_urls.py   # Проверка редиректов
-```
+### Каталог продукции (4 уровня)
+- **Каталог** → **Категория** → **Линейка** → **Типоразмер**
+- Гибкая настройка SEO для каждого уровня
+- Галереи изображений с автопрокруткой
+- Блоки комплектующих для линеек
+- Таблица типоразмеров с ценами и наличием
+
+### Услуги
+- Отдельный раздел с услугами компании
+- Галереи изображений для каждой услуги
+- WYSIWYG редактор контента
+- Hero-баннеры с настраиваемыми заголовками
+
+### Новости
+- Публикация новостей с датой
+- SEO-оптимизация каждой новости
+- Вывод на главной странице
+
+### Статические страницы
+- О компании, Контакты, Цены, Документация
+- Hero-баннеры с изображениями
+- Яндекс.Карта на странице контактов
 
 ## Админка
 
-- URL: /admin/
-- Логин по умолчанию: admin / admin123
+- **URL:** /admin/
+- **Логин по умолчанию:** admin / admin123
 
-### Разделы админки:
-1. Страницы
-2. Меню
-3. Категории
-4. Линейки продукции
-5. Типоразмеры
-6. Новости
-7. Документы
-8. Заявки (Leads)
-9. Редиректы
-10. Настройки
+### Структура меню админки
+
+**Контент:**
+- Страницы (статические)
+- Меню навигации
+- Новости
+- Разделы сайта (главная, каталог, услуги, новости)
+
+**Каталог:**
+- Категории
+- Линейки продукции
+- Типоразмеры
+
+**Услуги:**
+- Список услуг
+
+**Заявки:**
+- Входящие заявки (Leads)
+
+**Настройки:**
+- Общие настройки (контакты, Telegram)
+- Редиректы
+- Документы
+- Водяной знак
+
+## Галереи изображений
+
+### Возможности
+- Загрузка нескольких изображений
+- Drag-and-drop сортировка
+- Автопрокрутка с настраиваемым интервалом (сек)
+- Ручная навигация (стрелки, точки)
+- Поворот изображений на 90° влево/вправо
+
+### SEO-редактирование изображений
+- Редактирование alt, title, caption
+- Оптимизация (сжатие, ресайз до 1920px)
+- Конвертация в WebP
+- Переименование файлов
+- Просмотр информации (размеры, вес, формат)
+
+### Водяные знаки
+- Загрузка PNG с прозрачностью
+- Тайловое размещение по всему изображению
+- Настройка уровня непрозрачности (0.1 - 1.0)
+- Возможность отключить для отдельных изображений
+
+## Hero-баннеры
+
+Настраиваемые баннеры для:
+- Страниц (about, contacts, price, documentation)
+- Категорий каталога
+- Линеек продукции
+- Услуг
+- Разделов сайта (главная, каталог, услуги, новости)
+
+Параметры:
+- Фоновое изображение
+- Заголовок
+- Подзаголовок
 
 ## URL-структура
 
-### Публичные страницы:
-- `/` - Главная
-- `/about/` - О компании
-- `/services/` - Услуги
-- `/price/` - Цены
-- `/documentation/` - Документация
-- `/contacts/` - Контакты
-- `/news/` - Новости
-- `/catalog/` - Каталог (уровень 1)
+### Публичные страницы
+| URL | Описание |
+|-----|----------|
+| `/` | Главная страница |
+| `/about/` | О компании |
+| `/services/` | Список услуг |
+| `/services/<slug>/` | Страница услуги |
+| `/price/` | Цены |
+| `/documentation/` | Документация |
+| `/contacts/` | Контакты (с Яндекс.Картой) |
+| `/news/` | Список новостей |
+| `/news/<slug>/` | Страница новости |
+| `/catalog/` | Каталог (все категории) |
 
-### Каталог (4 уровня):
-- `/<category_slug>/` - Категория
-- `/<category_slug>/<product_slug>/` - Линейка
-- `/<category_slug>/<product_slug>/<size_slug>/` - Типоразмер
+### Каталог (4 уровня)
+| URL | Уровень |
+|-----|---------|
+| `/<category>/` | Категория |
+| `/<category>/<product>/` | Линейка продукции |
+| `/<category>/<product>/<size>/` | Типоразмер |
 
-### Редиректы:
-Старые URL `/catalog/...` автоматически редиректят на новые `/<...>/` с кодом 301.
+### Системные
+| URL | Описание |
+|-----|----------|
+| `/sitemap.xml` | Карта сайта |
+| `/robots.txt` | Правила для роботов |
+| `/wm/<type>/<id>/` | Изображения с водяным знаком |
 
-## Импорт CSV
+## Редиректы
 
-Форматы CSV файлов:
+### Системные (автоматические)
+- `/catalog/xxx/` → `/xxx/` (301)
+- `/xxx` → `/xxx/` (добавление слеша, 301)
 
-### categories.csv
+### Ручные
+- Настраиваются в админке: /admin/redirects/
+- Приоритет над системными редиректами
+- Поддержка кодов 301 и 302
+
+## Импорт/Экспорт CSV
+
+### Импорт
+Разделитель: точка с запятой (;)
+
+**categories.csv:**
 ```
-name,slug,description_html,image_path,seo_title,seo_description,h1,seo_text_html,sort_order,is_active
+name;slug;description_html;image_path;seo_title;seo_description;h1;seo_text_html;sort_order;is_active
 ```
 
-### product_lines.csv
+**product_lines.csv:**
 ```
-category_slug,name,slug,description_html,image_path,seo_title,seo_description,h1,seo_text_html,sort_order,is_active
-```
-
-### size_items.csv
-```
-category_slug,product_slug,size_text,size_slug,sku,price,currency,unit,in_stock,image_path
+category_slug;name;slug;description_html;image_path;seo_title;seo_description;h1;seo_text_html;sort_order;is_active
 ```
 
-### news.csv
+**size_items.csv:**
 ```
-date,title,slug,content_html,seo_title,seo_description,h1,seo_text_html
+category_slug;product_slug;size_text;size_slug;sku;price;currency;unit;in_stock;image_path
 ```
 
-## Настройка редиректов
+**news.csv:**
+```
+date;title;slug;content_html;seo_title;seo_description;h1;seo_text_html
+```
 
-1. В админке: /admin/redirects/
-2. Укажите from_path и to_path (оба должны начинаться с /)
-3. Выберите код (301 или 302)
-4. Ручные редиректы имеют приоритет над системными
+### Экспорт
+Кнопка "Скачать CSV" доступна в списках:
+- Категории
+- Линейки
+- Типоразмеры
+- Новости
+
+## SEO
+
+### Мета-теги
+- title (автогенерация или ручной)
+- description (автогенерация или ручной)
+- canonical URL
+- OpenGraph теги (og:title, og:description, og:image, og:url)
+
+### Микроразметка JSON-LD
+- Product (для линеек и типоразмеров)
+- BreadcrumbList (хлебные крошки)
+- Organization (организация)
+
+### Карта сайта
+- Автоматическая генерация sitemap.xml
+- Все публичные страницы, категории, линейки, типоразмеры, новости, услуги
 
 ## Telegram бот
 
-Для запуска бота:
+### Настройка
+В админке (Настройки) или переменных окружения:
+- `TELEGRAM_TOKEN` — токен от @BotFather
+- `TELEGRAM_CHAT_ID` — ID чата для уведомлений
 
-1. Установите переменные окружения:
-   - `TELEGRAM_TOKEN` - токен бота от @BotFather
-   - `TELEGRAM_CHAT_ID` - ID чата для уведомлений
-
-2. Запустите:
+### Запуск
 ```bash
 python telegram_bot.py
 ```
 
-## SEO
+### Функции
+- Уведомления о новых заявках
+- Базовые команды бота
 
-- Автоматическая генерация title и description
-- Canonical URL на всех страницах
-- OpenGraph теги
-- JSON-LD микроразметка (Product, BreadcrumbList, Organization)
-- sitemap.xml и robots.txt
+## Структура проекта
+
+```
+├── app.py                  # Точка входа, фабрика приложения
+├── config.py               # Конфигурация
+├── extensions.py           # Flask расширения (db, migrate, login)
+├── models.py               # Модели БД (SQLAlchemy)
+├── blueprints/
+│   ├── public.py           # Публичные маршруты
+│   ├── admin.py            # Админка (CRUD)
+│   └── redirects.py        # Обработка редиректов
+├── services/
+│   ├── seo.py              # SEO-функции
+│   ├── schema.py           # JSON-LD микроразметка
+│   ├── slug.py             # Генерация слагов
+│   ├── importers.py        # CSV импорт
+│   └── image_utils.py      # Работа с изображениями, водяные знаки
+├── templates/
+│   ├── base.html           # Базовый шаблон
+│   ├── public/             # Публичные страницы
+│   └── admin/              # Шаблоны админки
+├── static/
+│   ├── css/                # Стили
+│   ├── uploads/            # Загруженные файлы
+│   └── images/             # Статичные изображения
+├── migrations/             # Миграции БД (Flask-Migrate)
+└── telegram_bot.py         # Telegram бот
+```
+
+## Модели базы данных
+
+| Модель | Описание |
+|--------|----------|
+| User | Пользователи админки |
+| Page | Статические страницы |
+| MenuItem | Пункты меню навигации |
+| Category | Категории каталога |
+| ProductLine | Линейки продукции |
+| ProductLineImage | Изображения галереи линейки |
+| SizeItem | Типоразмеры |
+| Service | Услуги |
+| ServiceImage | Изображения галереи услуги |
+| News | Новости |
+| SiteSection | Разделы сайта (главная, каталог и т.д.) |
+| HomeGalleryImage | Изображения галереи главной |
+| AccessoryBlock | Блоки комплектующих |
+| Lead | Входящие заявки |
+| RedirectRule | Правила редиректов |
+| Setting | Общие настройки |
+| DocumentFile | Загруженные документы |
 
 ## Переменные окружения
 
-```
+```env
+# Обязательные
 SECRET_KEY=your-secret-key
-DATABASE_URL=sqlite:///glavtrubtorg.db  # или PostgreSQL URL
+DATABASE_URL=postgresql://user:pass@host:port/dbname
+
+# Админка
 ADMIN_USERNAME=admin
-ADMIN_PASSWORD=admin123
+ADMIN_PASSWORD=your-secure-password
+
+# Telegram (опционально)
 TELEGRAM_TOKEN=your-bot-token
 TELEGRAM_CHAT_ID=your-chat-id
+
+# Сайт
 SITE_URL=https://glavtrubtorg.ru
 ```
 
-## Миграции
+## Миграции БД
 
 ```bash
 flask db init      # Инициализация (один раз)
-flask db migrate   # Создание миграции
+flask db migrate   # Создание миграции после изменений моделей
 flask db upgrade   # Применение миграций
 ```
+
+## Технологии
+
+- **Backend:** Python 3.11, Flask, Flask-SQLAlchemy, Flask-Login, Flask-WTF, Flask-Migrate
+- **Database:** PostgreSQL
+- **Frontend:** Jinja2, CSS (без фреймворков)
+- **Изображения:** Pillow (оптимизация, водяные знаки)
+- **Telegram:** python-telegram-bot
+
+## Лицензия
+
+Проприетарное ПО. Все права защищены.

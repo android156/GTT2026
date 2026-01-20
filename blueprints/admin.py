@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, jsonify, Response
+from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, jsonify, Response, make_response
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.utils import secure_filename
 from extensions import db, login_manager
@@ -1606,4 +1606,54 @@ def api_image_toggle_watermark(image_type, image_id):
     db.session.commit()
     
     return jsonify({'success': True, 'no_watermark': img.no_watermark})
+
+
+from services.backup_service import export_database, import_database
+from datetime import datetime as dt
+
+
+@admin_bp.route('/settings/backup/download/')
+@login_required
+def backup_download():
+    """Download database backup as JSON file."""
+    json_data = export_database()
+    filename = f"glavtrubtorg_backup_{dt.now().strftime('%Y%m%d_%H%M%S')}.json"
+    
+    response = make_response(json_data)
+    response.headers['Content-Type'] = 'application/json'
+    response.headers['Content-Disposition'] = f'attachment; filename="{filename}"'
+    return response
+
+
+@admin_bp.route('/settings/backup/upload/', methods=['POST'])
+@login_required
+def backup_upload():
+    """Upload and restore database from JSON backup."""
+    file = request.files.get('backup_file')
+    if not file or file.filename == '':
+        flash('Файл не выбран', 'error')
+        return redirect(url_for('admin.settings_list'))
+    
+    if not file.filename.endswith('.json'):
+        flash('Разрешены только JSON файлы', 'error')
+        return redirect(url_for('admin.settings_list'))
+    
+    try:
+        json_data = file.read().decode('utf-8')
+    except Exception as e:
+        flash(f'Ошибка чтения файла: {str(e)}', 'error')
+        return redirect(url_for('admin.settings_list'))
+    
+    clear_existing = request.form.get('clear_existing') == 'on'
+    
+    success, result = import_database(json_data, clear_existing=clear_existing)
+    
+    if success:
+        total_imported = sum(r.get('imported', 0) for r in result.values())
+        total_updated = sum(r.get('updated', 0) for r in result.values())
+        flash(f'Импорт завершён: {total_imported} новых, {total_updated} обновлено', 'success')
+    else:
+        flash(f'Ошибка импорта: {result}', 'error')
+    
+    return redirect(url_for('admin.settings_list'))
 

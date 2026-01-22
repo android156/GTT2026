@@ -1,119 +1,196 @@
 {% macro wysiwyg_editor(field_id, field_name, content, rows=10) %}
-<div class="ckeditor-wrapper">
-    <div id="{{ field_id }}_editor" class="ckeditor-container"></div>
-    <textarea name="{{ field_name }}" id="{{ field_id }}" class="ckeditor-hidden" style="display: none;">{{ content }}</textarea>
+<div class="wysiwyg-wrapper">
+    <div class="wysiwyg-toolbar" data-target="{{ field_id }}">
+        <button type="button" onclick="formatText('{{ field_id }}', 'bold')" title="Жирный"><b>B</b></button>
+        <button type="button" onclick="formatText('{{ field_id }}', 'italic')" title="Курсив"><i>I</i></button>
+        <button type="button" onclick="formatText('{{ field_id }}', 'underline')" title="Подчёркнутый"><u>U</u></button>
+        <span class="toolbar-sep"></span>
+        <button type="button" onclick="insertTag('{{ field_id }}', 'h2')" title="Заголовок H2">H2</button>
+        <button type="button" onclick="insertTag('{{ field_id }}', 'h3')" title="Заголовок H3">H3</button>
+        <button type="button" onclick="insertTag('{{ field_id }}', 'p')" title="Абзац">P</button>
+        <button type="button" onclick="insertTag('{{ field_id }}', 'ul')" title="Список">UL</button>
+        <span class="toolbar-sep"></span>
+        <button type="button" onclick="insertLink('{{ field_id }}')" title="Ссылка">Link</button>
+        <button type="button" onclick="insertTable('{{ field_id }}')" title="Таблица">Table</button>
+        <button type="button" onclick="toggleHtmlMode('{{ field_id }}')" title="HTML код">&lt;/&gt;</button>
+    </div>
+    <textarea name="{{ field_name }}" id="{{ field_id }}" class="wysiwyg-textarea" rows="{{ rows }}">{{ content }}</textarea>
 </div>
 {% endmacro %}
 
 {% macro wysiwyg_styles() %}
 <style>
-.ckeditor-wrapper {
+.wysiwyg-wrapper {
     margin-bottom: 15px;
 }
-.ckeditor-container {
+.wysiwyg-toolbar {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    margin-bottom: 0;
+    padding: 8px;
+    background: #f5f5f5;
     border: 1px solid #ccc;
-    border-radius: 4px;
-    min-height: 200px;
+    border-bottom: none;
+    border-radius: 4px 4px 0 0;
 }
-.ckeditor-container .ck-editor__editable {
-    min-height: 200px;
-}
-.ckeditor-container .ck-editor__editable_inline {
-    padding: 15px;
-}
-.ck.ck-editor__main>.ck-editor__editable {
+.wysiwyg-toolbar button {
+    padding: 6px 12px;
+    border: 1px solid #ccc;
     background: white;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 13px;
+    min-width: 32px;
+    transition: background 0.2s;
 }
-.ck.ck-editor__editable:not(.ck-editor__nested-editable).ck-focused {
+.wysiwyg-toolbar button:hover {
+    background: #e9e9e9;
+}
+.toolbar-sep {
+    width: 1px;
+    background: #ccc;
+    margin: 0 4px;
+    align-self: stretch;
+}
+.wysiwyg-textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 0 0 4px 4px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    resize: vertical;
+    min-height: 150px;
+}
+.wysiwyg-textarea:focus {
+    outline: none;
     border-color: #d32f2f;
-    box-shadow: none;
 }
-.ck-content h2 { font-size: 1.5em; margin: 0.8em 0 0.4em; }
-.ck-content h3 { font-size: 1.25em; margin: 0.7em 0 0.35em; }
-.ck-content p { margin: 0.5em 0; line-height: 1.6; }
-.ck-content ul, .ck-content ol { margin: 0.5em 0; padding-left: 1.5em; }
-.ck-content li { margin: 0.25em 0; }
-.ck-content table { border-collapse: collapse; width: 100%; margin: 1em 0; }
-.ck-content table td, .ck-content table th { border: 1px solid #ccc; padding: 8px; }
-.ck-content table th { background: #f5f5f5; font-weight: bold; }
-.ck-content a { color: #d32f2f; text-decoration: underline; }
+.wysiwyg-textarea.html-mode {
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    line-height: 1.4;
+    background: #f8f8f8;
+}
 </style>
 {% endmacro %}
 
 {% macro wysiwyg_scripts() %}
-<script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/classic/ckeditor.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const editorContainers = document.querySelectorAll('.ckeditor-container');
+function formatText(textareaId, format) {
+    const textarea = document.getElementById(textareaId);
+    if (!textarea) return;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selected = textarea.value.substring(start, end);
     
-    editorContainers.forEach(function(container) {
-        const editorId = container.id.replace('_editor', '');
-        const textarea = document.getElementById(editorId);
-        
-        if (!textarea) return;
-        
-        ClassicEditor
-            .create(container, {
-                language: 'ru',
-                toolbar: {
-                    items: [
-                        'heading', '|',
-                        'bold', 'italic', 'underline', 'strikethrough', '|',
-                        'link', '|',
-                        'bulletedList', 'numberedList', '|',
-                        'alignment', '|',
-                        'insertTable', '|',
-                        'undo', 'redo', '|',
-                        'sourceEditing'
-                    ]
-                },
-                heading: {
-                    options: [
-                        { model: 'paragraph', title: 'Параграф', class: 'ck-heading_paragraph' },
-                        { model: 'heading2', view: 'h2', title: 'Заголовок 2', class: 'ck-heading_heading2' },
-                        { model: 'heading3', view: 'h3', title: 'Заголовок 3', class: 'ck-heading_heading3' },
-                        { model: 'heading4', view: 'h4', title: 'Заголовок 4', class: 'ck-heading_heading4' }
-                    ]
-                },
-                table: {
-                    contentToolbar: ['tableColumn', 'tableRow', 'mergeTableCells']
-                },
-                link: {
-                    decorators: {
-                        openInNewTab: {
-                            mode: 'manual',
-                            label: 'Открывать в новой вкладке',
-                            attributes: {
-                                target: '_blank',
-                                rel: 'noopener noreferrer'
-                            }
-                        }
-                    }
-                },
-                initialData: textarea.value
-            })
-            .then(editor => {
-                container.editorInstance = editor;
-                
-                editor.model.document.on('change:data', () => {
-                    textarea.value = editor.getData();
-                });
-                
-                const form = textarea.closest('form');
-                if (form) {
-                    form.addEventListener('submit', () => {
-                        textarea.value = editor.getData();
-                    });
-                }
-            })
-            .catch(error => {
-                console.error('CKEditor initialization error:', error);
-                container.innerHTML = '<textarea name="' + textarea.name + '" id="' + editorId + '" rows="10" style="width: 100%;">' + textarea.value + '</textarea>';
-            });
-    });
-});
+    let tag = '';
+    switch(format) {
+        case 'bold': tag = 'strong'; break;
+        case 'italic': tag = 'em'; break;
+        case 'underline': tag = 'u'; break;
+    }
+    
+    const replacement = '<' + tag + '>' + selected + '</' + tag + '>';
+    textarea.value = textarea.value.substring(0, start) + replacement + textarea.value.substring(end);
+    textarea.focus();
+    textarea.setSelectionRange(start + tag.length + 2, start + tag.length + 2 + selected.length);
+}
+
+function insertTag(textareaId, tag) {
+    const textarea = document.getElementById(textareaId);
+    if (!textarea) return;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selected = textarea.value.substring(start, end);
+    
+    let replacement;
+    if (tag === 'ul') {
+        const items = selected ? selected.split('\n').map(function(line) { return '  <li>' + line + '</li>'; }).join('\n') : '  <li></li>';
+        replacement = '<ul>\n' + items + '\n</ul>';
+    } else {
+        replacement = '<' + tag + '>' + selected + '</' + tag + '>';
+    }
+    
+    textarea.value = textarea.value.substring(0, start) + replacement + textarea.value.substring(end);
+    textarea.focus();
+}
+
+function insertLink(textareaId) {
+    const url = prompt('Введите URL:');
+    if (!url) return;
+    
+    const textarea = document.getElementById(textareaId);
+    if (!textarea) return;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selected = textarea.value.substring(start, end) || 'Текст ссылки';
+    
+    const replacement = '<a href="' + url + '">' + selected + '</a>';
+    textarea.value = textarea.value.substring(0, start) + replacement + textarea.value.substring(end);
+    textarea.focus();
+}
+
+function insertTable(textareaId) {
+    const rows = prompt('Количество строк:', '3');
+    if (!rows) return;
+    const cols = prompt('Количество столбцов:', '3');
+    if (!cols) return;
+    
+    const numRows = parseInt(rows) || 3;
+    const numCols = parseInt(cols) || 3;
+    
+    let table = '<table>\n  <thead>\n    <tr>\n';
+    for (let c = 0; c < numCols; c++) {
+        table += '      <th>Заголовок ' + (c + 1) + '</th>\n';
+    }
+    table += '    </tr>\n  </thead>\n  <tbody>\n';
+    for (let r = 0; r < numRows - 1; r++) {
+        table += '    <tr>\n';
+        for (let c = 0; c < numCols; c++) {
+            table += '      <td></td>\n';
+        }
+        table += '    </tr>\n';
+    }
+    table += '  </tbody>\n</table>';
+    
+    const textarea = document.getElementById(textareaId);
+    if (!textarea) return;
+    const pos = textarea.selectionStart;
+    textarea.value = textarea.value.substring(0, pos) + table + textarea.value.substring(pos);
+    textarea.focus();
+}
+
+function toggleHtmlMode(textareaId) {
+    const textarea = document.getElementById(textareaId);
+    if (!textarea) return;
+    textarea.classList.toggle('html-mode');
+    
+    if (textarea.classList.contains('html-mode')) {
+        const formatted = textarea.value
+            .replace(/></g, '>\n<')
+            .replace(/\n\n+/g, '\n');
+        textarea.value = formatted;
+    }
+}
 </script>
 {% endmacro %}
 
 {% macro wysiwyg_toolbar(field_id) %}
+<div class="wysiwyg-toolbar" data-target="{{ field_id }}">
+    <button type="button" onclick="formatText('{{ field_id }}', 'bold')" title="Жирный"><b>B</b></button>
+    <button type="button" onclick="formatText('{{ field_id }}', 'italic')" title="Курсив"><i>I</i></button>
+    <button type="button" onclick="formatText('{{ field_id }}', 'underline')" title="Подчёркнутый"><u>U</u></button>
+    <span class="toolbar-sep"></span>
+    <button type="button" onclick="insertTag('{{ field_id }}', 'h2')" title="Заголовок H2">H2</button>
+    <button type="button" onclick="insertTag('{{ field_id }}', 'h3')" title="Заголовок H3">H3</button>
+    <button type="button" onclick="insertTag('{{ field_id }}', 'p')" title="Абзац">P</button>
+    <button type="button" onclick="insertTag('{{ field_id }}', 'ul')" title="Список">UL</button>
+    <span class="toolbar-sep"></span>
+    <button type="button" onclick="insertLink('{{ field_id }}')" title="Ссылка">Link</button>
+    <button type="button" onclick="insertTable('{{ field_id }}')" title="Таблица">Table</button>
+    <button type="button" onclick="toggleHtmlMode('{{ field_id }}')" title="HTML код">&lt;/&gt;</button>
+</div>
 {% endmacro %}

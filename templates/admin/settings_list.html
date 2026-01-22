@@ -84,8 +84,8 @@
     <h3>Резервное копирование</h3>
     <p style="color: #666; margin-bottom: 15px;">Экспорт и импорт всех данных сайта (страницы, категории, линейки, типоразмеры, услуги, новости, настройки и т.д.) в формате JSON.</p>
     
-    <div style="display: flex; gap: 30px; flex-wrap: wrap;">
-        <div style="flex: 1; min-width: 250px;">
+    <div style="display: flex; flex-direction: column; gap: 30px;">
+        <div style="min-width: 250px; border-bottom: 1px solid #eee; padding-bottom: 20px;">
             <h4 style="margin-bottom: 10px;">Скачать бэкап</h4>
             <p style="color: #888; font-size: 14px; margin-bottom: 10px;">Скачивает все данные из базы в JSON-файл</p>
             <a href="{{ url_for('admin.backup_download') }}" class="btn btn-primary">
@@ -93,7 +93,7 @@
             </a>
         </div>
         
-        <div style="flex: 1; min-width: 250px;">
+        <div style="min-width: 250px;">
             <h4 style="margin-bottom: 10px;">Загрузить бэкап</h4>
             <p style="color: #888; font-size: 14px; margin-bottom: 10px;">Восстанавливает данные из JSON-файла</p>
             <form method="POST" action="{{ url_for('admin.backup_upload') }}" enctype="multipart/form-data">

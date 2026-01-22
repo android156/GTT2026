@@ -138,7 +138,8 @@ h3 { font-family: var(--font-heading); font-size: 20px; font-weight: 600; margin
 .lead-form .captcha-row input { max-width: 120px; min-width: 80px; flex: 0; text-align: center; }
 .service-lead-form { margin-top: 20px; }
 .service-lead-form .form-row { margin-bottom: 12px; }
-.service-action { background: #f8f9fa; padding: 30px; border-radius: var(--radius-lg); margin: 40px 0; }
+.product-actions .captcha-row { margin-top: 16px; }
+.product-actions button { margin-top: 16px; }
 
 .cta-section { position: relative; padding: 60px 40px; border-radius: var(--radius-lg); color: white; display: grid; grid-template-columns: 1fr 1fr; gap: 50px; align-items: center; margin: 60px 0; background: linear-gradient(135deg, rgba(30,30,30,0.9) 0%, rgba(42,42,42,0.85) 100%), url('/static/images/cta-bg.jpg') center/cover no-repeat; background-color: var(--bg-dark); }
 

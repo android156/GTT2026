@@ -1,4 +1,5 @@
 {% extends 'admin/base.html' %}
+{% from 'admin/_wysiwyg.html' import wysiwyg_editor, wysiwyg_styles, wysiwyg_scripts %}
 {% block title %}{{ 'Редактировать' if block else 'Добавить' }} блок комплектующих{% endblock %}
 {% block page_title %}{{ 'Редактировать' if block else 'Добавить' }} блок комплектующих{% endblock %}
 
@@ -17,18 +18,7 @@
         
         <div class="form-group">
             <label>Описание</label>
-            <div class="wysiwyg-toolbar" data-target="description_html">
-                <button type="button" onclick="formatText('description_html', 'bold')" title="Жирный"><b>B</b></button>
-                <button type="button" onclick="formatText('description_html', 'italic')" title="Курсив"><i>I</i></button>
-                <button type="button" onclick="formatText('description_html', 'underline')" title="Подчёркнутый"><u>U</u></button>
-                <span class="toolbar-sep"></span>
-                <button type="button" onclick="insertTag('description_html', 'p')" title="Абзац">P</button>
-                <button type="button" onclick="insertTag('description_html', 'ul')" title="Список">UL</button>
-                <span class="toolbar-sep"></span>
-                <button type="button" onclick="insertLink('description_html')" title="Ссылка">🔗</button>
-                <button type="button" onclick="toggleHtmlMode('description_html')" title="HTML код">&lt;/&gt;</button>
-            </div>
-            <textarea name="description_html" id="description_html" rows="4" class="wysiwyg-textarea">{{ block.description_html if block else '' }}</textarea>
+            {{ wysiwyg_editor('description_html', 'description_html', block.description_html if block else '') }}
             <small class="hint">Текст перед таблицей комплектующих</small>
         </div>
         
@@ -49,14 +39,7 @@
         
         <div class="form-group">
             <label>Таблица (HTML)</label>
-            <div class="wysiwyg-toolbar" data-target="table_html">
-                <button type="button" onclick="formatText('table_html', 'bold')" title="Жирный"><b>B</b></button>
-                <button type="button" onclick="formatText('table_html', 'italic')" title="Курсив"><i>I</i></button>
-                <span class="toolbar-sep"></span>
-                <button type="button" onclick="insertTable('table_html')" title="Вставить таблицу">⊞ Таблица</button>
-                <button type="button" onclick="toggleHtmlMode('table_html')" title="HTML код">&lt;/&gt;</button>
-            </div>
-            <textarea name="table_html" id="table_html" rows="8" class="wysiwyg-textarea">{{ block.table_html if block else '' }}</textarea>
+            {{ wysiwyg_editor('table_html', 'table_html', block.table_html if block else '') }}
             <small class="hint">HTML-таблица с типоразмерами комплектующих</small>
         </div>
         
@@ -78,124 +61,6 @@
     </form>
 </div>
 
-<style>
-.wysiwyg-toolbar {
-    display: flex;
-    gap: 4px;
-    flex-wrap: wrap;
-    margin-bottom: 5px;
-    padding: 8px;
-    background: #f5f5f5;
-    border: 1px solid #ddd;
-    border-bottom: none;
-    border-radius: 4px 4px 0 0;
-}
-.wysiwyg-toolbar button {
-    padding: 5px 10px;
-    border: 1px solid #ccc;
-    background: white;
-    border-radius: 3px;
-    cursor: pointer;
-    font-size: 12px;
-    min-width: 30px;
-}
-.wysiwyg-toolbar button:hover { background: #e9e9e9; }
-.toolbar-sep {
-    width: 1px;
-    background: #ccc;
-    margin: 0 4px;
-    align-self: stretch;
-}
-.wysiwyg-textarea { 
-    border-radius: 0 0 4px 4px !important; 
-    font-family: monospace;
-}
-</style>
-
-<script>
-function formatText(textareaId, format) {
-    const textarea = document.getElementById(textareaId);
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const selected = textarea.value.substring(start, end);
-    
-    let tag = '';
-    switch(format) {
-        case 'bold': tag = 'strong'; break;
-        case 'italic': tag = 'em'; break;
-        case 'underline': tag = 'u'; break;
-    }
-    
-    const replacement = `<${tag}>${selected}</${tag}>`;
-    textarea.value = textarea.value.substring(0, start) + replacement + textarea.value.substring(end);
-    textarea.focus();
-}
-
-function insertTag(textareaId, tag) {
-    const textarea = document.getElementById(textareaId);
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const selected = textarea.value.substring(start, end);
-    
-    let replacement;
-    if (tag === 'ul') {
-        const items = selected ? selected.split('\n').map(line => `  <li>${line}</li>`).join('\n') : '  <li></li>';
-        replacement = `<ul>\n${items}\n</ul>`;
-    } else {
-        replacement = `<${tag}>${selected}</${tag}>`;
-    }
-    
-    textarea.value = textarea.value.substring(0, start) + replacement + textarea.value.substring(end);
-    textarea.focus();
-}
-
-function insertLink(textareaId) {
-    const url = prompt('Введите URL:');
-    if (!url) return;
-    
-    const textarea = document.getElementById(textareaId);
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const selected = textarea.value.substring(start, end) || 'Текст ссылки';
-    
-    const replacement = `<a href="${url}">${selected}</a>`;
-    textarea.value = textarea.value.substring(0, start) + replacement + textarea.value.substring(end);
-    textarea.focus();
-}
-
-function insertTable(textareaId) {
-    const rows = prompt('Количество строк:', '3');
-    if (!rows) return;
-    const cols = prompt('Количество столбцов:', '3');
-    if (!cols) return;
-    
-    const numRows = parseInt(rows) || 3;
-    const numCols = parseInt(cols) || 3;
-    
-    let table = '<table class="content-table">\n';
-    table += '  <thead>\n    <tr>\n';
-    for (let c = 0; c < numCols; c++) {
-        table += `      <th>Заголовок ${c + 1}</th>\n`;
-    }
-    table += '    </tr>\n  </thead>\n  <tbody>\n';
-    for (let r = 0; r < numRows - 1; r++) {
-        table += '    <tr>\n';
-        for (let c = 0; c < numCols; c++) {
-            table += '      <td></td>\n';
-        }
-        table += '    </tr>\n';
-    }
-    table += '  </tbody>\n</table>';
-    
-    const textarea = document.getElementById(textareaId);
-    const pos = textarea.selectionStart;
-    textarea.value = textarea.value.substring(0, pos) + table + textarea.value.substring(pos);
-    textarea.focus();
-}
-
-function toggleHtmlMode(textareaId) {
-    const textarea = document.getElementById(textareaId);
-    textarea.classList.toggle('html-mode');
-}
-</script>
+{{ wysiwyg_styles() }}
+{{ wysiwyg_scripts() }}
 {% endblock %}

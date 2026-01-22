@@ -1,5 +1,5 @@
 {% extends 'admin/base.html' %}
-{% from 'admin/_wysiwyg.html' import wysiwyg_toolbar, wysiwyg_styles, wysiwyg_scripts %}
+{% from 'admin/_wysiwyg.html' import wysiwyg_editor, wysiwyg_styles, wysiwyg_scripts %}
 {% block title %}{{ 'Редактировать' if category else 'Добавить' }} категорию{% endblock %}
 {% block page_title %}{{ 'Редактировать' if category else 'Добавить' }} категорию{% endblock %}
 
@@ -54,8 +54,7 @@
         </div>
         <div class="form-group">
             <label>SEO текст</label>
-            {{ wysiwyg_toolbar('seo_text_html') }}
-            <textarea name="seo_text_html" id="seo_text_html" rows="4" class="wysiwyg-textarea" placeholder="Дополнительный текст для SEO внизу страницы...">{{ category.seo_text_html if category else '' }}</textarea>
+            {{ wysiwyg_editor('seo_text_html', 'seo_text_html', category.seo_text_html if category else '') }}
             <small class="hint">Текст внизу страницы для поисковой оптимизации</small>
         </div>
         

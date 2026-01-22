@@ -5,6 +5,7 @@ from services.seo import get_page_seo, get_canonical_url, get_og_tags
 from services.schema import generate_product_jsonld, generate_breadcrumb_jsonld, generate_organization_jsonld
 from services.image_utils import get_watermarked_image_bytes
 from services.email_service import send_lead_email
+from services.telegram_service import send_lead_to_telegram
 from services.captcha_service import generate_captcha, verify_captcha, check_honeypot
 from config import RESERVED_SLUGS, Config
 from datetime import datetime
@@ -444,6 +445,7 @@ def submit_lead():
     db.session.commit()
     
     send_lead_email(name, phone, email, message, page_url, utm_params)
+    send_lead_to_telegram(name, phone, email, message, page_url, utm_params)
     
     flash('Заявка успешно отправлена! Мы свяжемся с вами в ближайшее время.', 'success')
     

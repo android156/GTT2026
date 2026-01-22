@@ -47,6 +47,44 @@
         });
     </script>
     {% endif %}
+    {% if page.url_path == 'contacts' or page.url_path == '/contacts/' %}
+    <section class="service-cta-section" id="callback" style="margin-top: 60px;">
+        <div class="cta-content">
+            <div class="cta-info">
+                <h3>Остались вопросы?</h3>
+                <p>Оставьте заявку, и наш специалист свяжется с вами в течение 15 минут.</p>
+            </div>
+        </div>
+        <div class="cta-form-wrapper">
+            <form action="{{ url_for('public.submit_lead') }}" method="POST" class="lead-form service-lead-form" id="contacts-lead-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="message" value="Заявка со страницы контактов">
+                <input type="hidden" name="page_url" value="{{ request.url }}">
+                <input type="hidden" name="utm_source" value="">
+                <input type="hidden" name="utm_medium" value="">
+                <input type="hidden" name="utm_campaign" value="">
+                <input type="hidden" name="utm_term" value="">
+                <input type="hidden" name="utm_content" value="">
+                <input type="hidden" name="captcha_token" id="contacts-captcha-token" value="">
+                <div style="display:none !important;"><input type="text" name="website" tabindex="-1" autocomplete="off"></div>
+                <div class="form-row">
+                    <input type="text" name="name" placeholder="Ваше имя" required>
+                </div>
+                <div class="form-row">
+                    <input type="tel" name="phone" placeholder="Телефон" required>
+                </div>
+                <div class="form-row">
+                    <input type="email" name="email" placeholder="Email">
+                </div>
+                <div class="form-row captcha-row">
+                    <label id="contacts-captcha-question">Загрузка...</label>
+                    <input type="number" name="captcha_answer" placeholder="Ответ" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Отправить заявку</button>
+            </form>
+        </div>
+    </section>
+    {% endif %}
 </div>
 
 {% if seo.seo_text %}

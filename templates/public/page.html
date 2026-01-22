@@ -58,7 +58,6 @@
         <div class="cta-form-wrapper">
             <form action="{{ url_for('public.submit_lead') }}" method="POST" class="lead-form service-lead-form" id="contacts-lead-form">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <input type="hidden" name="message" value="Заявка со страницы контактов">
                 <input type="hidden" name="page_url" value="{{ request.url }}">
                 <input type="hidden" name="utm_source" value="">
                 <input type="hidden" name="utm_medium" value="">
@@ -75,6 +74,9 @@
                 </div>
                 <div class="form-row">
                     <input type="email" name="email" placeholder="Email">
+                </div>
+                <div class="form-row">
+                    <textarea name="message" placeholder="Ваш вопрос или сообщение" style="width: 100%; min-height: 100px; padding: 12px; border: 1px solid var(--border-color); border-radius: var(--radius); margin-bottom: 15px; font-family: inherit;"></textarea>
                 </div>
                 <div class="form-row captcha-row">
                     <label id="contacts-captcha-question">Загрузка...</label>

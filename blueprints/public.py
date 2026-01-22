@@ -1,9 +1,11 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, abort, Response, send_file, make_response
+from flask import Blueprint, render_template, request, redirect, url_for, flash, abort, Response, send_file, make_response, jsonify
 from extensions import db
 from models import Page, MenuItem, Category, ProductLine, SizeItem, News, Lead, Setting, Service, SiteSection, HomeGalleryImage, ProductLineImage, AccessoryBlock, ServiceImage
 from services.seo import get_page_seo, get_canonical_url, get_og_tags
 from services.schema import generate_product_jsonld, generate_breadcrumb_jsonld, generate_organization_jsonld
 from services.image_utils import get_watermarked_image_bytes
+from services.email_service import send_lead_email
+from services.captcha_service import generate_captcha, verify_captcha, check_honeypot
 from config import RESERVED_SLUGS, Config
 from datetime import datetime
 import os
@@ -395,12 +397,40 @@ def render_size_item(category, product_line, size_item):
                          og=get_og_tags(seo['title'], seo['description']))
 
 
+@public_bp.route('/get-captcha/', methods=['GET'])
+def get_captcha():
+    """Generate new captcha for forms."""
+    captcha = generate_captcha()
+    return jsonify(captcha)
+
+
 @public_bp.route('/lead/', methods=['POST'])
 def submit_lead():
+    if not check_honeypot(request.form, 'website'):
+        referer = request.referrer or url_for('public.index')
+        return redirect(referer)
+    
+    captcha_answer = request.form.get('captcha_answer', '')
+    captcha_token = request.form.get('captcha_token', '')
+    
+    if not verify_captcha(captcha_answer, captcha_token):
+        flash('Неверный ответ на проверочный вопрос. Попробуйте ещё раз.', 'error')
+        referer = request.referrer or url_for('public.index')
+        return redirect(referer)
+    
     name = request.form.get('name', '')
     phone = request.form.get('phone', '')
     email = request.form.get('email', '')
     message = request.form.get('message', '')
+    page_url = request.form.get('page_url', request.referrer or '')
+    
+    utm_params = {
+        'utm_source': request.form.get('utm_source', ''),
+        'utm_medium': request.form.get('utm_medium', ''),
+        'utm_campaign': request.form.get('utm_campaign', ''),
+        'utm_term': request.form.get('utm_term', ''),
+        'utm_content': request.form.get('utm_content', ''),
+    }
     
     lead = Lead(
         name=name,
@@ -412,6 +442,8 @@ def submit_lead():
     )
     db.session.add(lead)
     db.session.commit()
+    
+    send_lead_email(name, phone, email, message, page_url, utm_params)
     
     flash('Заявка успешно отправлена! Мы свяжемся с вами в ближайшее время.', 'success')
     

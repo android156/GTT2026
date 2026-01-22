@@ -111,14 +111,26 @@
         
         <div class="product-actions">
             <h3>Оставить заявку</h3>
-            <form action="{{ url_for('public.submit_lead') }}" method="POST" class="lead-form">
+            <form action="{{ url_for('public.submit_lead') }}" method="POST" class="lead-form" id="size-lead-form">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <input type="hidden" name="message" value="Заявка на товар: {{ seo.h1 }}">
+                <input type="hidden" name="page_url" value="{{ request.url }}">
+                <input type="hidden" name="utm_source" value="">
+                <input type="hidden" name="utm_medium" value="">
+                <input type="hidden" name="utm_campaign" value="">
+                <input type="hidden" name="utm_term" value="">
+                <input type="hidden" name="utm_content" value="">
+                <input type="hidden" name="captcha_token" id="size-captcha-token" value="">
+                <div style="display:none !important;"><input type="text" name="website" tabindex="-1" autocomplete="off"></div>
                 <div class="form-row">
                     <input type="text" name="name" placeholder="Ваше имя" required>
                     <input type="tel" name="phone" placeholder="Телефон" required>
                 </div>
                 <input type="email" name="email" placeholder="Email">
+                <div class="form-row captcha-row">
+                    <label id="size-captcha-question">Загрузка...</label>
+                    <input type="number" name="captcha_answer" placeholder="Ответ" required>
+                </div>
                 <button type="submit" class="btn btn-primary">Отправить заявку</button>
             </form>
         </div>

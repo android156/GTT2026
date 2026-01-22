@@ -129,5 +129,75 @@
     {% if product_jsonld %}
     <script type="application/ld+json">{{ product_jsonld|safe }}</script>
     {% endif %}
+    
+    <script>
+    (function() {
+        function getUtmParams() {
+            var params = {};
+            var search = window.location.search.substring(1);
+            if (search) {
+                search.split('&').forEach(function(part) {
+                    var pair = part.split('=');
+                    var key = decodeURIComponent(pair[0]);
+                    if (key.indexOf('utm_') === 0) {
+                        params[key] = pair[1] ? decodeURIComponent(pair[1]) : '';
+                    }
+                });
+            }
+            var stored = sessionStorage.getItem('utm_params');
+            if (stored) {
+                try {
+                    var storedParams = JSON.parse(stored);
+                    for (var k in storedParams) {
+                        if (!params[k]) params[k] = storedParams[k];
+                    }
+                } catch(e) {}
+            }
+            if (Object.keys(params).length > 0) {
+                sessionStorage.setItem('utm_params', JSON.stringify(params));
+            }
+            return params;
+        }
+        
+        function fillUtmFields() {
+            var utm = getUtmParams();
+            document.querySelectorAll('input[name="utm_source"]').forEach(function(el) { el.value = utm.utm_source || ''; });
+            document.querySelectorAll('input[name="utm_medium"]').forEach(function(el) { el.value = utm.utm_medium || ''; });
+            document.querySelectorAll('input[name="utm_campaign"]').forEach(function(el) { el.value = utm.utm_campaign || ''; });
+            document.querySelectorAll('input[name="utm_term"]').forEach(function(el) { el.value = utm.utm_term || ''; });
+            document.querySelectorAll('input[name="utm_content"]').forEach(function(el) { el.value = utm.utm_content || ''; });
+        }
+        
+        function loadCaptcha(questionId, tokenId) {
+            var questionEl = document.getElementById(questionId);
+            var tokenEl = document.getElementById(tokenId);
+            if (!questionEl || !tokenEl) return;
+            
+            fetch('/get-captcha/')
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    questionEl.textContent = 'Решите: ' + data.question + ' = ?';
+                    tokenEl.value = data.token;
+                })
+                .catch(function() {
+                    questionEl.textContent = 'Ошибка загрузки капчи';
+                });
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            fillUtmFields();
+            
+            if (document.getElementById('cta-captcha-question')) {
+                loadCaptcha('cta-captcha-question', 'cta-captcha-token');
+            }
+            if (document.getElementById('size-captcha-question')) {
+                loadCaptcha('size-captcha-question', 'size-captcha-token');
+            }
+            if (document.getElementById('service-captcha-question')) {
+                loadCaptcha('service-captcha-question', 'service-captcha-token');
+            }
+        });
+    })();
+    </script>
 </body>
 </html>

@@ -1,12 +1,13 @@
 {% extends 'base.html' %}
 
 {% block hero %}
-<h1 class="visually-hidden">{{ seo.h1 }}</h1>
-{% set hero_img = size_item.image_path or product_line.image_path or category.image_path or '/static/images/WhatsApp_Image_2019-10-21_at_13.44.44_1766758697538.jpeg' %}
+{% set h1_text = "Труба " ~ seo.h1 %}
+<h1 class="visually-hidden" itemprop="name">{{ h1_text }}</h1>
+{% set hero_img = size_item.image_path or product_line.get_main_image() or category.image_path or '/static/images/WhatsApp_Image_2019-10-21_at_13.44.44_1766758697538.jpeg' %}
 <section class="hero page-hero" style="background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('{{ hero_img }}');">
     <div class="container">
         <div class="hero-content">
-            <div class="hero-main-title">{{ size_item.size_text }}</div>
+            <div class="hero-main-title" itemprop="name">{{ h1_text }}</div>
         </div>
     </div>
 </section>
@@ -23,20 +24,27 @@
     {% endfor %}
 </nav>
 
-<div class="product-detail">
+<div class="product-detail" itemscope itemtype="http://schema.org/Product">
     <div class="product-main">
-        {% if size_item.image_path %}
-        <img src="{{ size_item.image_path }}" alt="{{ seo.h1 }}" class="product-img">
-        {% elif product_line.image_path %}
-        <img src="{{ product_line.image_path }}" alt="{{ seo.h1 }}" class="product-img">
+        {% set main_image = size_item.image_path or product_line.get_main_image() or category.image_path %}
+        {% if main_image %}
+        <img src="{{ main_image }}" alt="{{ h1_text }}" class="product-img" itemprop="image">
         {% else %}
         <div class="product-img placeholder"></div>
         {% endif %}
     </div>
     
     <div class="product-info">
-        <div class="product-title">{{ size_item.size_text }}</div>
+        {% set h1_without_truba = seo.h1 %}
+        {% set seo_desc = product_line.seo_description or '' %}
+        {% if ' — ' in seo_desc %}
+            {% set desc_after_dash = seo_desc.split(' — ', 1)[1] %}
+        {% else %}
+            {% set desc_after_dash = seo_desc %}
+        {% endif %}
+        <div class="product-title seo-text" itemprop="description">{{ h1_without_truba }}{% if desc_after_dash %} — {{ desc_after_dash }}{% endif %}</div>
         
+        <div itemprop="offers" itemscope itemtype="http://schema.org/Offer">
         <table class="product-specs">
             <tr>
                 <th>Размер:</th>
@@ -87,14 +95,20 @@
                         {% if hide_price %}
                         <span class="price-hidden" aria-hidden="true">По запросу</span>
                         <span class="price-seo" style="position:absolute;left:-9999px;visibility:hidden;">
-                            <strong class="price">{{ "%.2f"|format(display_price) }} {{ size_item.currency }}</strong>
+                            <span itemprop="price" content="{{ "%.2f"|format(display_price) }}">{{ "%.2f"|format(display_price) }}</span>
+                            <span itemprop="priceCurrency" content="{{ size_item.currency }}">{{ size_item.currency }}</span>
                         </span>
                         {% else %}
-                        <strong class="price">{{ "%.2f"|format(display_price) }} {{ size_item.currency }}</strong>
+                        <strong class="price">
+                            <span itemprop="price" content="{{ "%.2f"|format(display_price) }}">{{ "%.2f"|format(display_price) }}</span>
+                            <span itemprop="priceCurrency" content="{{ size_item.currency }}">{{ size_item.currency }}</span>
+                        </strong>
                         {% if size_item.unit %} / {{ size_item.unit }}{% endif %}
                         {% endif %}
                     {% else %}
                     По запросу
+                    <meta itemprop="price" content="0">
+                    <meta itemprop="priceCurrency" content="RUB">
                     {% endif %}
                 </td>
             </tr>
@@ -117,12 +131,18 @@
                 <td>{{ size_item.sku or '-' }}</td>
             </tr>
         </table>
+        {% if size_item.in_stock %}
+        <link itemprop="availability" href="http://schema.org/InStock">
+        {% else %}
+        <link itemprop="availability" href="http://schema.org/OutOfStock">
+        {% endif %}
+        </div>
         
         <div class="product-actions">
             <h3>Оставить заявку</h3>
             <form action="{{ url_for('public.submit_lead') }}" method="POST" class="lead-form" id="size-lead-form">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <input type="hidden" name="message" value="Заявка на товар: {{ seo.h1 }}">
+                <input type="hidden" name="message" value="Заявка на товар: {{ h1_text }}">
                 <input type="hidden" name="page_url" value="{{ request.url }}">
                 <input type="hidden" name="utm_source" value="">
                 <input type="hidden" name="utm_medium" value="">

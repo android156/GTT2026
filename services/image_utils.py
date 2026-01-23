@@ -50,8 +50,15 @@ def optimize_image(image_path, quality=85, max_width=1920, max_height=1920, conv
         with Image.open(full_path) as img:
             original_format = img.format
             
-            if img.mode in ('RGBA', 'P') and not convert_to_webp:
-                img = img.convert('RGBA')
+            if img.mode in ('RGBA', 'P'):
+                if convert_to_webp:
+                    white_bg = Image.new('RGB', img.size, (255, 255, 255))
+                    if img.mode == 'P':
+                        img = img.convert('RGBA')
+                    white_bg.paste(img, mask=img.split()[3])
+                    img = white_bg
+                else:
+                    img = img.convert('RGBA')
             else:
                 img = img.convert('RGB')
             

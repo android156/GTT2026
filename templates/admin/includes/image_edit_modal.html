@@ -201,10 +201,14 @@ function openImageEditModal(imageId, imageType) {
                 document.getElementById('modalDimensions').textContent = data.info.dimensions;
                 document.getElementById('modalFileSize').textContent = data.info.file_size_str;
                 document.getElementById('modalFormat').textContent = data.info.format;
+                document.getElementById('modalMaxWidth').value = data.info.width || 1920;
+                document.getElementById('modalMaxHeight').value = data.info.height || 1920;
             } else {
                 document.getElementById('modalDimensions').textContent = '';
                 document.getElementById('modalFileSize').textContent = '';
                 document.getElementById('modalFormat').textContent = '';
+                document.getElementById('modalMaxWidth').value = 1920;
+                document.getElementById('modalMaxHeight').value = 1920;
             }
         })
         .catch(err => {

@@ -31,9 +31,15 @@
 <div class="product-lines-grid">
     {% for pl in product_lines %}
     <a href="/{{ category.slug }}/{{ pl.slug }}/" class="product-line-card">
-        {% set main_img = pl.get_main_image() %}
-        {% if main_img %}
-        <img src="{{ main_img }}" alt="{{ pl.name }}" class="product-line-img">
+        {% set main_img_obj = pl.get_main_image_object() %}
+        {% if main_img_obj %}
+            {% if main_img_obj.no_watermark %}
+        <img src="{{ main_img_obj.image_path }}" alt="{{ main_img_obj.alt or pl.name }}" class="product-line-img">
+            {% else %}
+        <img src="/wm/product_line/{{ main_img_obj.id }}/" alt="{{ main_img_obj.alt or pl.name }}" class="product-line-img">
+            {% endif %}
+        {% elif pl.image_path %}
+        <img src="{{ pl.image_path }}" alt="{{ pl.name }}" class="product-line-img">
         {% else %}
         <div class="product-line-img placeholder"></div>
         {% endif %}

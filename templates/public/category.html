@@ -34,9 +34,9 @@
         {% set main_img_obj = pl.get_main_image_object() %}
         {% if main_img_obj %}
             {% if main_img_obj.no_watermark %}
-        <img src="{{ main_img_obj.image_path }}" alt="{{ main_img_obj.alt or pl.name }}" class="product-line-img">
+        <img src="{{ main_img_obj.image_path }}" alt="{{ main_img_obj.alt_text or pl.name }}" class="product-line-img">
             {% else %}
-        <img src="/wm/product_line/{{ main_img_obj.id }}/" alt="{{ main_img_obj.alt or pl.name }}" class="product-line-img">
+        <img src="/wm/product_line/{{ main_img_obj.id }}/" alt="{{ main_img_obj.alt_text or pl.name }}" class="product-line-img">
             {% endif %}
         {% elif pl.image_path %}
         <img src="{{ pl.image_path }}" alt="{{ pl.name }}" class="product-line-img">

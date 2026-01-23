@@ -88,6 +88,8 @@ class ProductLine(db.Model):
     hero_title = db.Column(db.String(200), default='')
     hero_subtitle = db.Column(db.String(300), default='')
     gallery_interval = db.Column(db.Integer, default=5)
+    discount_percent = db.Column(db.Float, default=0.0)
+    hide_price = db.Column(db.Boolean, default=False)
     sort_order = db.Column(db.Integer, default=0)
     is_active = db.Column(db.Boolean, default=True)
     
@@ -122,6 +124,8 @@ class SizeItem(db.Model):
     unit = db.Column(db.String(20), default='шт')
     in_stock = db.Column(db.Boolean, default=True)
     image_path = db.Column(db.String(300), default='')
+    discount_percent = db.Column(db.Float, nullable=True)
+    hide_price = db.Column(db.Boolean, nullable=True)
     
     # Новые параметры
     pipe_dxs = db.Column(db.String(100), default='')  # Напорная труба DxS, мм
@@ -132,6 +136,28 @@ class SizeItem(db.Model):
     max_len_drum = db.Column(db.String(50), default='')    # Макс. длина на барабане, м
     
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    def get_effective_discount(self):
+        """Возвращает эффективную скидку (из типоразмера или линейки)"""
+        if self.discount_percent is not None:
+            return self.discount_percent
+        return self.product_line.discount_percent if self.product_line else 0.0
+    
+    def get_effective_hide_price(self):
+        """Возвращает эффективный флаг скрытия цены (из типоразмера или линейки)"""
+        if self.hide_price is not None:
+            return self.hide_price
+        return self.product_line.hide_price if self.product_line else False
+    
+    def get_display_price(self):
+        """Возвращает цену с учётом скидки, округлённую до 2 знаков"""
+        if self.price is None or self.price == 0:
+            return 0.0
+        discount = self.get_effective_discount()
+        if discount > 0:
+            discounted = self.price * (1 - discount / 100)
+            return round(discounted, 2)
+        return round(self.price, 2)
     
     __table_args__ = (
         db.UniqueConstraint('product_line_id', 'size_slug', name='uq_sizeitem_productline_slug'),

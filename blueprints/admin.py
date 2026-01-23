@@ -777,6 +777,8 @@ def product_lines_add():
             hero_title=request.form.get('hero_title', '').strip(),
             hero_subtitle=request.form.get('hero_subtitle', '').strip(),
             gallery_interval=int(request.form.get('gallery_interval', 5) or 5),
+            discount_percent=float(request.form.get('discount_percent', 0) or 0),
+            hide_price=request.form.get('hide_price') == 'on',
             sort_order=int(request.form.get('sort_order', 0) or 0),
             is_active=request.form.get('is_active') == 'on'
         )
@@ -818,6 +820,8 @@ def product_lines_edit(id):
         pl.hero_title = request.form.get('hero_title', '').strip()
         pl.hero_subtitle = request.form.get('hero_subtitle', '').strip()
         pl.gallery_interval = int(request.form.get('gallery_interval', 5) or 5)
+        pl.discount_percent = float(request.form.get('discount_percent', 0) or 0)
+        pl.hide_price = request.form.get('hide_price') == 'on'
         pl.sort_order = int(request.form.get('sort_order', 0) or 0)
         pl.is_active = request.form.get('is_active') == 'on'
         
@@ -1022,6 +1026,17 @@ def size_items_add():
         pl = ProductLine.query.get(pl_id)
         size_text = request.form.get('size_text', '').strip()
         
+        discount_str = request.form.get('discount_percent', '').strip()
+        discount_val = float(discount_str) if discount_str else None
+        
+        hide_price_opt = request.form.get('hide_price_option', '')
+        if hide_price_opt == 'show':
+            hide_price_val = False
+        elif hide_price_opt == 'hide':
+            hide_price_val = True
+        else:
+            hide_price_val = None
+        
         si = SizeItem(
             product_line_id=pl_id,
             size_text=size_text,
@@ -1033,6 +1048,8 @@ def size_items_add():
             unit=request.form.get('unit', 'шт'),
             in_stock=request.form.get('in_stock') == 'on',
             image_path=request.form.get('image_path', ''),
+            discount_percent=discount_val,
+            hide_price=hide_price_val,
             pipe_dxs=request.form.get('pipe_dxs', ''),
             pressure=request.form.get('pressure', ''),
             mass_per_m=request.form.get('mass_per_m', ''),
@@ -1059,6 +1076,17 @@ def size_items_edit(id):
         pl = ProductLine.query.get(pl_id)
         size_text = request.form.get('size_text', '').strip()
         
+        discount_str = request.form.get('discount_percent', '').strip()
+        discount_val = float(discount_str) if discount_str else None
+        
+        hide_price_opt = request.form.get('hide_price_option', '')
+        if hide_price_opt == 'show':
+            hide_price_val = False
+        elif hide_price_opt == 'hide':
+            hide_price_val = True
+        else:
+            hide_price_val = None
+        
         si.product_line_id = pl_id
         si.size_text = size_text
         si.size_slug = request.form.get('size_slug', '').strip() or size_text.replace('/', '_')
@@ -1069,6 +1097,8 @@ def size_items_edit(id):
         si.unit = request.form.get('unit', 'шт')
         si.in_stock = request.form.get('in_stock') == 'on'
         si.image_path = request.form.get('image_path', '')
+        si.discount_percent = discount_val
+        si.hide_price = hide_price_val
         si.pipe_dxs = request.form.get('pipe_dxs', '')
         si.pressure = request.form.get('pressure', '')
         si.mass_per_m = request.form.get('mass_per_m', '')

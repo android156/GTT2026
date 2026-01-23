@@ -126,7 +126,7 @@ def rename_image_file(image_path, new_name):
 
 def apply_watermark(image_path, watermark_path, opacity=0.4, scale=0.15):
     """
-    Apply tiled watermark pattern to image with diagonal offset.
+    Apply soft watermark pattern - one watermark per row at random position.
     
     Args:
         image_path: Path to the original image
@@ -137,6 +137,9 @@ def apply_watermark(image_path, watermark_path, opacity=0.4, scale=0.15):
     Returns:
         PIL Image object with watermark applied, or None on error
     """
+    import random
+    import hashlib
+    
     if not image_path or not watermark_path:
         return None
     
@@ -173,20 +176,20 @@ def apply_watermark(image_path, watermark_path, opacity=0.4, scale=0.15):
         
         transparent_layer = Image.new('RGBA', base_image.size, (0, 0, 0, 0))
         
-        spacing_x = int(wm_width * 1.5)
-        spacing_y = int(wm_height * 1.5)
-        offset_x = int(wm_width * 0.5)
+        seed = int(hashlib.md5(image_path.encode()).hexdigest()[:8], 16)
+        random.seed(seed)
         
-        row = 0
-        y = -wm_height // 2
-        while y < img_height + wm_height:
-            x_start = (offset_x if row % 2 == 1 else 0) - wm_width // 2
-            x = x_start
-            while x < img_width + wm_width:
-                transparent_layer.paste(watermark, (x, y), watermark)
-                x += spacing_x
+        spacing_y = int(wm_height * 2.5)
+        
+        y = wm_height // 2
+        while y < img_height - wm_height // 2:
+            max_x = img_width - wm_width
+            if max_x > 0:
+                x = random.randint(0, max_x)
+            else:
+                x = 0
+            transparent_layer.paste(watermark, (x, y), watermark)
             y += spacing_y
-            row += 1
         
         result = Image.alpha_composite(base_image, transparent_layer)
         

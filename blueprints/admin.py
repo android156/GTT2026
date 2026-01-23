@@ -1037,12 +1037,15 @@ def size_items_add():
         else:
             hide_price_val = None
         
+        size_slug = request.form.get('size_slug', '').strip() or size_text.replace('/', '_')
+        auto_sku = f"{pl.slug}-{size_slug}" if pl else size_slug
+        
         si = SizeItem(
             product_line_id=pl_id,
             size_text=size_text,
-            size_slug=request.form.get('size_slug', '').strip() or size_text.replace('/', '_'),
+            size_slug=size_slug,
             full_name=f"{pl.name} {size_text}" if pl else size_text,
-            sku=request.form.get('sku', ''),
+            sku=auto_sku,
             price=float(request.form.get('price', 0) or 0),
             currency=request.form.get('currency', 'RUB'),
             unit=request.form.get('unit', 'шт'),
@@ -1091,7 +1094,7 @@ def size_items_edit(id):
         si.size_text = size_text
         si.size_slug = request.form.get('size_slug', '').strip() or size_text.replace('/', '_')
         si.full_name = f"{pl.name} {size_text}" if pl else size_text
-        si.sku = request.form.get('sku', '')
+        si.sku = f"{pl.slug}-{si.size_slug}" if pl else si.size_slug
         si.price = float(request.form.get('price', 0) or 0)
         si.currency = request.form.get('currency', 'RUB')
         si.unit = request.form.get('unit', 'шт')

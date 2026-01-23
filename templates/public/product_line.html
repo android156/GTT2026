@@ -75,9 +75,16 @@
             <td>{{ si.pressure or '-' }}</td>
             <td>{{ si.max_len_coil or '-' }}</td>
             <td>{{ si.sku or '-' }}</td>
-            <td>
-                {% if si.price %}
-                {{ "%.2f"|format(si.price) }} {{ si.currency }}{% if si.unit %}/{{ si.unit }}{% endif %}
+            <td class="price-cell">
+                {% set display_price = si.get_display_price() %}
+                {% set hide_price = si.get_effective_hide_price() %}
+                {% if display_price > 0 %}
+                    {% if hide_price %}
+                    <span class="price-hidden" aria-hidden="true">По запросу</span>
+                    <span class="price-seo" style="position:absolute;left:-9999px;visibility:hidden;">{{ "%.2f"|format(display_price) }} {{ si.currency }}</span>
+                    {% else %}
+                    <span class="price-visible">{{ "%.2f"|format(display_price) }} {{ si.currency }}{% if si.unit %}/{{ si.unit }}{% endif %}</span>
+                    {% endif %}
                 {% else %}
                 По запросу
                 {% endif %}

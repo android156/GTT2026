@@ -80,10 +80,19 @@
             {% endif %}
             <tr>
                 <th>Цена:</th>
-                <td>
-                    {% if size_item.price %}
-                    <strong class="price">{{ "%.2f"|format(size_item.price) }} {{ size_item.currency }}</strong>
-                    {% if size_item.unit %} / {{ size_item.unit }}{% endif %}
+                <td class="price-cell">
+                    {% set display_price = size_item.get_display_price() %}
+                    {% set hide_price = size_item.get_effective_hide_price() %}
+                    {% if display_price > 0 %}
+                        {% if hide_price %}
+                        <span class="price-hidden" aria-hidden="true">По запросу</span>
+                        <span class="price-seo" style="position:absolute;left:-9999px;visibility:hidden;">
+                            <strong class="price">{{ "%.2f"|format(display_price) }} {{ size_item.currency }}</strong>
+                        </span>
+                        {% else %}
+                        <strong class="price">{{ "%.2f"|format(display_price) }} {{ size_item.currency }}</strong>
+                        {% if size_item.unit %} / {{ size_item.unit }}{% endif %}
+                        {% endif %}
                     {% else %}
                     По запросу
                     {% endif %}

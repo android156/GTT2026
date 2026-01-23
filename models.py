@@ -106,6 +106,16 @@ class ProductLine(db.Model):
             return images_list[0].image_path
         return self.image_path if self.image_path else ''
     
+    def get_main_image_object(self):
+        """Возвращает объект главного изображения галереи (для водяного знака)"""
+        images_list = self.images.order_by('sort_order').all()
+        for img in images_list:
+            if img.is_main:
+                return img
+        if images_list:
+            return images_list[0]
+        return None
+    
     __table_args__ = (
         db.UniqueConstraint('category_id', 'slug', name='uq_productline_category_slug'),
     )

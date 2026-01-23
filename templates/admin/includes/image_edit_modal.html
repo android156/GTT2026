@@ -311,10 +311,8 @@ function optimizeImage() {
                 document.getElementById('modalFileSize').textContent = result.info.file_size_str;
                 document.getElementById('modalFormat').textContent = result.info.format;
             }
-            const filename = result.new_path.split('/').pop();
-            document.getElementById('modalCurrentFilename').textContent = filename;
-            document.getElementById('modalNewFilename').value = filename.replace(/\.[^.]+$/, '');
             alert('Изображение оптимизировано');
+            location.reload();
         } else {
             alert('Ошибка: ' + result.error);
         }

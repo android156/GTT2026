@@ -1609,8 +1609,9 @@ def api_image_optimize(image_type, image_id):
         if os.path.exists(old_path) and new_path.lstrip('/') != old_path:
             try:
                 os.remove(old_path)
-            except Exception:
-                pass
+                current_app.logger.info(f"Deleted old image: {old_path}")
+            except Exception as e:
+                current_app.logger.error(f"Failed to delete old image {old_path}: {e}")
     
     info = get_image_info(new_path)
     return jsonify({'success': True, 'new_path': new_path, 'info': info})

@@ -27,6 +27,7 @@
 <div itemscope itemtype="http://schema.org/Product" class="product-detail">
     <div class="product-main">
         {% set h1_without_truba = seo.h1 %}
+        <div class="product-title" style="font-size: 15px; font-weight: 700; margin-bottom: 16px;">{{ h1_without_truba }}</div>
         {% set main_image = size_item.image_path or product_line.get_main_image() or category.image_path %}
         {% if main_image %}
         <img src="{{ main_image }}" alt="{{ h1_text }}" class="product-img" itemprop="image">
@@ -44,7 +45,6 @@
     </div>
     
     <div class="product-info">
-        <div class="product-title" style="font-size: 15px; font-weight: 700; margin-bottom: 0;">{{ h1_without_truba }}</div>
         <div itemprop="offers" itemscope itemtype="http://schema.org/Offer">
         <table class="product-specs">
             <tr>

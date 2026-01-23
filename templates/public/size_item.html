@@ -26,24 +26,25 @@
 
 <div class="product-detail" itemscope itemtype="http://schema.org/Product">
     <div class="product-main">
+        {% set h1_without_truba = seo.h1 %}
+        <div class="product-title">{{ h1_without_truba }}</div>
         {% set main_image = size_item.image_path or product_line.get_main_image() or category.image_path %}
         {% if main_image %}
         <img src="{{ main_image }}" alt="{{ h1_text }}" class="product-img" itemprop="image">
         {% else %}
         <div class="product-img placeholder"></div>
         {% endif %}
-    </div>
-    
-    <div class="product-info">
-        {% set h1_without_truba = seo.h1 %}
+        
         {% set seo_desc = product_line.seo_description or '' %}
         {% if ' — ' in seo_desc %}
             {% set desc_after_dash = seo_desc.split(' — ', 1)[1] %}
         {% else %}
             {% set desc_after_dash = seo_desc %}
         {% endif %}
-        <div class="product-title seo-text" itemprop="description">{{ h1_without_truba }}{% if desc_after_dash %} — {{ desc_after_dash }}{% endif %}</div>
-        
+        <div class="seo-text" itemprop="description">{{ h1_without_truba }}{% if desc_after_dash %} — {{ desc_after_dash }}{% endif %}</div>
+    </div>
+    
+    <div class="product-info">
         <div itemprop="offers" itemscope itemtype="http://schema.org/Offer">
         <table class="product-specs">
             <tr>

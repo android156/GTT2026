@@ -43,35 +43,72 @@
         </form>
     </div>
     
-    <table>
-        <thead>
-            <tr><th>Категория</th><th>Линейка</th><th>Размер</th><th>Цена</th><th>В наличии</th><th>Действия</th></tr>
-        </thead>
-        <tbody>
-            {% for si in size_items %}
-            <tr>
-                <td>{{ si.product_line.category.name }}</td>
-                <td>{{ si.product_line.name }}</td>
-                <td>{{ si.size_text }}</td>
-                <td>{{ si.price }} {{ si.currency }}</td>
-                <td>{{ 'Да' if si.in_stock else 'Нет' }}</td>
-                <td class="actions">
-                    <a href="{{ url_for('admin.size_items_edit', id=si.id) }}" class="btn btn-sm btn-primary">Изменить</a>
-                    <form action="{{ url_for('admin.size_items_delete', id=si.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Удалить?')">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                        <button type="submit" class="btn btn-sm btn-danger">Удалить</button>
-                    </form>
-                </td>
-            </tr>
-            {% else %}
-            <tr><td colspan="6" style="text-align:center;color:#888;">Нет типоразмеров</td></tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <form id="bulkDeleteForm" action="{{ url_for('admin.size_items_bulk_delete') }}" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="bulk-actions" style="margin-bottom: 10px; display: flex; gap: 10px; align-items: center;">
+            <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                <input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)"> Выбрать все
+            </label>
+            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirmBulkDelete()">Удалить выбранные</button>
+            <span id="selectedCount" style="color: #666;"></span>
+        </div>
+        <table>
+            <thead>
+                <tr><th style="width:30px;"></th><th>Категория</th><th>Линейка</th><th>Размер</th><th>Цена</th><th>В наличии</th><th>Действия</th></tr>
+            </thead>
+            <tbody>
+                {% for si in size_items %}
+                <tr>
+                    <td><input type="checkbox" name="selected_ids[]" value="{{ si.id }}" class="item-checkbox" onchange="updateSelectedCount()"></td>
+                    <td>{{ si.product_line.category.name }}</td>
+                    <td>{{ si.product_line.name }}</td>
+                    <td>{{ si.size_text }}</td>
+                    <td>{{ si.price }} {{ si.currency }}</td>
+                    <td>{{ 'Да' if si.in_stock else 'Нет' }}</td>
+                    <td class="actions">
+                        <a href="{{ url_for('admin.size_items_edit', id=si.id) }}" class="btn btn-sm btn-primary">Изменить</a>
+                        <form action="{{ url_for('admin.size_items_delete', id=si.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Удалить?')">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn btn-sm btn-danger">Удалить</button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="7" style="text-align:center;color:#888;">Нет типоразмеров</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </form>
     <p style="margin-top:10px;color:#666;">Найдено: {{ size_items|length }}</p>
 </div>
 
 <script>
+function toggleSelectAll(checkbox) {
+    const checkboxes = document.querySelectorAll('.item-checkbox');
+    checkboxes.forEach(cb => cb.checked = checkbox.checked);
+    updateSelectedCount();
+}
+
+function updateSelectedCount() {
+    const checked = document.querySelectorAll('.item-checkbox:checked').length;
+    const countSpan = document.getElementById('selectedCount');
+    countSpan.textContent = checked > 0 ? `Выбрано: ${checked}` : '';
+    
+    const selectAll = document.getElementById('selectAll');
+    const total = document.querySelectorAll('.item-checkbox').length;
+    selectAll.checked = checked === total && total > 0;
+    selectAll.indeterminate = checked > 0 && checked < total;
+}
+
+function confirmBulkDelete() {
+    const checked = document.querySelectorAll('.item-checkbox:checked').length;
+    if (checked === 0) {
+        alert('Выберите хотя бы один типоразмер');
+        return false;
+    }
+    return confirm(`Удалить выбранные типоразмеры (${checked} шт.)?`);
+}
+
 function filterByCategory() {
     const categoryId = document.getElementById('categoryFilter').value;
     filterProductLines(categoryId);

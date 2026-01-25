@@ -1127,6 +1127,24 @@ def size_items_delete(id):
     return redirect(url_for('admin.size_items_list'))
 
 
+@admin_bp.route('/size-items/bulk-delete/', methods=['POST'])
+@login_required
+def size_items_bulk_delete():
+    ids = request.form.getlist('selected_ids[]')
+    if ids:
+        count = 0
+        for id_str in ids:
+            si = SizeItem.query.get(int(id_str))
+            if si:
+                db.session.delete(si)
+                count += 1
+        db.session.commit()
+        flash(f'Удалено типоразмеров: {count}', 'success')
+    else:
+        flash('Ничего не выбрано', 'warning')
+    return redirect(url_for('admin.size_items_list'))
+
+
 @admin_bp.route('/size-items/import/', methods=['GET', 'POST'])
 @login_required
 def size_items_import():

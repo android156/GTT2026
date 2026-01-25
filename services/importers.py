@@ -169,7 +169,7 @@ def import_size_items_csv(file_content):
                     results['errors'].append(f"Строка {row_num}: линейка {product_slug} не найдена")
                     continue
                 
-                price_str = row.get('price', '0').strip()
+                price_str = row.get('price', '0').strip().replace(',', '.')
                 try:
                     price = float(price_str) if price_str else 0.0
                 except:

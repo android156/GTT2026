@@ -33,7 +33,15 @@
     <div class="gallery-track">
         {% for img in gallery_images %}
         <div class="gallery-slide {% if loop.first %}active{% endif %}">
-            <img src="{{ watermark_url('product_line', img.id) }}" alt="{{ img.alt_text or product_line.name }}" style="{% if img.rotation %}transform: rotate({{ img.rotation }}deg);{% endif %}">
+            <figure class="gallery-figure">
+                <img src="{{ watermark_url('product_line', img.id) }}" 
+                     alt="{{ img.alt_text or product_line.name }}" 
+                     title="{{ img.title_text or product_line.name }}"
+                     style="{% if img.rotation %}transform: rotate({{ img.rotation }}deg);{% endif %}">
+                {% if img.caption %}
+                <figcaption class="gallery-caption">{{ img.caption }}</figcaption>
+                {% endif %}
+            </figure>
         </div>
         {% endfor %}
     </div>

@@ -41,7 +41,16 @@
             <div class="gallery-track">
                 {% for img in images %}
                 <div class="gallery-slide">
-                    <img src="{{ watermark_url('service', img.id) }}" alt="{{ img.alt_text or service.title }}" loading="lazy" style="{% if img.rotation %}transform: rotate({{ img.rotation }}deg);{% endif %}">
+                    <figure class="gallery-figure">
+                        <img src="{{ watermark_url('service', img.id) }}" 
+                             alt="{{ img.alt_text or service.title }}" 
+                             title="{{ img.title_text or service.title }}"
+                             loading="lazy" 
+                             style="{% if img.rotation %}transform: rotate({{ img.rotation }}deg);{% endif %}">
+                        {% if img.caption %}
+                        <figcaption class="gallery-caption">{{ img.caption }}</figcaption>
+                        {% endif %}
+                    </figure>
                 </div>
                 {% endfor %}
             </div>

@@ -6,8 +6,8 @@
 <div class="card">
     <div class="list-toolbar">
         <div class="toolbar-actions">
-            <a href="{{ url_for('admin.size_items_add') }}" class="btn btn-success">Добавить типоразмер</a>
-            <a href="{{ url_for('admin.size_items_import') }}" class="btn btn-secondary">Импорт CSV</a>
+            <a href="{{ url_for('admin.size_items_add', category_id=selected_category, product_line_id=selected_product_line, search=search) }}" class="btn btn-success">Добавить типоразмер</a>
+            <a href="{{ url_for('admin.size_items_import', category_id=selected_category, product_line_id=selected_product_line, search=search) }}" class="btn btn-secondary">Импорт CSV</a>
             <a href="{{ url_for('admin.csv_export_size_items') }}" class="btn btn-outline">Скачать CSV</a>
         </div>
         <div class="toolbar-search">
@@ -43,7 +43,7 @@
         </form>
     </div>
     
-    <form id="bulkDeleteForm" action="{{ url_for('admin.size_items_bulk_delete') }}" method="POST">
+    <form id="bulkDeleteForm" action="{{ url_for('admin.size_items_bulk_delete', category_id=selected_category, product_line_id=selected_product_line, search=search) }}" method="POST">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="bulk-actions" style="margin-bottom: 10px; display: flex; gap: 10px; align-items: center;">
             <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
@@ -66,8 +66,8 @@
                     <td>{{ si.price }} {{ si.currency }}</td>
                     <td>{{ 'Да' if si.in_stock else 'Нет' }}</td>
                     <td class="actions">
-                        <a href="{{ url_for('admin.size_items_edit', id=si.id) }}" class="btn btn-sm btn-primary">Изменить</a>
-                        <form action="{{ url_for('admin.size_items_delete', id=si.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Удалить?')">
+                        <a href="{{ url_for('admin.size_items_edit', id=si.id, category_id=selected_category, product_line_id=selected_product_line, search=search) }}" class="btn btn-sm btn-primary">Изменить</a>
+                        <form action="{{ url_for('admin.size_items_delete', id=si.id, category_id=selected_category, product_line_id=selected_product_line, search=search) }}" method="POST" style="display:inline;" onsubmit="return confirm('Удалить?')">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <button type="submit" class="btn btn-sm btn-danger">Удалить</button>
                         </form>

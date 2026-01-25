@@ -1065,7 +1065,11 @@ def size_items_add():
         db.session.add(si)
         db.session.commit()
         flash('Типоразмер создан', 'success')
-        return redirect(url_for('admin.size_items_list'))
+        
+        return redirect(url_for('admin.size_items_list', 
+                               category_id=request.args.get('category_id'),
+                               product_line_id=request.args.get('product_line_id'),
+                               search=request.args.get('search')))
     
     return render_template('admin/size_items_form.html', size_item=None, product_lines=product_lines)
 
@@ -1112,7 +1116,11 @@ def size_items_edit(id):
         si.max_len_drum = request.form.get('max_len_drum', '')
         db.session.commit()
         flash('Типоразмер обновлён', 'success')
-        return redirect(url_for('admin.size_items_list'))
+        
+        return redirect(url_for('admin.size_items_list', 
+                               category_id=request.args.get('category_id'),
+                               product_line_id=request.args.get('product_line_id'),
+                               search=request.args.get('search')))
     
     return render_template('admin/size_items_form.html', size_item=si, product_lines=product_lines)
 
@@ -1124,7 +1132,10 @@ def size_items_delete(id):
     db.session.delete(si)
     db.session.commit()
     flash('Типоразмер удалён', 'success')
-    return redirect(url_for('admin.size_items_list'))
+    return redirect(url_for('admin.size_items_list', 
+                           category_id=request.args.get('category_id'),
+                           product_line_id=request.args.get('product_line_id'),
+                           search=request.args.get('search')))
 
 
 @admin_bp.route('/size-items/bulk-delete/', methods=['POST'])
@@ -1142,7 +1153,10 @@ def size_items_bulk_delete():
         flash(f'Удалено типоразмеров: {count}', 'success')
     else:
         flash('Ничего не выбрано', 'warning')
-    return redirect(url_for('admin.size_items_list'))
+    return redirect(url_for('admin.size_items_list', 
+                           category_id=request.args.get('category_id'),
+                           product_line_id=request.args.get('product_line_id'),
+                           search=request.args.get('search')))
 
 
 @admin_bp.route('/size-items/import/', methods=['GET', 'POST'])
@@ -1157,7 +1171,10 @@ def size_items_import():
             if results['errors']:
                 for err in results['errors'][:5]:
                     flash(err, 'danger')
-        return redirect(url_for('admin.size_items_list'))
+        return redirect(url_for('admin.size_items_list', 
+                               category_id=request.args.get('category_id'),
+                               product_line_id=request.args.get('product_line_id'),
+                               search=request.args.get('search')))
     
     return render_template('admin/import_csv.html', entity='типоразмеры', template_type='size_items')
 

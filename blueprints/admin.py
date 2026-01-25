@@ -787,9 +787,10 @@ def product_lines_list():
             )
         )
     
-    pls = query.order_by(Category.name, ProductLine.sort_order).all()
+    # Use query instead of ProductLine.query.filter_by
+    lines = query.order_by(Category.name, ProductLine.sort_order).all()
     return render_template('admin/product_lines_list.html', 
-                           product_lines=pls, 
+                           product_lines=lines, 
                            categories=categories,
                            selected_category=category_id,
                            search=request.args.get('search', ''))

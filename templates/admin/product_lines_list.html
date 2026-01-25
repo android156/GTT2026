@@ -8,7 +8,7 @@
         <div class="toolbar-actions">
             <a href="{{ url_for('admin.product_lines_add') }}" class="btn btn-success">Добавить линейку</a>
             <a href="{{ url_for('admin.product_lines_import') }}" class="btn btn-secondary">Импорт CSV</a>
-            <a href="{{ url_for('admin.csv_export_product_lines') }}" class="btn btn-outline">Скачать CSV</a>
+            <a href="{{ url_for('admin.csv_export_product_lines', search=search, category_id=selected_category) }}" class="btn btn-outline">Скачать CSV</a>
         </div>
         <div class="toolbar-search">
             <form method="GET" class="search-form">

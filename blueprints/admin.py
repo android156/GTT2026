@@ -110,7 +110,11 @@ def escape_csv_field(value):
 @admin_bp.route('/csv-export/categories/')
 @login_required
 def csv_export_categories():
-    categories = Category.query.order_by(Category.sort_order).all()
+    search = request.args.get('search', '', type=str).strip().lower()
+    query = Category.query
+    if search:
+        query = query.filter(Category.name.ilike(f'%{search}%'))
+    categories = query.order_by(Category.sort_order).all()
     lines = ['name;slug;sort_order;is_active;seo_title;seo_description;h1;seo_text_html']
     for c in categories:
         row = ';'.join([
@@ -135,7 +139,22 @@ def csv_export_categories():
 @admin_bp.route('/csv-export/product-lines/')
 @login_required
 def csv_export_product_lines():
-    product_lines = ProductLine.query.join(Category).order_by(Category.sort_order, ProductLine.sort_order).all()
+    category_id = request.args.get('category_id', '', type=str)
+    search = request.args.get('search', '', type=str).strip().lower()
+    
+    query = ProductLine.query.join(Category)
+    
+    if category_id:
+        query = query.filter(ProductLine.category_id == int(category_id))
+    if search:
+        query = query.filter(
+            db.or_(
+                Category.name.ilike(f'%{search}%'),
+                ProductLine.name.ilike(f'%{search}%')
+            )
+        )
+        
+    product_lines = query.order_by(Category.sort_order, ProductLine.sort_order).all()
     lines = ['category_slug;name;slug;sort_order;is_active;seo_title;seo_description;h1;seo_text_html']
     for pl in product_lines:
         row = ';'.join([
@@ -161,7 +180,26 @@ def csv_export_product_lines():
 @admin_bp.route('/csv-export/size-items/')
 @login_required
 def csv_export_size_items():
-    size_items = SizeItem.query.join(ProductLine).join(Category).order_by(
+    category_id = request.args.get('category_id', '', type=str)
+    product_line_id = request.args.get('product_line_id', '', type=str)
+    search = request.args.get('search', '', type=str).strip().lower()
+    
+    query = SizeItem.query.join(ProductLine).join(Category)
+    
+    if category_id:
+        query = query.filter(ProductLine.category_id == int(category_id))
+    if product_line_id:
+        query = query.filter(SizeItem.product_line_id == int(product_line_id))
+    if search:
+        query = query.filter(
+            db.or_(
+                Category.name.ilike(f'%{search}%'),
+                ProductLine.name.ilike(f'%{search}%'),
+                SizeItem.size_text.ilike(f'%{search}%')
+            )
+        )
+        
+    size_items = query.order_by(
         Category.sort_order, ProductLine.sort_order, SizeItem.size_text
     ).all()
     lines = ['category_slug;product_slug;size_text;sku;price;unit;in_stock;pipe_dxs;pressure;mass_per_m;min_bend_radius;max_len_coil;max_len_drum']
@@ -193,7 +231,12 @@ def csv_export_size_items():
 @admin_bp.route('/csv-export/news/')
 @login_required
 def csv_export_news():
-    news_list = News.query.order_by(News.date.desc()).all()
+    search = request.args.get('search', '', type=str).strip().lower()
+    query = News.query
+    if search:
+        query = query.filter(News.title.ilike(f'%{search}%'))
+        
+    news_list = query.order_by(News.date.desc()).all()
     lines = ['date;title;slug;content;seo_title;seo_description;h1;is_published']
     for n in news_list:
         date_str = n.date.strftime('%d.%m.%Y') if n.date else ''

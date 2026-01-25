@@ -8,7 +8,7 @@
         <div class="toolbar-actions">
             <a href="{{ url_for('admin.size_items_add', category_id=selected_category, product_line_id=selected_product_line, search=search) }}" class="btn btn-success">Добавить типоразмер</a>
             <a href="{{ url_for('admin.size_items_import', category_id=selected_category, product_line_id=selected_product_line, search=search) }}" class="btn btn-secondary">Импорт CSV</a>
-            <a href="{{ url_for('admin.csv_export_size_items') }}" class="btn btn-outline">Скачать CSV</a>
+            <a href="{{ url_for('admin.csv_export_size_items', category_id=selected_category, product_line_id=selected_product_line, search=search) }}" class="btn btn-outline">Скачать CSV</a>
         </div>
         <div class="toolbar-search">
             <form method="GET" class="search-form">

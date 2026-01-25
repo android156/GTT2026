@@ -12,6 +12,7 @@
         </div>
         <div class="toolbar-search">
             <form method="GET" class="search-form">
+                <input type="hidden" name="category_id" value="{{ selected_category }}">
                 <input type="text" name="search" value="{{ search }}" placeholder="Поиск по категории и названию..." class="search-input">
                 <button type="submit" class="btn btn-primary btn-sm">Найти</button>
                 {% if search or selected_category %}
@@ -23,7 +24,9 @@
     
     <div class="filters-row">
         <form method="GET" class="filter-form">
+            {% if search %}
             <input type="hidden" name="search" value="{{ search }}">
+            {% endif %}
             <label>Категория:
                 <select name="category_id" onchange="this.form.submit()">
                     <option value="">Все категории</option>

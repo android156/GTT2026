@@ -1042,13 +1042,12 @@ def size_items_list():
         query = query.filter(SizeItem.product_line_id == int(product_line_id))
     
     if search:
-        query = query.filter(
-            db.or_(
-                Category.name.ilike(f'%{search}%'),
-                ProductLine.name.ilike(f'%{search}%'),
-                SizeItem.size_text.ilike(f'%{search}%')
-            )
+        search_filter = db.or_(
+            Category.name.ilike(f'%{search}%'),
+            ProductLine.name.ilike(f'%{search}%'),
+            SizeItem.size_text.ilike(f'%{search}%')
         )
+        query = query.filter(search_filter)
     
     items = query.order_by(Category.name, ProductLine.name, SizeItem.size_text).all()
     return render_template('admin/size_items_list.html', 

@@ -143,13 +143,34 @@ h3 { font-family: var(--font-heading); font-size: 20px; font-weight: 600; margin
 .page-content table th,
 .news-content table th,
 .seo-text table th {
-    background: var(--bg-dark);
-    color: white;
+    background: #000000 !important;
+    color: #ffffff !important;
     font-weight: 600;
     font-size: 14px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     border: none;
+}
+
+.size-items-table td:first-child,
+.content-table td:first-child,
+.accessory-table td:first-child,
+.content-text table td:first-child,
+.page-content table td:first-child,
+.news-content table td:first-child,
+.seo-text table td:first-child {
+    color: var(--primary-color) !important;
+    font-weight: 600;
+}
+
+.size-items-table td:first-child a,
+.content-table td:first-child a,
+.accessory-table td:first-child a,
+.content-text table td:first-child a,
+.page-content table td:first-child a,
+.news-content table td:first-child a,
+.seo-text table td:first-child a {
+    color: var(--primary-color) !important;
 }
 
 .size-items-table tr:hover,

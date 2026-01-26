@@ -527,10 +527,12 @@ Sitemap: {get_absolute_url('/sitemap.xml')}
 @public_bp.route('/wm/<image_type>/<int:image_id>/')
 def watermarked_image(image_type, image_id):
     """Serve gallery image with watermark applied."""
+    from models import HomeGalleryImage, ServiceImage, ProductLineImage, AccessoryImage
     model_map = {
         'home': HomeGalleryImage,
         'service': ServiceImage,
-        'product_line': ProductLineImage
+        'product_line': ProductLineImage,
+        'accessory': AccessoryImage
     }
     
     model = model_map.get(image_type)

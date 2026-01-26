@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.utils import secure_filename
 from extensions import db, login_manager
-from models import User, Page, MenuItem, Category, ProductLine, SizeItem, News, DocumentFile, Lead, RedirectRule, Setting, Service, SiteSection, ServiceImage, HomeGalleryImage, ProductLineImage, AccessoryBlock
+from models import User, Page, MenuItem, Category, ProductLine, SizeItem, News, DocumentFile, Lead, RedirectRule, Setting, Service, SiteSection, ServiceImage, HomeGalleryImage, ProductLineImage, AccessoryBlock, AccessoryImage
 from services.importers import import_categories_csv, import_product_lines_csv, import_size_items_csv, import_news_csv
 from services.slug import generate_slug, is_reserved_slug, validate_slug
 from services.image_uploader import save_uploaded_image, delete_image

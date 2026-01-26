@@ -332,3 +332,19 @@ class AccessoryBlock(db.Model):
     sort_order = db.Column(db.Integer, default=0)
     is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    images = db.relationship('AccessoryImage', backref='accessory_block', lazy='dynamic', cascade='all, delete-orphan')
+
+
+class AccessoryImage(db.Model):
+    __tablename__ = 'accessory_images'
+    id = db.Column(db.Integer, primary_key=True)
+    accessory_block_id = db.Column(db.Integer, db.ForeignKey('accessory_blocks.id'), nullable=False)
+    image_path = db.Column(db.String(300), nullable=False)
+    alt_text = db.Column(db.String(200), default='')
+    title_text = db.Column(db.String(200), default='')
+    caption = db.Column(db.String(500), default='')
+    sort_order = db.Column(db.Integer, default=0)
+    rotation = db.Column(db.Integer, default=0)
+    no_watermark = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)

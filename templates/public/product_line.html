@@ -121,7 +121,22 @@
         {% if block.description_html %}
         <div class="accessory-desc">{{ block.description_html|safe }}</div>
         {% endif %}
-        {% if block.image_path %}
+        {% set acc_images = block.images.order_by('sort_order').all() %}
+        {% if acc_images|length > 0 %}
+        <div class="accessory-gallery">
+            {% for img in acc_images %}
+            <figure class="gallery-figure">
+                <img src="{{ watermark_url('accessory', img.id) }}" 
+                     alt="{{ img.alt_text or block.name }}" 
+                     title="{{ img.title_text or block.name }}"
+                     class="accessory-img">
+                {% if img.caption %}
+                <figcaption class="gallery-caption">{{ img.caption }}</figcaption>
+                {% endif %}
+            </figure>
+            {% endfor %}
+        </div>
+        {% elif block.image_path %}
         <img src="{{ block.image_path }}" alt="{{ block.name }}" class="accessory-img">
         {% endif %}
         {% if block.table_html %}

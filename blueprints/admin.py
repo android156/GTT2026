@@ -964,16 +964,24 @@ def accessory_blocks_add(pl_id):
             sort_order=int(request.form.get('sort_order', 0) or 0),
             is_active=request.form.get('is_active') == 'on'
         )
-        
-        if 'image_file' in request.files:
-            file = request.files['image_file']
-            if file and file.filename:
-                block.image_path = save_uploaded_image(file, 'accessories')
-        
         db.session.add(block)
+        db.session.flush() # Get block.id
+        
+        # Handle gallery images
+        files = request.files.getlist('gallery_images')
+        for file in files:
+            if file and file.filename:
+                img_path = save_uploaded_image(file, 'accessories')
+                if img_path:
+                    aimg = AccessoryImage(
+                        accessory_block_id=block.id,
+                        image_path=img_path
+                    )
+                    db.session.add(aimg)
+        
         db.session.commit()
         flash('Блок комплектующих добавлен', 'success')
-        return redirect(url_for('admin.accessory_blocks_list', pl_id=pl_id))
+        return redirect(url_for('admin.accessory_blocks_edit', id=block.id))
     
     return render_template('admin/accessory_blocks_form.html', product_line=pl, block=None)
 
@@ -991,17 +999,33 @@ def accessory_blocks_edit(id):
         block.sort_order = int(request.form.get('sort_order', 0) or 0)
         block.is_active = request.form.get('is_active') == 'on'
         
-        if request.form.get('delete_image') == 'on':
-            if block.image_path:
-                delete_image(block.image_path)
-            block.image_path = ''
+        # SEO for images
+        for img in block.images:
+            img.alt_text = request.form.get(f'alt_{img.id}', '')
+            img.title_text = request.form.get(f'title_{img.id}', '')
+            img.caption = request.form.get(f'caption_{img.id}', '')
+            img.sort_order = int(request.form.get(f'sort_{img.id}', 0) or 0)
+            img.no_watermark = request.form.get(f'no_wm_{img.id}') == 'on'
+
+        # Delete images
+        delete_ids = request.form.getlist('delete_images[]')
+        for did in delete_ids:
+            img = AccessoryImage.query.get(int(did))
+            if img:
+                delete_image(img.image_path)
+                db.session.delete(img)
         
-        if 'image_file' in request.files:
-            file = request.files['image_file']
+        # Add new images
+        files = request.files.getlist('gallery_images')
+        for file in files:
             if file and file.filename:
-                if block.image_path:
-                    delete_image(block.image_path)
-                block.image_path = save_uploaded_image(file, 'accessories')
+                img_path = save_uploaded_image(file, 'accessories')
+                if img_path:
+                    aimg = AccessoryImage(
+                        accessory_block_id=block.id,
+                        image_path=img_path
+                    )
+                    db.session.add(aimg)
         
         db.session.commit()
         flash('Блок комплектующих обновлен', 'success')

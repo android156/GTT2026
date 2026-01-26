@@ -23,18 +23,29 @@
         </div>
         
         <div class="form-group">
-            <label>Изображение</label>
-            {% if block and block.image_path %}
-            <div class="current-image">
-                <img src="{{ block.image_path }}" alt="" style="max-width: 200px; max-height: 150px;">
-                <div class="form-check" style="margin-top: 10px;">
-                    <input type="checkbox" name="delete_image" id="delete_image">
-                    <label for="delete_image">Удалить изображение</label>
+            <label>Галерея изображений</label>
+            <input type="file" name="gallery_images" multiple accept="image/*" class="form-control">
+            <small class="hint">Выберите одно или несколько изображений. После сохранения вы сможете настроить их SEO-параметры.</small>
+            
+            {% if block and block.images.count() > 0 %}
+            <div class="gallery-admin-grid">
+                {% for img in block.images.order_by('sort_order').all() %}
+                <div class="gallery-admin-item">
+                    <img src="{{ img.image_path }}" alt="">
+                    <div class="gallery-admin-fields">
+                        <input type="text" name="alt_{{ img.id }}" value="{{ img.alt_text }}" placeholder="ALT текст">
+                        <input type="text" name="title_{{ img.id }}" value="{{ img.title_text }}" placeholder="Title текст">
+                        <input type="text" name="caption_{{ img.id }}" value="{{ img.caption }}" placeholder="Подпись">
+                        <div class="row-fields">
+                            <input type="number" name="sort_{{ img.id }}" value="{{ img.sort_order }}" placeholder="Сортировка" style="width: 80px;">
+                            <label><input type="checkbox" name="no_wm_{{ img.id }}" {{ 'checked' if img.no_watermark }}> Без WM</label>
+                            <label class="delete-label"><input type="checkbox" name="delete_images[]" value="{{ img.id }}"> Удалить</label>
+                        </div>
+                    </div>
                 </div>
+                {% endfor %}
             </div>
             {% endif %}
-            <input type="file" name="image_file" accept="image/*">
-            <small class="hint">Изображение комплектующих</small>
         </div>
         
         <div class="form-group">

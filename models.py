@@ -330,10 +330,20 @@ class AccessoryBlock(db.Model):
     image_path = db.Column(db.String(300), default='')
     table_html = db.Column(db.Text, default='')
     sort_order = db.Column(db.Integer, default=0)
+    gallery_interval = db.Column(db.Integer, default=5)
     is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     images = db.relationship('AccessoryImage', backref='accessory_block', lazy='dynamic', cascade='all, delete-orphan')
+
+    def get_main_image(self):
+        main_img = self.images.filter_by(is_main=True).first()
+        if main_img:
+            return main_img.image_path
+        first_img = self.images.order_by(AccessoryImage.sort_order.asc()).first()
+        if first_img:
+            return first_img.image_path
+        return self.image_path
 
 
 class AccessoryImage(db.Model):
@@ -346,5 +356,6 @@ class AccessoryImage(db.Model):
     caption = db.Column(db.String(500), default='')
     sort_order = db.Column(db.Integer, default=0)
     rotation = db.Column(db.Integer, default=0)
+    is_main = db.Column(db.Boolean, default=False)
     no_watermark = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)

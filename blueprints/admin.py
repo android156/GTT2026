@@ -1064,7 +1064,15 @@ def accessory_blocks_edit(id):
         block.description_html = sanitize_html(request.form.get('description_html', ''))
         block.table_html = sanitize_html(request.form.get('table_html', ''))
         block.sort_order = int(request.form.get('sort_order', 0) or 0)
+        block.gallery_interval = int(request.form.get('gallery_interval', 5) or 5)
         block.is_active = request.form.get('is_active') == 'on'
+        
+        main_image_id = request.form.get('main_image_id')
+        if main_image_id:
+            AccessoryImage.query.filter_by(accessory_block_id=block.id).update({'is_main': False})
+            img = AccessoryImage.query.get(int(main_image_id))
+            if img:
+                img.is_main = True
         
         # We need to preserve SEO for existing images because they might be lost 
         # if we only rely on the AJAX modal and don't handle them in the main form submit

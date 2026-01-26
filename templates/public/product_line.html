@@ -123,7 +123,7 @@
         {% endif %}
         {% set acc_images = block.images.order_by('sort_order').all() %}
         {% if acc_images|length > 0 %}
-        <div class="product-gallery accessory-gallery-slider" data-interval="{{ product_line.gallery_interval or 5 }}">
+        <div class="product-gallery accessory-gallery-slider" data-interval="{{ block.gallery_interval or 5 }}">
             <div class="gallery-track">
                 {% for img in acc_images %}
                 <div class="gallery-slide {% if loop.first %}active{% endif %}">

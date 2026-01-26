@@ -1003,6 +1003,31 @@ def accessory_blocks_edit(id):
     block = AccessoryBlock.query.get_or_404(id)
     pl = block.product_line
     
+    # Navigation
+    prev_block = AccessoryBlock.query.filter(
+        AccessoryBlock.product_line_id == pl.id,
+        AccessoryBlock.sort_order < block.sort_order
+    ).order_by(AccessoryBlock.sort_order.desc()).first()
+    
+    if not prev_block:
+        prev_block = AccessoryBlock.query.filter(
+            AccessoryBlock.product_line_id == pl.id,
+            AccessoryBlock.sort_order == block.sort_order,
+            AccessoryBlock.id < block.id
+        ).order_by(AccessoryBlock.id.desc()).first()
+        
+    next_block = AccessoryBlock.query.filter(
+        AccessoryBlock.product_line_id == pl.id,
+        AccessoryBlock.sort_order > block.sort_order
+    ).order_by(AccessoryBlock.sort_order.asc()).first()
+    
+    if not next_block:
+        next_block = AccessoryBlock.query.filter(
+            AccessoryBlock.product_line_id == pl.id,
+            AccessoryBlock.sort_order == block.sort_order,
+            AccessoryBlock.id > block.id
+        ).order_by(AccessoryBlock.id.asc()).first()
+    
     if request.method == 'POST':
         block.name = request.form.get('name', '').strip()
         block.description_html = sanitize_html(request.form.get('description_html', ''))
@@ -1042,7 +1067,11 @@ def accessory_blocks_edit(id):
         flash('Блок комплектующих обновлен', 'success')
         return redirect(url_for('admin.accessory_blocks_list', pl_id=pl.id))
     
-    return render_template('admin/accessory_blocks_form.html', product_line=pl, block=block)
+    return render_template('admin/accessory_blocks_form.html', 
+                           product_line=pl, 
+                           block=block,
+                           prev_id=prev_block.id if prev_block else None,
+                           next_id=next_block.id if next_block else None)
 
 
 @admin_bp.route('/accessories/<int:id>/delete/', methods=['POST'])

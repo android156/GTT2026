@@ -123,18 +123,31 @@
         {% endif %}
         {% set acc_images = block.images.order_by('sort_order').all() %}
         {% if acc_images|length > 0 %}
-        <div class="accessory-gallery">
-            {% for img in acc_images %}
-            <figure class="gallery-figure">
-                <img src="{{ watermark_url('accessory', img.id) }}" 
-                     alt="{{ img.alt_text or block.name }}" 
-                     title="{{ img.title_text or block.name }}"
-                     class="accessory-img">
-                {% if img.caption %}
-                <figcaption class="gallery-caption">{{ img.caption }}</figcaption>
-                {% endif %}
-            </figure>
-            {% endfor %}
+        <div class="product-gallery accessory-gallery-slider" data-interval="{{ product_line.gallery_interval or 5 }}">
+            <div class="gallery-track">
+                {% for img in acc_images %}
+                <div class="gallery-slide {% if loop.first %}active{% endif %}">
+                    <figure class="gallery-figure">
+                        <img src="{{ watermark_url('accessory', img.id) }}" 
+                             alt="{{ img.alt_text or block.name }}" 
+                             title="{{ img.title_text or block.name }}"
+                             style="{% if img.rotation %}transform: rotate({{ img.rotation }}deg);{% endif %}">
+                        {% if img.caption %}
+                        <figcaption class="gallery-caption">{{ img.caption }}</figcaption>
+                        {% endif %}
+                    </figure>
+                </div>
+                {% endfor %}
+            </div>
+            {% if acc_images|length > 1 %}
+            <button class="gallery-btn gallery-prev" aria-label="Предыдущее">&lsaquo;</button>
+            <button class="gallery-btn gallery-next" aria-label="Следующее">&rsaquo;</button>
+            <div class="gallery-dots">
+                {% for img in acc_images %}
+                <span class="gallery-dot {% if loop.first %}active{% endif %}" data-index="{{ loop.index0 }}"></span>
+                {% endfor %}
+            </div>
+            {% endif %}
         </div>
         {% elif block.image_path %}
         <img src="{{ block.image_path }}" alt="{{ block.name }}" class="accessory-img">
@@ -235,33 +248,6 @@
     max-height: 300px;
     border-radius: 4px;
 }
-.accessory-gallery {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    margin-bottom: 15px;
-}
-.accessory-gallery .gallery-figure {
-    flex: 0 0 auto;
-    max-width: 280px;
-    margin: 0;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-.accessory-gallery .gallery-figure img {
-    max-width: 100%;
-    max-height: 200px;
-    border-radius: 4px;
-    display: block;
-}
-.accessory-gallery .gallery-caption {
-    font-size: 13px;
-    color: #666;
-    margin-top: 8px;
-    line-height: 1.4;
-}
 .accessory-table {
     margin: 15px 0;
 }
@@ -269,71 +255,72 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const gallery = document.querySelector('.product-gallery');
-    if (!gallery) return;
+    const galleries = document.querySelectorAll('.product-gallery');
     
-    const track = gallery.querySelector('.gallery-track');
-    const slides = gallery.querySelectorAll('.gallery-slide');
-    const prevBtn = gallery.querySelector('.gallery-prev');
-    const nextBtn = gallery.querySelector('.gallery-next');
-    const dots = gallery.querySelectorAll('.gallery-dot');
-    const interval = parseInt(gallery.dataset.interval) * 1000 || 5000;
-    
-    if (slides.length <= 1) return;
-    
-    let currentIndex = 0;
-    let autoplayTimer;
-    
-    function goToSlide(index) {
-        if (index < 0) index = slides.length - 1;
-        if (index >= slides.length) index = 0;
+    galleries.forEach(gallery => {
+        const track = gallery.querySelector('.gallery-track');
+        const slides = gallery.querySelectorAll('.gallery-slide');
+        const prevBtn = gallery.querySelector('.gallery-prev');
+        const nextBtn = gallery.querySelector('.gallery-next');
+        const dots = gallery.querySelectorAll('.gallery-dot');
+        const interval = parseInt(gallery.dataset.interval) * 1000 || 5000;
         
-        currentIndex = index;
-        track.style.transform = `translateX(-${currentIndex * 100}%)`;
+        if (slides.length <= 1) return;
+        
+        let currentIndex = 0;
+        let autoplayTimer;
+        
+        function goToSlide(index) {
+            if (index < 0) index = slides.length - 1;
+            if (index >= slides.length) index = 0;
+            
+            currentIndex = index;
+            track.style.transform = `translateX(-${currentIndex * 100}%)`;
+            
+            dots.forEach((dot, i) => {
+                dot.classList.toggle('active', i === currentIndex);
+            });
+        }
+        
+        function startAutoplay() {
+            stopAutoplay();
+            autoplayTimer = setInterval(() => {
+                goToSlide(currentIndex + 1);
+            }, interval);
+        }
+        
+        function stopAutoplay() {
+            if (autoplayTimer) {
+                clearInterval(autoplayTimer);
+            }
+        }
+        
+        if (prevBtn) {
+            prevBtn.addEventListener('click', () => {
+                goToSlide(currentIndex - 1);
+                startAutoplay();
+            });
+        }
+        
+        if (nextBtn) {
+            nextBtn.addEventListener('click', () => {
+                goToSlide(currentIndex + 1);
+                startAutoplay();
+            });
+        }
         
         dots.forEach((dot, i) => {
-            dot.classList.toggle('active', i === currentIndex);
+            dot.addEventListener('click', () => {
+                goToSlide(i);
+                startAutoplay();
+            });
         });
-    }
-    
-    function startAutoplay() {
-        stopAutoplay();
-        autoplayTimer = setInterval(() => {
-            goToSlide(currentIndex + 1);
-        }, interval);
-    }
-    
-    function stopAutoplay() {
-        if (autoplayTimer) {
-            clearInterval(autoplayTimer);
-        }
-    }
-    
-    if (prevBtn) {
-        prevBtn.addEventListener('click', () => {
-            goToSlide(currentIndex - 1);
-            startAutoplay();
-        });
-    }
-    
-    if (nextBtn) {
-        nextBtn.addEventListener('click', () => {
-            goToSlide(currentIndex + 1);
-            startAutoplay();
-        });
-    }
-    
-    dots.forEach((dot, i) => {
-        dot.addEventListener('click', () => {
-            goToSlide(i);
-            startAutoplay();
-        });
+        
+        startAutoplay();
+        
+        gallery.addEventListener('mouseenter', stopAutoplay);
+        gallery.addEventListener('mouseleave', startAutoplay);
     });
-    
-    startAutoplay();
-    
-    gallery.addEventListener('mouseenter', stopAutoplay);
-    gallery.addEventListener('mouseleave', startAutoplay);
 });
 </script>
 {% endblock %}

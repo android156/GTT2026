@@ -244,6 +244,17 @@ function saveImageData() {
     .then(result => {
         if (result.success) {
             closeImageModal();
+            // Update hidden fields in the form if they exist
+            const item = document.querySelector(`.gallery-item[data-id="${currentImageId}"]`);
+            if (item) {
+                const altInput = item.querySelector(`input[name="alt_${currentImageId}"]`);
+                const titleInput = item.querySelector(`input[name="title_${currentImageId}"]`);
+                const captionInput = item.querySelector(`input[name="caption_${currentImageId}"]`);
+                
+                if (altInput) altInput.value = data.alt_text;
+                if (titleInput) titleInput.value = data.title_text;
+                if (captionInput) captionInput.value = data.caption;
+            }
             alert('Данные сохранены');
         } else {
             alert('Ошибка: ' + result.error);

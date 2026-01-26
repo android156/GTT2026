@@ -1066,13 +1066,27 @@ def accessory_blocks_edit(id):
         block.sort_order = int(request.form.get('sort_order', 0) or 0)
         block.is_active = request.form.get('is_active') == 'on'
         
-        # SEO for images
+        # We need to preserve SEO for existing images because they might be lost 
+        # if we only rely on the AJAX modal and don't handle them in the main form submit
         for img in block.images:
-            img.alt_text = request.form.get(f'alt_{img.id}', '')
-            img.title_text = request.form.get(f'title_{img.id}', '')
-            img.caption = request.form.get(f'caption_{img.id}', '')
-            img.sort_order = int(request.form.get(f'sort_{img.id}', 0) or 0)
-            img.no_watermark = request.form.get(f'no_wm_{img.id}') == 'on'
+            alt = request.form.get(f'alt_{img.id}')
+            title = request.form.get(f'title_{img.id}')
+            caption = request.form.get(f'caption_{img.id}')
+            
+            if alt is not None:
+                img.alt_text = alt
+            if title is not None:
+                img.title_text = title
+            if caption is not None:
+                img.caption = caption
+            
+            sort = request.form.get(f'sort_{img.id}')
+            if sort is not None:
+                img.sort_order = int(sort or 0)
+                
+            no_wm = request.form.get(f'no_wm_{img.id}')
+            if no_wm is not None:
+                img.no_watermark = (no_wm == 'on')
 
         # Delete images
         delete_ids = request.form.getlist('delete_images[]')

@@ -46,6 +46,12 @@
             <div class="gallery-images">
                 {% for img in block.images.order_by('sort_order').all() %}
                 <div class="gallery-item" data-id="{{ img.id }}">
+                    <input type="hidden" name="alt_{{ img.id }}" value="{{ img.alt_text }}">
+                    <input type="hidden" name="title_{{ img.id }}" value="{{ img.title_text }}">
+                    <input type="hidden" name="caption_{{ img.id }}" value="{{ img.caption }}">
+                    <input type="hidden" name="sort_{{ img.id }}" value="{{ img.sort_order }}">
+                    <input type="hidden" name="no_wm_{{ img.id }}" value="{{ 'on' if img.no_watermark else 'off' }}">
+                    
                     <div class="gallery-img-wrap">
                         <img src="{{ img.image_path }}" alt="" style="transform: rotate({{ img.rotation or 0 }}deg);">
                     </div>

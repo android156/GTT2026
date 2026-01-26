@@ -838,6 +838,33 @@ def product_lines_add():
 @login_required
 def product_lines_edit(id):
     pl = ProductLine.query.get_or_404(id)
+    cat = pl.category
+    
+    # Navigation logic for product lines within the same category
+    prev_pl = ProductLine.query.filter(
+        ProductLine.category_id == cat.id,
+        ProductLine.sort_order < pl.sort_order
+    ).order_by(ProductLine.sort_order.desc()).first()
+    
+    if not prev_pl:
+        prev_pl = ProductLine.query.filter(
+            ProductLine.category_id == cat.id,
+            ProductLine.sort_order == pl.sort_order,
+            ProductLine.id < pl.id
+        ).order_by(ProductLine.id.desc()).first()
+        
+    next_pl = ProductLine.query.filter(
+        ProductLine.category_id == cat.id,
+        ProductLine.sort_order > pl.sort_order
+    ).order_by(ProductLine.sort_order.asc()).first()
+    
+    if not next_pl:
+        next_pl = ProductLine.query.filter(
+            ProductLine.category_id == cat.id,
+            ProductLine.sort_order == pl.sort_order,
+            ProductLine.id > pl.id
+        ).order_by(ProductLine.id.asc()).first()
+    
     categories = Category.query.order_by(Category.name).all()
     
     if request.method == 'POST':
@@ -901,7 +928,11 @@ def product_lines_edit(id):
         flash('Линейка обновлена', 'success')
         return redirect(url_for('admin.product_lines_edit', id=pl.id))
     
-    return render_template('admin/product_lines_form.html', product_line=pl, categories=categories)
+    return render_template('admin/product_lines_form.html', 
+                           product_line=pl, 
+                           categories=categories,
+                           prev_id=prev_pl.id if prev_pl else None,
+                           next_id=next_pl.id if next_pl else None)
 
 
 @admin_bp.route('/product-lines/<int:id>/delete/', methods=['POST'])

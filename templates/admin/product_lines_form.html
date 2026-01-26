@@ -4,6 +4,25 @@
 {% block page_title %}{{ 'Редактировать' if product_line else 'Добавить' }} линейку{% endblock %}
 
 {% block content %}
+<div class="nav-controls" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <div>
+        {% if prev_id %}
+        <a href="{{ url_for('admin.product_lines_edit', id=prev_id) }}" class="btn btn-secondary">&larr; Предыдущая</a>
+        {% else %}
+        <button class="btn btn-secondary" disabled style="opacity: 0.5;">&larr; Предыдущая</button>
+        {% endif %}
+        
+        {% if next_id %}
+        <a href="{{ url_for('admin.product_lines_edit', id=next_id) }}" class="btn btn-secondary">Следующая &rarr;</a>
+        {% else %}
+        <button class="btn btn-secondary" disabled style="opacity: 0.5;">Следующая &rarr;</a>
+        {% endif %}
+    </div>
+    {% if product_line %}
+    <p class="section-desc" style="margin: 0;">Категория: <strong>{{ product_line.category.name }}</strong></p>
+    {% endif %}
+</div>
+
 <div class="card">
     <form method="POST" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">

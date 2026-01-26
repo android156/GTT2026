@@ -942,6 +942,17 @@ def rotate_product_line_image(image_id):
     return jsonify({'success': True, 'rotation': img.rotation})
 
 
+@admin_bp.route('/api/image/accessory/<int:image_id>/rotate/', methods=['POST'])
+@login_required
+def rotate_accessory_image(image_id):
+    img = AccessoryImage.query.get_or_404(image_id)
+    data = request.get_json() or {}
+    degrees = data.get('degrees', 90)
+    img.rotation = (img.rotation + degrees) % 360
+    db.session.commit()
+    return jsonify({'success': True, 'rotation': img.rotation})
+
+
 @admin_bp.route('/product-lines/<int:pl_id>/accessories/')
 @login_required
 def accessory_blocks_list(pl_id):
@@ -1596,7 +1607,8 @@ def api_image_info(image_type, image_id):
     model_map = {
         'home': HomeGalleryImage,
         'service': ServiceImage,
-        'product_line': ProductLineImage
+        'product_line': ProductLineImage,
+        'accessory': AccessoryImage
     }
     
     model = model_map.get(image_type)
@@ -1623,7 +1635,8 @@ def api_image_update(image_type, image_id):
     model_map = {
         'home': HomeGalleryImage,
         'service': ServiceImage,
-        'product_line': ProductLineImage
+        'product_line': ProductLineImage,
+        'accessory': AccessoryImage
     }
     
     model = model_map.get(image_type)
@@ -1652,7 +1665,8 @@ def api_image_rename(image_type, image_id):
     model_map = {
         'home': HomeGalleryImage,
         'service': ServiceImage,
-        'product_line': ProductLineImage
+        'product_line': ProductLineImage,
+        'accessory': AccessoryImage
     }
     
     model = model_map.get(image_type)
@@ -1684,7 +1698,8 @@ def api_image_optimize(image_type, image_id):
     model_map = {
         'home': HomeGalleryImage,
         'service': ServiceImage,
-        'product_line': ProductLineImage
+        'product_line': ProductLineImage,
+        'accessory': AccessoryImage
     }
     
     model = model_map.get(image_type)
@@ -1734,7 +1749,8 @@ def api_image_toggle_watermark(image_type, image_id):
     model_map = {
         'home': HomeGalleryImage,
         'service': ServiceImage,
-        'product_line': ProductLineImage
+        'product_line': ProductLineImage,
+        'accessory': AccessoryImage
     }
     
     model = model_map.get(image_type)

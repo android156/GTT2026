@@ -22,30 +22,41 @@
             <small class="hint">Текст перед таблицей комплектующих</small>
         </div>
         
-        <div class="form-group">
-            <label>Галерея изображений</label>
-            <input type="file" name="gallery_images" multiple accept="image/*" class="form-control">
-            <small class="hint">Выберите одно или несколько изображений. После сохранения вы сможете настроить их SEO-параметры.</small>
-            
-            {% if block and block.images.count() > 0 %}
-            <div class="gallery-admin-grid">
+        <h3>Галерея изображений</h3>
+        <p class="section-desc">Загрузите изображения для блока комплектующих</p>
+        
+        {% if block and block.images.count() > 0 %}
+        <div class="gallery-manager">
+            <div class="gallery-images">
                 {% for img in block.images.order_by('sort_order').all() %}
-                <div class="gallery-admin-item">
-                    <img src="{{ img.image_path }}" alt="">
-                    <div class="gallery-admin-fields">
-                        <input type="text" name="alt_{{ img.id }}" value="{{ img.alt_text }}" placeholder="ALT текст">
-                        <input type="text" name="title_{{ img.id }}" value="{{ img.title_text }}" placeholder="Title текст">
-                        <input type="text" name="caption_{{ img.id }}" value="{{ img.caption }}" placeholder="Подпись">
-                        <div class="row-fields">
-                            <input type="number" name="sort_{{ img.id }}" value="{{ img.sort_order }}" placeholder="Сортировка" style="width: 80px;">
-                            <label><input type="checkbox" name="no_wm_{{ img.id }}" {{ 'checked' if img.no_watermark }}> Без WM</label>
-                            <label class="delete-label"><input type="checkbox" name="delete_images[]" value="{{ img.id }}"> Удалить</label>
-                        </div>
+                <div class="gallery-item" data-id="{{ img.id }}">
+                    <div class="gallery-img-wrap">
+                        <img src="{{ img.image_path }}" alt="" style="transform: rotate({{ img.rotation or 0 }}deg);">
+                    </div>
+                    <div class="gallery-rotate">
+                        <button type="button" class="btn-rotate" onclick="rotateImage({{ img.id }}, -90)" title="Повернуть влево">↺</button>
+                        <span class="rotation-deg">{{ img.rotation or 0 }}°</span>
+                        <button type="button" class="btn-rotate" onclick="rotateImage({{ img.id }}, 90)" title="Повернуть вправо">↻</button>
+                    </div>
+                    <div class="gallery-controls">
+                        <button type="button" class="btn-edit-image" onclick="openImageEditModal({{ img.id }}, 'accessory')">SEO / Оптимизация</button>
+                        <label title="Без водяного знака" class="watermark-toggle">
+                            <input type="checkbox" onchange="toggleWatermark({{ img.id }}, 'accessory', this.checked)" {% if img.no_watermark %}checked{% endif %}> Без водяного знака
+                        </label>
+                        <label title="Удалить">
+                            <input type="checkbox" name="delete_images[]" value="{{ img.id }}"> Удалить
+                        </label>
                     </div>
                 </div>
                 {% endfor %}
             </div>
-            {% endif %}
+        </div>
+        {% endif %}
+        
+        <div class="form-group">
+            <label>Добавить изображения</label>
+            <input type="file" name="gallery_images" multiple accept="image/*">
+            <small class="hint">Можно выбрать несколько файлов</small>
         </div>
         
         <div class="form-group">
@@ -74,4 +85,99 @@
 
 {{ wysiwyg_styles() }}
 {{ wysiwyg_scripts() }}
+
+<style>
+.gallery-manager { margin-bottom: 20px; }
+.gallery-images { display: flex; flex-wrap: wrap; gap: 15px; }
+.gallery-item { 
+    border: 2px solid #ddd; 
+    border-radius: 8px; 
+    padding: 10px; 
+    background: #f9f9f9;
+    width: 180px;
+}
+.gallery-img-wrap { 
+    width: 100%; 
+    height: 120px; 
+    overflow: hidden; 
+    border-radius: 4px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    background: #eee;
+}
+.gallery-item img { 
+    max-width: 100%; 
+    max-height: 120px; 
+    object-fit: contain;
+    transition: transform 0.3s;
+}
+.gallery-rotate {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 8px;
+    padding: 5px;
+    background: #e9ecef;
+    border-radius: 4px;
+}
+.btn-rotate {
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: #fff;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.btn-rotate:hover { background: #dee2e6; }
+.rotation-deg { font-size: 11px; color: #666; min-width: 30px; text-align: center; }
+.gallery-controls { margin-top: 8px; font-size: 12px; }
+.gallery-controls label { display: block; margin: 5px 0; cursor: pointer; }
+.btn-edit-image {
+    padding: 4px 8px;
+    font-size: 11px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    margin-bottom: 5px;
+    width: 100%;
+}
+.btn-edit-image:hover { background: #0056b3; }
+</style>
+
+{% if block %}
+<script>
+function rotateImage(imageId, degrees) {
+    fetch(`/admin/api/image/accessory/${imageId}/rotate/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token() }}'
+        },
+        body: JSON.stringify({ degrees: degrees })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const item = document.querySelector(`.gallery-item[data-id="${imageId}"]`);
+            const img = item.querySelector('img');
+            const degSpan = item.querySelector('.rotation-deg');
+            img.style.transform = `rotate(${data.rotation}deg)`;
+            degSpan.textContent = data.rotation + '°';
+        } else {
+            alert('Ошибка: ' + data.error);
+        }
+    })
+    .catch(err => alert('Ошибка сети'));
+}
+</script>
+{% include 'admin/includes/image_edit_modal.html' %}
+{% endif %}
 {% endblock %}

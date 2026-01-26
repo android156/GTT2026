@@ -233,8 +233,31 @@
 .accessory-img {
     max-width: 100%;
     max-height: 300px;
-    margin-bottom: 15px;
     border-radius: 4px;
+}
+.accessory-gallery {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+.accessory-gallery .gallery-figure {
+    flex: 0 0 auto;
+    max-width: 280px;
+    margin: 0;
+    text-align: center;
+}
+.accessory-gallery .gallery-figure img {
+    max-width: 100%;
+    max-height: 200px;
+    border-radius: 4px;
+    display: block;
+}
+.accessory-gallery .gallery-caption {
+    font-size: 13px;
+    color: #666;
+    margin-top: 8px;
+    line-height: 1.4;
 }
 .accessory-table {
     margin: 15px 0;

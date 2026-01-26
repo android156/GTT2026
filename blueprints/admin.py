@@ -1096,7 +1096,7 @@ def accessory_blocks_edit(id):
         
         db.session.commit()
         flash('Блок комплектующих обновлен', 'success')
-        return redirect(url_for('admin.accessory_blocks_list', pl_id=pl.id))
+        return redirect(url_for('admin.accessory_blocks_edit', id=block.id))
     
     return render_template('admin/accessory_blocks_form.html', 
                            product_line=pl, 
@@ -1276,10 +1276,7 @@ def size_items_edit(id):
         db.session.commit()
         flash('Типоразмер обновлён', 'success')
         
-        return redirect(url_for('admin.size_items_list', 
-                               category_id=request.args.get('category_id'),
-                               product_line_id=request.args.get('product_line_id'),
-                               search=request.args.get('search')))
+        return redirect(url_for('admin.size_items_edit', id=si.id))
     
     return render_template('admin/size_items_form.html', 
                            size_item=si, 

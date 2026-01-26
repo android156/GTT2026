@@ -3,6 +3,25 @@
 {% block page_title %}{{ 'Редактировать' if size_item else 'Добавить' }} типоразмер{% endblock %}
 
 {% block content %}
+<div class="nav-controls" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <div>
+        {% if prev_id %}
+        <a href="{{ url_for('admin.size_items_edit', id=prev_id) }}" class="btn btn-secondary">&larr; Предыдущий</a>
+        {% else %}
+        <button class="btn btn-secondary" disabled style="opacity: 0.5;">&larr; Предыдущий</button>
+        {% endif %}
+        
+        {% if next_id %}
+        <a href="{{ url_for('admin.size_items_edit', id=next_id) }}" class="btn btn-secondary">Следующий &rarr;</a>
+        {% else %}
+        <button class="btn btn-secondary" disabled style="opacity: 0.5;">Следующий &rarr;</a>
+        {% endif %}
+    </div>
+    {% if size_item %}
+    <p class="section-desc" style="margin: 0;">Линейка: <strong>{{ size_item.product_line.name }}</strong></p>
+    {% endif %}
+</div>
+
 <div class="card">
     <form method="POST">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">

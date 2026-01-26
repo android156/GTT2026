@@ -1185,6 +1185,19 @@ def size_items_add():
 @login_required
 def size_items_edit(id):
     si = SizeItem.query.get_or_404(id)
+    pl = si.product_line
+    
+    # Navigation logic for size items within the same product line
+    prev_item = SizeItem.query.filter(
+        SizeItem.product_line_id == pl.id,
+        SizeItem.id < si.id
+    ).order_by(SizeItem.id.desc()).first()
+    
+    next_item = SizeItem.query.filter(
+        SizeItem.product_line_id == pl.id,
+        SizeItem.id > si.id
+    ).order_by(SizeItem.id.asc()).first()
+    
     product_lines = ProductLine.query.join(Category).order_by(Category.name, ProductLine.name).all()
     
     if request.method == 'POST':
@@ -1237,7 +1250,11 @@ def size_items_edit(id):
                                product_line_id=request.args.get('product_line_id'),
                                search=request.args.get('search')))
     
-    return render_template('admin/size_items_form.html', size_item=si, product_lines=product_lines)
+    return render_template('admin/size_items_form.html', 
+                           size_item=si, 
+                           product_lines=product_lines,
+                           prev_id=prev_item.id if prev_item else None,
+                           next_id=next_item.id if next_item else None)
 
 
 @admin_bp.route('/size-items/<int:id>/delete/', methods=['POST'])

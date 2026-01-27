@@ -4,7 +4,7 @@ from extensions import db
 from models import (
     User, Page, MenuItem, Category, ProductLine, SizeItem, News, DocumentFile,
     Lead, Service, ServiceImage, HomeGalleryImage, RedirectRule, Setting,
-    SiteSection, ProductLineImage, AccessoryBlock
+    SiteSection, ProductLineImage, AccessoryBlock, AccessoryImage
 )
 
 
@@ -56,6 +56,7 @@ def export_database():
     backup_data['tables']['settings'] = [model_to_dict(s) for s in Setting.query.all()]
     backup_data['tables']['site_sections'] = [model_to_dict(ss) for ss in SiteSection.query.all()]
     backup_data['tables']['accessory_blocks'] = [model_to_dict(ab) for ab in AccessoryBlock.query.all()]
+    backup_data['tables']['accessory_images'] = [model_to_dict(ai) for ai in AccessoryImage.query.all()]
     
     return json.dumps(backup_data, ensure_ascii=False, indent=2)
 
@@ -135,6 +136,7 @@ def import_database(json_data, clear_existing=False):
     
     try:
         if clear_existing:
+            AccessoryImage.query.delete()
             AccessoryBlock.query.delete()
             ProductLineImage.query.delete()
             ServiceImage.query.delete()
@@ -204,6 +206,10 @@ def import_database(json_data, clear_existing=False):
         if 'accessory_blocks' in tables:
             imported, updated = import_table(AccessoryBlock, tables['accessory_blocks'], datetime_fields=['created_at'])
             results['accessory_blocks'] = {'imported': imported, 'updated': updated}
+        
+        if 'accessory_images' in tables:
+            imported, updated = import_table(AccessoryImage, tables['accessory_images'], datetime_fields=['created_at'])
+            results['accessory_images'] = {'imported': imported, 'updated': updated}
         
         if 'news' in tables:
             imported, updated = import_table(News, tables['news'], date_fields=['date'], datetime_fields=['created_at'])

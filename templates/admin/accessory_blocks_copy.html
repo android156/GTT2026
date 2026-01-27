@@ -1,0 +1,67 @@
+{% extends 'admin/base.html' %}
+{% block title %}Копировать комплектующие в: {{ target_product_line.name }}{% endblock %}
+{% block page_title %}Копировать комплектующие{% endblock %}
+
+{% block content %}
+<div class="card">
+    <p class="section-desc">Выберите блок комплектующих для копирования в линейку <strong>{{ target_product_line.name }}</strong></p>
+    <p class="section-desc" style="color: #666; font-size: 13px;">При копировании создаётся независимая копия блока со всеми изображениями. Изменения в копии не влияют на оригинал.</p>
+    
+    <div style="margin-bottom: 20px;">
+        <a href="{{ url_for('admin.accessory_blocks_list', pl_id=target_product_line.id) }}" class="btn btn-secondary">Отмена</a>
+    </div>
+    
+    {% if product_lines_with_blocks %}
+    {% for pl in product_lines_with_blocks %}
+    <div class="copy-source-group">
+        <h3 style="margin: 20px 0 10px; font-size: 16px; border-bottom: 1px solid #ddd; padding-bottom: 8px;">
+            {{ pl.category.name }} / {{ pl.name }}
+        </h3>
+        <div class="copy-blocks-list">
+            {% for block in pl.accessory_blocks %}
+            <div class="copy-block-item">
+                <div class="copy-block-info">
+                    <strong>{{ block.name }}</strong>
+                    {% if block.images.count() > 0 %}
+                    <span class="badge">{{ block.images.count() }} фото</span>
+                    {% endif %}
+                    {% if block.use_outer_diameter %}
+                    <span class="badge badge-info">По внешнему ø</span>
+                    {% endif %}
+                </div>
+                <form method="POST" action="{{ url_for('admin.accessory_blocks_copy', block_id=block.id, target_pl_id=target_product_line.id) }}" style="display: inline;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-sm btn-primary">Копировать</button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <p class="empty-msg">В других линейках нет блоков комплектующих для копирования</p>
+    {% endif %}
+</div>
+
+<style>
+.copy-source-group { margin-bottom: 15px; }
+.copy-blocks-list { display: flex; flex-direction: column; gap: 8px; }
+.copy-block-item { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    padding: 12px 16px; 
+    background: #f5f5f5; 
+    border-radius: 6px;
+}
+.copy-block-info { display: flex; align-items: center; gap: 10px; }
+.badge { 
+    background: #e0e0e0; 
+    padding: 2px 8px; 
+    border-radius: 4px; 
+    font-size: 12px; 
+    color: #666; 
+}
+.badge-info { background: #e3f2fd; color: #1976d2; }
+</style>
+{% endblock %}

@@ -7,6 +7,7 @@ from services.image_utils import get_watermarked_image_bytes
 from services.email_service import send_lead_email
 from services.telegram_service import send_lead_to_telegram
 from services.captcha_service import generate_captcha, verify_captcha, check_honeypot
+from services.size_matcher import get_matching_accessories
 from config import RESERVED_SLUGS, Config
 from datetime import datetime
 import os
@@ -386,6 +387,13 @@ def render_size_item(category, product_line, size_item):
     
     product_jsonld = generate_product_jsonld(size_item, product_line, category)
     
+    accessory_blocks = AccessoryBlock.query.filter_by(
+        product_line_id=product_line.id,
+        is_active=True
+    ).order_by(AccessoryBlock.sort_order).all()
+    
+    matching_accessories = get_matching_accessories(size_item, accessory_blocks)
+    
     return render_template('public/size_item.html',
                          category=category,
                          product_line=product_line,
@@ -394,6 +402,7 @@ def render_size_item(category, product_line, size_item):
                          breadcrumbs=breadcrumbs,
                          breadcrumbs_jsonld=generate_breadcrumb_jsonld(breadcrumbs),
                          product_jsonld=product_jsonld,
+                         matching_accessories=matching_accessories,
                          canonical=get_canonical_url(f'/{category.slug}/{product_line.slug}/{size_item.size_slug}/'),
                          og=get_og_tags(seo['title'], seo['description']))
 

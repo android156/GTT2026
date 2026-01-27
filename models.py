@@ -331,6 +331,7 @@ class AccessoryBlock(db.Model):
     table_html = db.Column(db.Text, default='')
     sort_order = db.Column(db.Integer, default=0)
     gallery_interval = db.Column(db.Integer, default=5)
+    use_outer_diameter = db.Column(db.Boolean, default=False)
     is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     

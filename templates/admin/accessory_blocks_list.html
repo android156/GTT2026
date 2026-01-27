@@ -7,6 +7,7 @@
     <div class="list-header">
         <a href="{{ url_for('admin.product_lines_edit', id=product_line.id) }}" class="btn btn-secondary">Назад к линейке</a>
         <a href="{{ url_for('admin.accessory_blocks_add', pl_id=product_line.id) }}" class="btn btn-primary">Добавить блок</a>
+        <a href="{{ url_for('admin.accessory_blocks_copy_select', pl_id=product_line.id) }}" class="btn btn-secondary">Копировать из другой линейки</a>
     </div>
     
     {% if blocks %}

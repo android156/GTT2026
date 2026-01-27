@@ -103,6 +103,12 @@
         </div>
         
         <div class="form-group form-check">
+            <input type="checkbox" name="use_outer_diameter" id="use_outer_diameter" {{ 'checked' if block and block.use_outer_diameter else '' }}>
+            <label for="use_outer_diameter">Подбирается по внешнему диаметру</label>
+            <small class="hint" style="display: block; margin-left: 22px;">Если включено, комплектующие будут подбираться по внешнему диаметру оболочки (число после /), а не по диаметру трубы</small>
+        </div>
+        
+        <div class="form-group form-check">
             <input type="checkbox" name="is_active" id="is_active" {{ 'checked' if block and block.is_active else 'checked' if not block else '' }}>
             <label for="is_active">Активен</label>
         </div>

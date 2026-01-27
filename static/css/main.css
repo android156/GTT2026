@@ -416,3 +416,55 @@ h3 { font-family: var(--font-heading); font-size: 20px; font-weight: 600; margin
         padding-top: 20px;
     }
 }
+
+.also-bought-section {
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 2px solid var(--border-color);
+}
+.also-bought-section h2 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 24px;
+    color: var(--text-color);
+}
+.also-bought-block {
+    margin-bottom: 30px;
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: var(--radius);
+}
+.also-bought-block h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: var(--primary-color);
+}
+.also-bought-desc {
+    margin-bottom: 16px;
+    font-size: 14px;
+    color: var(--text-muted);
+}
+.also-bought-table table,
+.also-bought-table .accessory-match-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+.also-bought-table th,
+.also-bought-table td {
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    text-align: left;
+}
+.also-bought-table thead th,
+.also-bought-table tr:first-child th {
+    background: #000000;
+    color: white;
+    font-weight: 600;
+}
+.also-bought-table tbody td:first-child,
+.also-bought-table tr td:first-child {
+    color: var(--primary-color);
+    font-weight: 600;
+}

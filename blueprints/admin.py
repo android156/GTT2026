@@ -1065,6 +1065,7 @@ def accessory_blocks_edit(id):
         block.table_html = sanitize_html(request.form.get('table_html', ''))
         block.sort_order = int(request.form.get('sort_order', 0) or 0)
         block.gallery_interval = int(request.form.get('gallery_interval', 5) or 5)
+        block.use_outer_diameter = request.form.get('use_outer_diameter') == 'on'
         block.is_active = request.form.get('is_active') == 'on'
         
         main_image_id = request.form.get('main_image_id')
@@ -1138,6 +1139,88 @@ def accessory_blocks_delete(id):
     db.session.commit()
     flash('Блок комплектующих удален', 'success')
     return redirect(url_for('admin.accessory_blocks_list', pl_id=pl_id))
+
+
+@admin_bp.route('/product-lines/<int:pl_id>/accessories/copy/')
+@login_required
+def accessory_blocks_copy_select(pl_id):
+    target_pl = ProductLine.query.get_or_404(pl_id)
+    
+    product_lines_with_blocks = ProductLine.query.filter(
+        ProductLine.id != pl_id
+    ).join(AccessoryBlock).distinct().order_by(ProductLine.name).all()
+    
+    return render_template('admin/accessory_blocks_copy.html',
+                         target_product_line=target_pl,
+                         product_lines_with_blocks=product_lines_with_blocks)
+
+
+@admin_bp.route('/accessories/<int:block_id>/copy/<int:target_pl_id>/', methods=['POST'])
+@login_required
+def accessory_blocks_copy(block_id, target_pl_id):
+    import shutil
+    import uuid
+    
+    source_block = AccessoryBlock.query.get_or_404(block_id)
+    target_pl = ProductLine.query.get_or_404(target_pl_id)
+    
+    new_block = AccessoryBlock(
+        product_line_id=target_pl_id,
+        name=source_block.name,
+        description_html=source_block.description_html,
+        table_html=source_block.table_html,
+        sort_order=source_block.sort_order,
+        gallery_interval=source_block.gallery_interval,
+        use_outer_diameter=source_block.use_outer_diameter,
+        is_active=source_block.is_active
+    )
+    
+    if source_block.image_path:
+        src_path = source_block.image_path
+        if src_path.startswith('/static/'):
+            src_full = src_path[1:]
+            if os.path.exists(src_full):
+                ext = os.path.splitext(src_full)[1]
+                new_filename = f"{uuid.uuid4().hex[:12]}{ext}"
+                new_path = f"static/uploads/accessories/{new_filename}"
+                os.makedirs(os.path.dirname(new_path), exist_ok=True)
+                shutil.copy2(src_full, new_path)
+                new_block.image_path = f"/{new_path}"
+    
+    db.session.add(new_block)
+    db.session.flush()
+    
+    for src_img in source_block.images.order_by(AccessoryImage.sort_order).all():
+        src_path = src_img.image_path
+        new_img_path = None
+        
+        if src_path and src_path.startswith('/static/'):
+            src_full = src_path[1:]
+            if os.path.exists(src_full):
+                ext = os.path.splitext(src_full)[1]
+                new_filename = f"{uuid.uuid4().hex[:12]}{ext}"
+                new_path = f"static/uploads/accessories/{new_filename}"
+                os.makedirs(os.path.dirname(new_path), exist_ok=True)
+                shutil.copy2(src_full, new_path)
+                new_img_path = f"/{new_path}"
+        
+        if new_img_path:
+            new_img = AccessoryImage(
+                accessory_block_id=new_block.id,
+                image_path=new_img_path,
+                alt_text=src_img.alt_text,
+                title_text=src_img.title_text,
+                caption=src_img.caption,
+                sort_order=src_img.sort_order,
+                rotation=src_img.rotation,
+                is_main=src_img.is_main,
+                no_watermark=src_img.no_watermark
+            )
+            db.session.add(new_img)
+    
+    db.session.commit()
+    flash(f'Блок "{source_block.name}" скопирован в линейку "{target_pl.name}"', 'success')
+    return redirect(url_for('admin.accessory_blocks_list', pl_id=target_pl_id))
 
 
 @admin_bp.route('/size-items/')

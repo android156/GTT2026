@@ -229,8 +229,47 @@ def import_database(json_data, clear_existing=False):
         
         db.session.commit()
         
+        reset_sequences()
+        
         return True, results
     
     except Exception as e:
         db.session.rollback()
         return False, f"Import error: {str(e)}"
+
+
+def reset_sequences():
+    """Reset PostgreSQL sequences to max(id) + 1 for all tables with auto-increment IDs."""
+    tables_with_sequences = [
+        ('users', 'id'),
+        ('pages', 'id'),
+        ('menu_items', 'id'),
+        ('categories', 'id'),
+        ('product_lines', 'id'),
+        ('size_items', 'id'),
+        ('news', 'id'),
+        ('document_files', 'id'),
+        ('leads', 'id'),
+        ('services', 'id'),
+        ('service_images', 'id'),
+        ('home_gallery_images', 'id'),
+        ('redirect_rules', 'id'),
+        ('settings', 'id'),
+        ('site_sections', 'id'),
+        ('product_line_images', 'id'),
+        ('accessory_blocks', 'id'),
+        ('accessory_images', 'id'),
+    ]
+    
+    for table, column in tables_with_sequences:
+        try:
+            sequence_name = f"{table}_{column}_seq"
+            sql = f"""
+                SELECT setval('{sequence_name}', 
+                    COALESCE((SELECT MAX({column}) FROM {table}), 0) + 1, false)
+            """
+            db.session.execute(db.text(sql))
+        except Exception:
+            pass
+    
+    db.session.commit()

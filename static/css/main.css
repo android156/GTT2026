@@ -292,6 +292,15 @@ h3 { font-family: var(--font-heading); font-size: 20px; font-weight: 600; margin
 
 .seo-text { margin-top: 50px; padding-top: 40px; border-top: 2px solid var(--border-color); color: var(--text-light); font-size: 14px; line-height: 1.8; }
 
+/* Documents list */
+.documents-list { margin-top: 30px; }
+.document-item { background: white; border: 1px solid var(--border-color); border-radius: var(--radius); padding: 20px; margin-bottom: 15px; transition: box-shadow 0.2s; }
+.document-item:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+.document-link { display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--text-color); font-weight: 600; font-size: 16px; }
+.document-link:hover { color: var(--primary-color); }
+.document-icon { font-size: 24px; }
+.document-description { margin-top: 10px; color: var(--text-light); font-size: 14px; line-height: 1.6; }
+
 .description { margin-bottom: 30px; line-height: 1.8; font-size: 16px; }
 .category-short-desc { margin-bottom: 30px; line-height: 1.8; font-size: 16px; text-align: justify; }
 .category-main-img, .product-line-main-img { max-width: 100%; border-radius: var(--radius-lg); margin-bottom: 30px; box-shadow: var(--shadow); }

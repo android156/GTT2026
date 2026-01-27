@@ -28,6 +28,22 @@
 <div class="page-content">
     {{ page.content_html|safe }}
     
+    {% if documents %}
+    <div class="documents-list">
+        {% for doc in documents %}
+        <div class="document-item">
+            <a href="{{ doc.file_path }}" target="_blank" class="document-link">
+                <span class="document-icon">📄</span>
+                <span class="document-name">{{ doc.title }}</span>
+            </a>
+            {% if doc.description %}
+            <p class="document-description">{{ doc.description }}</p>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
     {% if page.url_path == '/contacts/' %}
     <div id="map" style="width: 100%; height: 450px; margin-top: 30px; border: 1px solid var(--border-color);"></div>
     <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>

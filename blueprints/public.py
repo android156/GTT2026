@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, abort, Response, send_file, make_response, jsonify
 from extensions import db
-from models import Page, MenuItem, Category, ProductLine, SizeItem, News, Lead, Setting, Service, SiteSection, HomeGalleryImage, ProductLineImage, AccessoryBlock, ServiceImage
+from models import Page, MenuItem, Category, ProductLine, SizeItem, News, Lead, Setting, Service, SiteSection, HomeGalleryImage, ProductLineImage, AccessoryBlock, ServiceImage, DocumentFile
 from services.seo import get_page_seo, get_canonical_url, get_og_tags
 from services.schema import generate_product_jsonld, generate_breadcrumb_jsonld, generate_organization_jsonld
 from services.image_utils import get_watermarked_image_bytes
@@ -250,10 +250,15 @@ def static_page(url_path):
         
         hero = get_hero_for_page(page) or get_hero_for_url(url_path)
         
+        documents = None
+        if url_path == '/documentation/':
+            documents = DocumentFile.query.order_by(DocumentFile.created_at.desc()).all()
+        
         return render_template('public/page.html',
                              page=page,
                              seo=seo,
                              hero=hero,
+                             documents=documents,
                              breadcrumbs=breadcrumbs,
                              breadcrumbs_jsonld=generate_breadcrumb_jsonld(breadcrumbs),
                              canonical=get_canonical_url(url_path),

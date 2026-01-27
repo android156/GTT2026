@@ -181,10 +181,10 @@
                 </div>
                 {% endif %}
             </div>
-            {% set main_img = item.block.images[0].image_path if item.block.images else None %}
-            {% if main_img %}
+            {% set first_image = item.block.images.first() %}
+            {% if first_image %}
             <div class="accessory-image">
-                <img src="{{ main_img }}" alt="{{ item.block.name }}">
+                <img src="{{ first_image.image_path }}" alt="{{ item.block.name }}">
             </div>
             {% endif %}
         </div>

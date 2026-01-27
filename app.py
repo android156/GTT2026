@@ -42,6 +42,9 @@ def create_app():
     
     check_redirects(app)
     
+    from cli.admin import admin_cli
+    app.cli.add_command(admin_cli)
+    
     @app.context_processor
     def inject_now():
         return {'now': datetime.utcnow}
@@ -67,17 +70,7 @@ def create_app():
 
 
 def init_default_data():
-    from models import User, Page, MenuItem, Setting
-    
-    if not User.query.first():
-        admin = User(
-            username=Config.ADMIN_USERNAME,
-            role='admin',
-            is_active=True
-        )
-        admin.set_password(Config.ADMIN_PASSWORD)
-        db.session.add(admin)
-        logger.info(f"Created admin user: {Config.ADMIN_USERNAME}")
+    from models import Page, MenuItem, Setting
     
     default_pages = [
         {'slug': 'about', 'url_path': '/about/', 'title': 'О компании', 'content_html': '<p>Информация о компании ГлавТрубТорг.</p>'},

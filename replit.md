@@ -29,6 +29,8 @@
 │   ├── public.py       # Публичные маршруты
 │   ├── admin.py        # Админка
 │   └── redirects.py    # Редиректы
+├── cli/
+│   └── admin.py        # CLI команды управления администратором
 ├── services/
 │   ├── seo.py          # SEO сервисы
 │   ├── schema.py       # JSON-LD
@@ -48,9 +50,51 @@
 python app.py
 ```
 
+## Управление администратором (CLI)
+Администратор НЕ создаётся автоматически при старте. Используйте CLI-команды:
+
+### Создание/проверка администратора
+```bash
+flask admin ensure
+```
+- Создаёт администратора если не существует
+- Если уже есть — ничего не меняет
+- Требует переменные окружения: ADMIN_USERNAME, ADMIN_PASSWORD
+
+### Сброс пароля
+```bash
+flask admin ensure --reset-password
+```
+- Принудительно обновляет пароль из ADMIN_PASSWORD
+
+### Информация об администраторе
+```bash
+flask admin info
+```
+- Показывает существует ли админ и его статус
+
+### Регламент использования
+После чистой БД:
+```bash
+flask db upgrade
+flask admin ensure
+```
+
+После загрузки дампа:
+```bash
+flask admin ensure --reset-password
+```
+
+После git pull:
+```bash
+pip install -r requirements.txt
+flask db upgrade
+flask admin ensure
+```
+
 ## Админка
 - URL: /admin/
-- Логин: admin / admin123
+- Логин: из переменных ADMIN_USERNAME / ADMIN_PASSWORD
 
 ## Ключевые URL
 - `/` - Главная

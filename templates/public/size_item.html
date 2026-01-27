@@ -171,11 +171,23 @@
 <section class="also-bought-section">
     <h2>С этим товаром покупают:</h2>
     {% for item in matching_accessories %}
-    <div class="also-bought-block">
-        <h3>{{ item.block.name }}</h3>
-        {% if item.block.description_html %}
-        <div class="also-bought-desc">{{ item.block.description_html|safe }}</div>
-        {% endif %}
+    <div class="accessory-block">
+        <div class="accessory-header">
+            <div class="accessory-info">
+                <h3>{{ item.block.name }}</h3>
+                {% if item.block.description_html %}
+                <div class="accessory-description">
+                    {{ item.block.description_html|safe }}
+                </div>
+                {% endif %}
+            </div>
+            {% set main_img = item.block.images[0].image_path if item.block.images else None %}
+            {% if main_img %}
+            <div class="accessory-image">
+                <img src="{{ main_img }}" alt="{{ item.block.name }}">
+            </div>
+            {% endif %}
+        </div>
         <div class="also-bought-table">
             {{ item.filtered_table|safe }}
         </div>

@@ -35,7 +35,14 @@ def sanitize_html(html):
         'th': ['colspan', 'rowspan'],
         '*': ['class', 'id', 'style']
     }
-    return bleach.clean(html, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRS, strip=False)
+    # Используем bleach.clean, но если bleach слишком агрессивен, 
+    # в будущем можно рассмотреть переход на nh3 или другие библиотеки.
+    # Пока добавляем tags и attributes, и устанавливаем strip=False
+    try:
+        cleaned = bleach.clean(html, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRS, strip=False)
+        return cleaned
+    except Exception:
+        return html
 
 
 @login_manager.user_loader

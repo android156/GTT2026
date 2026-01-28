@@ -111,6 +111,15 @@ flask admin ensure
 - Ручные редиректы через админку имеют приоритет
 
 ## Последние изменения
+- 2026-01-28: Система управления типами документов:
+  - Модель DocumentType: name, slug, has_own_page, sort_order
+  - Фильтрация документов по типу на странице /documentation/
+  - Поиск документов по названию и описанию
+  - Индивидуальные SEO-страницы для документов типов с has_own_page=true
+  - SEO-поля документов: meta_title, meta_description, h1, seo_text, preview_image
+  - Маршрут /documentation/<slug>/ для страниц документов
+  - CRUD для типов документов в админке
+  - DocumentType включен в backup_service (экспорт/импорт/reset_sequences)
 - 2026-01-27: Исправления бэкапа и страницы документации:
   - AccessoryImage добавлен в экспорт/импорт бэкапа
   - Сброс PostgreSQL-последовательностей после импорта (исправлена ошибка duplicate key)

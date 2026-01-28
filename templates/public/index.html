@@ -43,7 +43,9 @@
     <div class="categories-grid">
         {% for cat in categories %}
         <a href="/{{ cat.slug }}/" class="category-card">
-            {% if cat.image_path %}
+            {% if cat.hero_image %}
+            <img src="{{ cat.hero_image }}" alt="{{ cat.name }}" class="category-img">
+            {% elif cat.image_path %}
             <img src="{{ cat.image_path }}" alt="{{ cat.name }}" class="category-img">
             {% else %}
             <div class="category-img placeholder"></div>
@@ -72,7 +74,9 @@
     <div class="services-grid">
         {% for service in services %}
         <a href="/services/{{ service.slug }}/" class="service-card">
-            {% if service.image_path %}
+            {% if service.hero_image %}
+            <img src="{{ service.hero_image }}" alt="{{ service.title }}" class="service-img">
+            {% elif service.image_path %}
             <img src="{{ service.image_path }}" alt="{{ service.title }}" class="service-img">
             {% else %}
             <div class="service-img placeholder"></div>

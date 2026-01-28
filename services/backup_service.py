@@ -150,6 +150,7 @@ def import_database(json_data, clear_existing=False):
             MenuItem.query.delete()
             News.query.delete()
             DocumentFile.query.delete()
+            DocumentType.query.delete()
             Lead.query.delete()
             RedirectRule.query.delete()
             Setting.query.delete()

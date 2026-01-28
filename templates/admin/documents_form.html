@@ -84,7 +84,8 @@
             
             <div class="form-group">
                 <label>SEO-текст страницы (содержит ссылку на скачивание и связанные разделы)</label>
-                {{ wysiwyg.wysiwyg_editor('seo_text_html', doc.seo_text_html if doc else '') }}
+                <textarea name="seo_text_html" id="seo_text_html" class="form-control" rows="10">{{ doc.seo_text_html if doc else '' }}</textarea>
+                <small style="color:#666;">Текст сохраняется как есть. Вы можете использовать HTML-теги для форматирования.</small>
             </div>
         </div>
         
@@ -105,5 +106,5 @@ document.querySelector('select[name="document_type_id"]').addEventListener('chan
 {% endblock %}
 
 {% block scripts %}
-{{ wysiwyg.wysiwyg_scripts() }}
+{# WYSIWYG отключен для этого поля для обеспечения 100% сохранения #}
 {% endblock %}

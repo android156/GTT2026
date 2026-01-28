@@ -189,12 +189,33 @@ class News(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
+class DocumentType(db.Model):
+    __tablename__ = 'document_types'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    slug = db.Column(db.String(100), unique=True, nullable=False)
+    has_own_page = db.Column(db.Boolean, default=False)
+    sort_order = db.Column(db.Integer, default=0)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    documents = db.relationship('DocumentFile', backref='document_type', lazy='dynamic')
+
+
 class DocumentFile(db.Model):
     __tablename__ = 'document_files'
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
+    slug = db.Column(db.String(200), unique=True, nullable=True)
+    description = db.Column(db.Text, default='')
     file_path = db.Column(db.String(300), nullable=False)
+    preview_image = db.Column(db.String(300), default='')
     doc_type = db.Column(db.String(50), default='other')
+    document_type_id = db.Column(db.Integer, db.ForeignKey('document_types.id'), nullable=True)
+    seo_title = db.Column(db.String(200), default='')
+    seo_description = db.Column(db.String(1000), default='')
+    h1 = db.Column(db.String(200), default='')
+    seo_text_html = db.Column(db.Text, default='')
+    sort_order = db.Column(db.Integer, default=0)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 

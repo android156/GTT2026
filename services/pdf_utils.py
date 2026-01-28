@@ -53,8 +53,12 @@ def update_pdf_metadata(file_path, title=None, author=None, subject=None, keywor
         if keywords is not None:
             metadata['/Keywords'] = keywords
         
-        if metadata:
-            writer.add_metadata(metadata)
+        # Merge with existing metadata to preserve other fields
+        existing_metadata = reader.metadata or {}
+        final_metadata = {k: v for k, v in existing_metadata.items()}
+        final_metadata.update(metadata)
+        
+        writer.add_metadata(final_metadata)
         
         temp_path = full_path + '.tmp'
         with open(temp_path, 'wb') as f:

@@ -2,7 +2,7 @@ import json
 from datetime import datetime, date
 from extensions import db
 from models import (
-    User, Page, MenuItem, Category, ProductLine, SizeItem, News, DocumentFile,
+    User, Page, MenuItem, Category, ProductLine, SizeItem, News, DocumentFile, DocumentType,
     Lead, Service, ServiceImage, HomeGalleryImage, RedirectRule, Setting,
     SiteSection, ProductLineImage, AccessoryBlock, AccessoryImage
 )
@@ -47,6 +47,7 @@ def export_database():
     backup_data['tables']['product_line_images'] = [model_to_dict(pli) for pli in ProductLineImage.query.all()]
     backup_data['tables']['size_items'] = [model_to_dict(si) for si in SizeItem.query.all()]
     backup_data['tables']['news'] = [model_to_dict(n) for n in News.query.all()]
+    backup_data['tables']['document_types'] = [model_to_dict(dt) for dt in DocumentType.query.all()]
     backup_data['tables']['document_files'] = [model_to_dict(d) for d in DocumentFile.query.all()]
     backup_data['tables']['leads'] = [model_to_dict(l) for l in Lead.query.all()]
     backup_data['tables']['services'] = [model_to_dict(s) for s in Service.query.all()]
@@ -215,6 +216,10 @@ def import_database(json_data, clear_existing=False):
             imported, updated = import_table(News, tables['news'], date_fields=['date'], datetime_fields=['created_at'])
             results['news'] = {'imported': imported, 'updated': updated}
         
+        if 'document_types' in tables:
+            imported, updated = import_table(DocumentType, tables['document_types'], datetime_fields=['created_at'])
+            results['document_types'] = {'imported': imported, 'updated': updated}
+        
         if 'document_files' in tables:
             imported, updated = import_table(DocumentFile, tables['document_files'], datetime_fields=['created_at'])
             results['document_files'] = {'imported': imported, 'updated': updated}
@@ -248,6 +253,7 @@ def reset_sequences():
         ('product_lines', 'id'),
         ('size_items', 'id'),
         ('news', 'id'),
+        ('document_types', 'id'),
         ('document_files', 'id'),
         ('leads', 'id'),
         ('services', 'id'),

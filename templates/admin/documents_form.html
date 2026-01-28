@@ -1,30 +1,109 @@
 {% extends 'admin/base.html' %}
-{% block title %}Загрузить документ{% endblock %}
-{% block page_title %}Загрузить документ{% endblock %}
+{% import 'admin/_wysiwyg.html' as wysiwyg %}
+{% block title %}{% if doc %}Редактировать документ{% else %}Загрузить документ{% endif %}{% endblock %}
+{% block page_title %}{% if doc %}Редактировать документ{% else %}Загрузить документ{% endif %}{% endblock %}
+
+{% block styles %}
+{{ wysiwyg.wysiwyg_styles() }}
+{% endblock %}
 
 {% block content %}
 <div class="card">
     <form method="POST" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        
         <div class="form-group">
-            <label>Название</label>
-            <input type="text" name="title">
+            <label>Название *</label>
+            <input type="text" name="title" value="{{ doc.title if doc else '' }}" required>
         </div>
+        
         <div class="form-group">
-            <label>Тип документа</label>
-            <select name="doc_type">
-                <option value="price">Прайс-лист</option>
-                <option value="cert">Сертификат</option>
-                <option value="manual">Инструкция</option>
-                <option value="other">Другое</option>
+            <label>Slug (URL)</label>
+            <input type="text" name="slug" value="{{ doc.slug if doc else '' }}" placeholder="Генерируется автоматически">
+        </div>
+        
+        <div class="form-group">
+            <label>Краткое описание</label>
+            <textarea name="description" rows="2" placeholder="Отображается в списке документов">{{ doc.description if doc else '' }}</textarea>
+        </div>
+        
+        <div class="form-group">
+            <label>Тип документа *</label>
+            <select name="document_type_id" required>
+                <option value="">Выберите тип</option>
+                {% for dt in document_types %}
+                <option value="{{ dt.id }}" 
+                    {% if doc and doc.document_type_id == dt.id %}selected
+                    {% elif preselect_type_id == dt.id %}selected{% endif %}
+                    data-has-own-page="{{ 'true' if dt.has_own_page else 'false' }}">
+                    {{ dt.name }}{% if dt.has_own_page %} (со своей страницей){% endif %}
+                </option>
+                {% endfor %}
             </select>
         </div>
+        
         <div class="form-group">
-            <label>Файл</label>
-            <input type="file" name="file" required>
+            <label>Порядок сортировки</label>
+            <input type="number" name="sort_order" value="{{ doc.sort_order if doc else 0 }}">
         </div>
-        <button type="submit" class="btn btn-primary">Загрузить</button>
-        <a href="{{ url_for('admin.documents_list') }}" class="btn btn-secondary">Отмена</a>
+        
+        <div class="form-group">
+            <label>{% if doc %}Заменить файл{% else %}Файл *{% endif %}</label>
+            <input type="file" name="file" {% if not doc %}required{% endif %}>
+            {% if doc %}<small style="color:#666;">Текущий файл: <a href="{{ doc.file_path }}" target="_blank">{{ doc.file_path.split('/')[-1] }}</a></small>{% endif %}
+        </div>
+        
+        <div id="seo-fields" style="{% if not doc or not doc.document_type or not doc.document_type.has_own_page %}display:none;{% endif %} margin-top: 30px; padding-top: 20px; border-top: 2px solid #ddd;">
+            <h3 style="margin-bottom: 20px;">SEO-настройки страницы документа</h3>
+            
+            <div class="form-group">
+                <label>Превью изображение (первая страница документа)</label>
+                {% if doc and doc.preview_image %}
+                <div style="margin-bottom: 10px;">
+                    <img src="{{ doc.preview_image }}" style="max-width: 200px; border: 1px solid #ddd; border-radius: 4px;">
+                </div>
+                {% endif %}
+                <input type="file" name="preview_image" accept="image/*">
+                <small style="color:#666;">Рекомендуется: скриншот первой страницы документа</small>
+            </div>
+            
+            <div class="form-group">
+                <label>SEO Title</label>
+                <input type="text" name="seo_title" value="{{ doc.seo_title if doc else '' }}" placeholder="Пример: Изопрофлекс 95 — техническое описание | Документация">
+            </div>
+            
+            <div class="form-group">
+                <label>H1</label>
+                <input type="text" name="h1" value="{{ doc.h1 if doc else '' }}" placeholder="Пример: Изопрофлекс 95 — техническое описание">
+            </div>
+            
+            <div class="form-group">
+                <label>SEO Description</label>
+                <textarea name="seo_description" rows="3" placeholder="Пример: Техническое описание труб Изопрофлекс 95 (0,6 МПа): типоразмеры, конструкция...">{{ doc.seo_description if doc else '' }}</textarea>
+            </div>
+            
+            <div class="form-group">
+                <label>SEO-текст страницы (содержит ссылку на скачивание и связанные разделы)</label>
+                {{ wysiwyg.wysiwyg_editor('seo_text_html', doc.seo_text_html if doc else '') }}
+            </div>
+        </div>
+        
+        <div style="margin-top: 20px;">
+            <button type="submit" class="btn btn-primary">{% if doc %}Сохранить{% else %}Загрузить{% endif %}</button>
+            <a href="{{ url_for('admin.documents_list') }}" class="btn btn-secondary">Отмена</a>
+        </div>
     </form>
 </div>
+
+<script>
+document.querySelector('select[name="document_type_id"]').addEventListener('change', function() {
+    var selected = this.options[this.selectedIndex];
+    var hasOwnPage = selected.getAttribute('data-has-own-page') === 'true';
+    document.getElementById('seo-fields').style.display = hasOwnPage ? 'block' : 'none';
+});
+</script>
+{% endblock %}
+
+{% block scripts %}
+{{ wysiwyg.wysiwyg_scripts() }}
 {% endblock %}

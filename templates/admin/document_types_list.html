@@ -1,0 +1,34 @@
+{% extends 'admin/base.html' %}
+{% block title %}Типы документов{% endblock %}
+{% block page_title %}Типы документов{% endblock %}
+
+{% block content %}
+<div class="card">
+    <p style="margin-bottom: 15px;">
+        <a href="{{ url_for('admin.document_types_add') }}" class="btn btn-success">Добавить тип</a>
+    </p>
+    <table>
+        <thead>
+            <tr><th>Название</th><th>Slug</th><th>Имеет свою страницу</th><th>Порядок</th><th>Документов</th><th>Действия</th></tr>
+        </thead>
+        <tbody>
+            {% for dt in document_types %}
+            <tr>
+                <td>{{ dt.name }}</td>
+                <td><code>{{ dt.slug }}</code></td>
+                <td>{% if dt.has_own_page %}<span style="color:green;">Да</span>{% else %}Нет{% endif %}</td>
+                <td>{{ dt.sort_order }}</td>
+                <td>{{ dt.documents.count() }}</td>
+                <td class="actions">
+                    <a href="{{ url_for('admin.document_types_edit', id=dt.id) }}" class="btn btn-sm btn-primary">Редактировать</a>
+                    <form action="{{ url_for('admin.document_types_delete', id=dt.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Удалить тип и все его документы?')">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-sm btn-danger">Удалить</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

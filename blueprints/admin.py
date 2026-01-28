@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.utils import secure_filename
 from extensions import db, login_manager
-from models import User, Page, MenuItem, Category, ProductLine, SizeItem, News, DocumentFile, Lead, RedirectRule, Setting, Service, SiteSection, ServiceImage, HomeGalleryImage, ProductLineImage, AccessoryBlock, AccessoryImage
+from models import User, Page, MenuItem, Category, ProductLine, SizeItem, News, DocumentFile, DocumentType, Lead, RedirectRule, Setting, Service, SiteSection, ServiceImage, HomeGalleryImage, ProductLineImage, AccessoryBlock, AccessoryImage
 from services.importers import import_categories_csv, import_product_lines_csv, import_size_items_csv, import_news_csv
 from services.slug import generate_slug, is_reserved_slug, validate_slug
 from services.image_uploader import save_uploaded_image, delete_image
@@ -1539,20 +1539,81 @@ def news_import():
     return render_template('admin/import_csv.html', entity='новости', template_type='news')
 
 
+@admin_bp.route('/document-types/')
+@login_required
+def document_types_list():
+    types = DocumentType.query.order_by(DocumentType.sort_order).all()
+    return render_template('admin/document_types_list.html', document_types=types)
+
+
+@admin_bp.route('/document-types/add/', methods=['GET', 'POST'])
+@login_required
+def document_types_add():
+    if request.method == 'POST':
+        name = request.form.get('name', '').strip()
+        slug = request.form.get('slug', '').strip() or generate_slug(name)
+        has_own_page = request.form.get('has_own_page') == 'on'
+        sort_order = int(request.form.get('sort_order', 0) or 0)
+        
+        doc_type = DocumentType(name=name, slug=slug, has_own_page=has_own_page, sort_order=sort_order)
+        db.session.add(doc_type)
+        db.session.commit()
+        flash('Тип документа добавлен', 'success')
+        return redirect(url_for('admin.document_types_list'))
+    
+    return render_template('admin/document_types_form.html', doc_type=None)
+
+
+@admin_bp.route('/document-types/<int:id>/edit/', methods=['GET', 'POST'])
+@login_required
+def document_types_edit(id):
+    doc_type = DocumentType.query.get_or_404(id)
+    if request.method == 'POST':
+        doc_type.name = request.form.get('name', '').strip()
+        doc_type.slug = request.form.get('slug', '').strip() or generate_slug(doc_type.name)
+        doc_type.has_own_page = request.form.get('has_own_page') == 'on'
+        doc_type.sort_order = int(request.form.get('sort_order', 0) or 0)
+        db.session.commit()
+        flash('Тип документа обновлён', 'success')
+        return redirect(url_for('admin.document_types_list'))
+    
+    return render_template('admin/document_types_form.html', doc_type=doc_type)
+
+
+@admin_bp.route('/document-types/<int:id>/delete/', methods=['POST'])
+@login_required
+def document_types_delete(id):
+    doc_type = DocumentType.query.get_or_404(id)
+    db.session.delete(doc_type)
+    db.session.commit()
+    flash('Тип документа удалён', 'success')
+    return redirect(url_for('admin.document_types_list'))
+
+
 @admin_bp.route('/documents/')
 @login_required
 def documents_list():
-    docs = DocumentFile.query.order_by(DocumentFile.created_at.desc()).all()
-    return render_template('admin/documents_list.html', documents=docs)
+    type_id = request.args.get('type_id', type=int)
+    query = DocumentFile.query
+    if type_id:
+        query = query.filter_by(document_type_id=type_id)
+    docs = query.order_by(DocumentFile.sort_order, DocumentFile.created_at.desc()).all()
+    types = DocumentType.query.order_by(DocumentType.sort_order).all()
+    return render_template('admin/documents_list.html', documents=docs, document_types=types, current_type_id=type_id)
 
 
 @admin_bp.route('/documents/upload/', methods=['GET', 'POST'])
 @login_required
 def documents_upload():
+    types = DocumentType.query.order_by(DocumentType.sort_order).all()
+    preselect_type_id = request.args.get('type_id', type=int)
+    
     if request.method == 'POST':
         file = request.files.get('file')
-        title = request.form.get('title', '')
-        doc_type = request.form.get('doc_type', 'other')
+        title = request.form.get('title', '').strip()
+        description = request.form.get('description', '').strip()
+        document_type_id = request.form.get('document_type_id', type=int)
+        sort_order = int(request.form.get('sort_order', 0) or 0)
         
         if file and file.filename:
             filename = secure_filename(file.filename)
@@ -1561,25 +1622,81 @@ def documents_upload():
             filepath = os.path.join(upload_path, filename)
             file.save(filepath)
             
+            slug = generate_slug(title or filename.rsplit('.', 1)[0])
+            existing = DocumentFile.query.filter_by(slug=slug).first()
+            if existing:
+                import time
+                slug = f"{slug}-{int(time.time())}"
+            
             doc = DocumentFile(
                 title=title or filename,
-                file_path=filepath,
-                doc_type=doc_type
+                slug=slug,
+                description=description,
+                file_path='/' + filepath,
+                document_type_id=document_type_id,
+                sort_order=sort_order
             )
             db.session.add(doc)
             db.session.commit()
             flash('Документ загружен', 'success')
+            
+            doc_type = DocumentType.query.get(document_type_id) if document_type_id else None
+            if doc_type and doc_type.has_own_page:
+                return redirect(url_for('admin.documents_edit', id=doc.id))
         return redirect(url_for('admin.documents_list'))
     
-    return render_template('admin/documents_form.html')
+    return render_template('admin/documents_form.html', doc=None, document_types=types, preselect_type_id=preselect_type_id)
+
+
+@admin_bp.route('/documents/<int:id>/edit/', methods=['GET', 'POST'])
+@login_required
+def documents_edit(id):
+    doc = DocumentFile.query.get_or_404(id)
+    types = DocumentType.query.order_by(DocumentType.sort_order).all()
+    
+    if request.method == 'POST':
+        doc.title = request.form.get('title', '').strip()
+        doc.slug = request.form.get('slug', '').strip() or generate_slug(doc.title)
+        doc.description = request.form.get('description', '').strip()
+        doc.document_type_id = request.form.get('document_type_id', type=int)
+        doc.sort_order = int(request.form.get('sort_order', 0) or 0)
+        
+        doc.seo_title = request.form.get('seo_title', '').strip()
+        doc.seo_description = request.form.get('seo_description', '').strip()
+        doc.h1 = request.form.get('h1', '').strip()
+        doc.seo_text_html = bleach.clean(request.form.get('seo_text_html', ''), tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRS, strip=True)
+        
+        preview = request.files.get('preview_image')
+        if preview and preview.filename:
+            preview_path = save_uploaded_image(preview, 'documents/previews')
+            if preview_path:
+                doc.preview_image = preview_path
+        
+        new_file = request.files.get('file')
+        if new_file and new_file.filename:
+            filename = secure_filename(new_file.filename)
+            upload_path = os.path.join('static', 'uploads', 'documents')
+            os.makedirs(upload_path, exist_ok=True)
+            filepath = os.path.join(upload_path, filename)
+            new_file.save(filepath)
+            doc.file_path = '/' + filepath
+        
+        db.session.commit()
+        flash('Документ обновлён', 'success')
+        return redirect(url_for('admin.documents_list'))
+    
+    return render_template('admin/documents_form.html', doc=doc, document_types=types, preselect_type_id=None)
 
 
 @admin_bp.route('/documents/<int:id>/delete/', methods=['POST'])
 @login_required
 def documents_delete(id):
     doc = DocumentFile.query.get_or_404(id)
-    if os.path.exists(doc.file_path):
-        os.remove(doc.file_path)
+    filepath = doc.file_path.lstrip('/')
+    if os.path.exists(filepath):
+        os.remove(filepath)
+    if doc.preview_image and os.path.exists(doc.preview_image.lstrip('/')):
+        os.remove(doc.preview_image.lstrip('/'))
     db.session.delete(doc)
     db.session.commit()
     flash('Документ удалён', 'success')

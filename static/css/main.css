@@ -293,13 +293,33 @@ h3 { font-family: var(--font-heading); font-size: 20px; font-weight: 600; margin
 .seo-text { margin-top: 50px; padding-top: 40px; border-top: 2px solid var(--border-color); color: var(--text-light); font-size: 14px; line-height: 1.8; }
 
 /* Documents list */
+/* Documents filter */
+.documents-filter { margin-bottom: 30px; }
+.filter-form .filter-row { display: flex; flex-wrap: wrap; gap: 20px; justify-content: space-between; align-items: center; }
+.filter-types { display: flex; flex-wrap: wrap; gap: 8px; }
+.filter-btn { padding: 8px 16px; background: #f5f5f5; border: 1px solid var(--border-color); border-radius: 20px; text-decoration: none; color: var(--text-color); font-size: 14px; transition: all 0.2s; }
+.filter-btn:hover { background: #e0e0e0; }
+.filter-btn.active { background: var(--primary-color); color: white; border-color: var(--primary-color); }
+.filter-search { display: flex; gap: 10px; }
+.filter-search input[type="text"] { padding: 8px 16px; border: 1px solid var(--border-color); border-radius: var(--radius); min-width: 200px; }
+.filter-search .btn { padding: 8px 20px; }
+
+/* Documents list */
 .documents-list { margin-top: 30px; }
-.document-item { background: white; border: 1px solid var(--border-color); border-radius: var(--radius); padding: 20px; margin-bottom: 15px; transition: box-shadow 0.2s; }
+.document-item { background: white; border: 1px solid var(--border-color); border-radius: var(--radius); padding: 20px; margin-bottom: 15px; transition: box-shadow 0.2s; position: relative; }
 .document-item:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
 .document-link { display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--text-color); font-weight: 600; font-size: 16px; }
 .document-link:hover { color: var(--primary-color); }
 .document-icon { font-size: 24px; }
 .document-description { margin-top: 10px; color: var(--text-light); font-size: 14px; line-height: 1.6; }
+.document-type-badge { position: absolute; top: 10px; right: 10px; background: #f0f0f0; padding: 4px 10px; border-radius: 12px; font-size: 12px; color: #666; }
+
+@media (max-width: 768px) {
+    .filter-form .filter-row { flex-direction: column; align-items: stretch; }
+    .filter-types { justify-content: center; }
+    .filter-search { justify-content: center; }
+    .filter-search input[type="text"] { flex: 1; min-width: 150px; }
+}
 
 .description { margin-bottom: 30px; line-height: 1.8; font-size: 16px; }
 .category-short-desc { margin-bottom: 30px; line-height: 1.8; font-size: 16px; text-align: justify; }

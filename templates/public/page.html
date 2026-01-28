@@ -28,18 +28,45 @@
 <div class="page-content">
     {{ page.content_html|safe }}
     
-    {% if documents %}
+    {% if document_types is not none %}
+    <div class="documents-filter">
+        <form method="GET" class="filter-form">
+            <div class="filter-row">
+                <div class="filter-types">
+                    <a href="/documentation/" class="filter-btn {% if not current_type_slug %}active{% endif %}">Все</a>
+                    {% for dt in document_types %}
+                    <a href="/documentation/?type={{ dt.slug }}" class="filter-btn {% if current_type_slug == dt.slug %}active{% endif %}">{{ dt.name }}</a>
+                    {% endfor %}
+                </div>
+                <div class="filter-search">
+                    <input type="text" name="q" placeholder="Поиск по названию..." value="{{ search_query or '' }}">
+                    {% if current_type_slug %}<input type="hidden" name="type" value="{{ current_type_slug }}">{% endif %}
+                    <button type="submit" class="btn btn-primary">Найти</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    
     <div class="documents-list">
         {% for doc in documents %}
         <div class="document-item">
+            {% if doc.document_type and doc.document_type.has_own_page and doc.slug %}
+            <a href="{{ url_for('public.document_page', slug=doc.slug) }}" class="document-link">
+            {% else %}
             <a href="{{ doc.file_path }}" target="_blank" class="document-link">
+            {% endif %}
                 <span class="document-icon">📄</span>
                 <span class="document-name">{{ doc.title }}</span>
             </a>
             {% if doc.description %}
             <p class="document-description">{{ doc.description }}</p>
             {% endif %}
+            {% if doc.document_type %}
+            <span class="document-type-badge">{{ doc.document_type.name }}</span>
+            {% endif %}
         </div>
+        {% else %}
+        <p style="text-align:center; color: #999;">Документы не найдены</p>
         {% endfor %}
     </div>
     {% endif %}

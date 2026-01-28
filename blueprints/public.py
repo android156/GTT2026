@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, abort, Response, send_file, make_response, jsonify
 from extensions import db
-from models import Page, MenuItem, Category, ProductLine, SizeItem, News, Lead, Setting, Service, SiteSection, HomeGalleryImage, ProductLineImage, AccessoryBlock, ServiceImage, DocumentFile
+from models import Page, MenuItem, Category, ProductLine, SizeItem, News, Lead, Setting, Service, SiteSection, HomeGalleryImage, ProductLineImage, AccessoryBlock, ServiceImage, DocumentFile, DocumentType
 from services.seo import get_page_seo, get_canonical_url, get_og_tags
 from services.schema import generate_product_jsonld, generate_breadcrumb_jsonld, generate_organization_jsonld
 from services.image_utils import get_watermarked_image_bytes
@@ -251,14 +251,37 @@ def static_page(url_path):
         hero = get_hero_for_page(page) or get_hero_for_url(url_path)
         
         documents = None
+        document_types = None
+        current_type_slug = None
+        search_query = None
         if url_path == '/documentation/':
-            documents = DocumentFile.query.order_by(DocumentFile.created_at.desc()).all()
+            document_types = DocumentType.query.order_by(DocumentType.sort_order).all()
+            current_type_slug = request.args.get('type', '')
+            search_query = request.args.get('q', '').strip()
+            
+            query = DocumentFile.query
+            if current_type_slug:
+                dtype = DocumentType.query.filter_by(slug=current_type_slug).first()
+                if dtype:
+                    query = query.filter_by(document_type_id=dtype.id)
+            if search_query:
+                search_like = f'%{search_query}%'
+                query = query.filter(
+                    db.or_(
+                        DocumentFile.title.ilike(search_like),
+                        DocumentFile.description.ilike(search_like)
+                    )
+                )
+            documents = query.order_by(DocumentFile.sort_order, DocumentFile.created_at.desc()).all()
         
         return render_template('public/page.html',
                              page=page,
                              seo=seo,
                              hero=hero,
                              documents=documents,
+                             document_types=document_types,
+                             current_type_slug=current_type_slug,
+                             search_query=search_query,
                              breadcrumbs=breadcrumbs,
                              breadcrumbs_jsonld=generate_breadcrumb_jsonld(breadcrumbs),
                              canonical=get_canonical_url(url_path),
@@ -465,6 +488,50 @@ def submit_lead():
     
     referer = request.referrer or url_for('public.index')
     return redirect(referer)
+
+
+@public_bp.route('/documentation/download/<int:id>/')
+def document_download(id):
+    doc = DocumentFile.query.get_or_404(id)
+    filepath = doc.file_path.lstrip('/')
+    if os.path.exists(filepath):
+        return send_file(filepath, as_attachment=True)
+    abort(404)
+
+
+@public_bp.route('/documentation/<slug>/')
+def document_page(slug):
+    doc = DocumentFile.query.filter_by(slug=slug).first_or_404()
+    
+    if not doc.document_type or not doc.document_type.has_own_page:
+        return redirect(doc.file_path)
+    
+    seo = {
+        'title': doc.seo_title or doc.title,
+        'description': doc.seo_description or doc.description or '',
+        'h1': doc.h1 or doc.title,
+        'seo_text': doc.seo_text_html or ''
+    }
+    
+    breadcrumbs = [
+        {'name': 'Главная', 'url': '/'},
+        {'name': 'Документация', 'url': '/documentation/'},
+        {'name': doc.title, 'url': None}
+    ]
+    
+    page_data = Page.query.filter_by(url_path='/documentation/').first()
+    hero = None
+    if page_data:
+        hero = get_hero_for_page(page_data)
+    
+    return render_template('public/document_page.html',
+                         doc=doc,
+                         seo=seo,
+                         hero=hero,
+                         breadcrumbs=breadcrumbs,
+                         breadcrumbs_jsonld=generate_breadcrumb_jsonld(breadcrumbs),
+                         canonical=get_canonical_url(f'/documentation/{slug}/'),
+                         og=get_og_tags(seo['title'], seo['description']))
 
 
 @public_bp.route('/sitemap.xml')

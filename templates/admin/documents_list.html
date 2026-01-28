@@ -4,27 +4,51 @@
 
 {% block content %}
 <div class="card">
-    <p style="margin-bottom: 15px;">
-        <a href="{{ url_for('admin.documents_upload') }}" class="btn btn-success">Загрузить документ</a>
-    </p>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+        <div>
+            <a href="{{ url_for('admin.documents_upload') }}" class="btn btn-success">Загрузить документ</a>
+        </div>
+        <form method="GET" style="display: flex; gap: 10px; align-items: center;">
+            <select name="type_id" onchange="this.form.submit()" style="padding: 8px; border-radius: 4px; border: 1px solid #ddd;">
+                <option value="">Все типы</option>
+                {% for dt in document_types %}
+                <option value="{{ dt.id }}" {% if current_type_id == dt.id %}selected{% endif %}>{{ dt.name }}</option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
     <table>
         <thead>
-            <tr><th>Название</th><th>Тип</th><th>Файл</th><th>Дата</th><th>Действия</th></tr>
+            <tr><th>Название</th><th>Тип</th><th>Slug</th><th>Файл</th><th>Дата</th><th>Действия</th></tr>
         </thead>
         <tbody>
             {% for doc in documents %}
             <tr>
-                <td>{{ doc.title }}</td>
-                <td>{{ doc.doc_type }}</td>
-                <td><a href="/{{ doc.file_path }}" target="_blank">Скачать</a></td>
+                <td>
+                    {{ doc.title }}
+                    {% if doc.description %}<br><small style="color:#666;">{{ doc.description[:50] }}{% if doc.description|length > 50 %}...{% endif %}</small>{% endif %}
+                </td>
+                <td>
+                    {% if doc.document_type %}
+                        {{ doc.document_type.name }}
+                        {% if doc.document_type.has_own_page %}<span style="color:green;" title="Имеет свою страницу">*</span>{% endif %}
+                    {% else %}
+                        <span style="color:#999;">Не указан</span>
+                    {% endif %}
+                </td>
+                <td><code>{{ doc.slug or '-' }}</code></td>
+                <td><a href="{{ doc.file_path }}" target="_blank">Скачать</a></td>
                 <td>{{ doc.created_at.strftime('%d.%m.%Y') if doc.created_at else '-' }}</td>
                 <td class="actions">
+                    <a href="{{ url_for('admin.documents_edit', id=doc.id) }}" class="btn btn-sm btn-primary">Редактировать</a>
                     <form action="{{ url_for('admin.documents_delete', id=doc.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Удалить?')">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <button type="submit" class="btn btn-sm btn-danger">Удалить</button>
                     </form>
                 </td>
             </tr>
+            {% else %}
+            <tr><td colspan="6" style="text-align:center;color:#999;">Документы не найдены</td></tr>
             {% endfor %}
         </tbody>
     </table>

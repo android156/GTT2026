@@ -62,7 +62,10 @@
             <p class="document-description">{{ doc.description }}</p>
             {% endif %}
             {% if doc.document_type %}
-            <span class="document-type-badge">{{ doc.document_type.name }}</span>
+            <div class="document-type-badge">
+                <span class="type-name">{{ doc.document_type.name }}</span>
+                <span class="type-date">{{ doc.created_at.strftime('%d.%m.%Y') if doc.created_at else '' }}</span>
+            </div>
             {% endif %}
         </div>
         {% else %}

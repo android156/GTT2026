@@ -1616,7 +1616,15 @@ def documents_upload():
         sort_order = int(request.form.get('sort_order', 0) or 0)
         
         if file and file.filename:
-            filename = secure_filename(file.filename)
+            original_name = file.filename
+            _, ext = os.path.splitext(original_name)
+            safe_name = secure_filename(original_name)
+            if ext and not safe_name.lower().endswith(ext.lower()):
+                safe_name = safe_name + ext.lower() if safe_name else 'document' + ext.lower()
+            if not safe_name:
+                import time
+                safe_name = f"document_{int(time.time())}{ext.lower() if ext else ''}"
+            filename = safe_name
             upload_path = os.path.join('static', 'uploads', 'documents')
             os.makedirs(upload_path, exist_ok=True)
             filepath = os.path.join(upload_path, filename)
@@ -1688,7 +1696,15 @@ def documents_edit(id):
         
         new_file = request.files.get('file')
         if new_file and new_file.filename:
-            filename = secure_filename(new_file.filename)
+            original_name = new_file.filename
+            _, ext = os.path.splitext(original_name)
+            safe_name = secure_filename(original_name)
+            if ext and not safe_name.lower().endswith(ext.lower()):
+                safe_name = safe_name + ext.lower() if safe_name else 'document' + ext.lower()
+            if not safe_name:
+                import time
+                safe_name = f"document_{int(time.time())}{ext.lower() if ext else ''}"
+            filename = safe_name
             upload_path = os.path.join('static', 'uploads', 'documents')
             os.makedirs(upload_path, exist_ok=True)
             filepath = os.path.join(upload_path, filename)

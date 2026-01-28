@@ -175,7 +175,7 @@
             </div>
         </div>
 
-        <div id="preview-image-tools" style="margin-top: 30px; padding-top: 20px; border-top: 2px solid #ddd;">
+        <div id="preview-image-tools" style="margin-top: 30px; padding-top: 20px; border-top: 2px solid #ddd; {% if doc and doc.file_path and doc.file_path.lower().endswith(('.png', '.jpg', '.jpeg', '.webp')) %}display:none;{% endif %}">
             <h3 style="margin-bottom: 20px;">Инструменты превью изображения</h3>
             <div class="form-group">
                 <label>Превью изображение (скриншот или фото)</label>
@@ -277,8 +277,10 @@ if (document.getElementById('previewImageEl') && document.getElementById('previe
                 document.getElementById('docDimensions').textContent = data.file_info.dimensions || '';
                 document.getElementById('docFileSize').textContent = data.file_info.file_size_str || '';
                 document.getElementById('docFormat').textContent = data.file_info.format || '';
-                document.getElementById('docMaxWidth').value = data.file_info.width || 1600;
-                document.getElementById('docMaxHeight').value = data.file_info.height || 1600;
+                
+                // Устанавливаем реальные размеры в поля оптимизации
+                if (data.file_info.width) document.getElementById('docMaxWidth').value = data.file_info.width;
+                if (data.file_info.height) document.getElementById('docMaxHeight').value = data.file_info.height;
             }
         });
 }

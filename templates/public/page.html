@@ -151,15 +151,17 @@
         <div class="statutory-docs-grid">
             {% for doc in statutory_docs %}
             {% set doc_url = url_for('public.document_page', slug=doc.slug) if doc.document_type and doc.document_type.has_own_page and doc.slug else doc.file_path %}
-            <a href="{{ doc_url }}" class="statutory-card" {% if not (doc.document_type and doc.document_type.has_own_page and doc.slug) %}target="_blank"{% endif %}>
-                <div class="statutory-card-link">
-                    <span class="statutory-card-icon">📄</span>
-                    <span class="statutory-card-name">{{ doc.title }}</span>
-                </div>
-                {% if doc.description %}
-                <p class="statutory-card-desc">{{ doc.description }}</p>
-                {% endif %}
-            </a>
+            <div class="statutory-card-wrapper">
+                <a href="{{ doc_url }}" class="statutory-card" {% if not (doc.document_type and doc.document_type.has_own_page and doc.slug) %}target="_blank"{% endif %}>
+                    <div class="statutory-card-icon">📄</div>
+                    <div class="statutory-card-content">
+                        <div class="statutory-card-name">{{ doc.title }}</div>
+                        {% if doc.description %}
+                        <div class="statutory-card-desc">{{ doc.description }}</div>
+                        {% endif %}
+                    </div>
+                </a>
+            </div>
             {% endfor %}
         </div>
     </div>

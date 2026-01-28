@@ -2129,3 +2129,168 @@ def backup_upload():
     
     return redirect(url_for('admin.settings_list'))
 
+
+from services.pdf_utils import get_pdf_metadata, update_pdf_metadata, rename_file as rename_document_file
+
+
+@admin_bp.route('/api/document/<int:doc_id>/info/')
+@login_required
+def api_document_info(doc_id):
+    """Get document info including preview image and PDF metadata."""
+    doc = DocumentFile.query.get_or_404(doc_id)
+    
+    result = {
+        'id': doc.id,
+        'title': doc.title,
+        'file_path': doc.file_path,
+        'preview_image': doc.preview_image or '',
+        'preview_alt_text': doc.preview_alt_text or '',
+        'preview_title_text': doc.preview_title_text or '',
+        'preview_caption': doc.preview_caption or '',
+    }
+    
+    if doc.preview_image:
+        result['preview_info'] = get_image_info(doc.preview_image)
+    
+    if doc.file_path and doc.file_path.lower().endswith('.pdf'):
+        result['pdf_metadata'] = get_pdf_metadata(doc.file_path)
+    
+    return jsonify(result)
+
+
+@admin_bp.route('/api/document/<int:doc_id>/preview/update/', methods=['POST'])
+@login_required
+def api_document_preview_update(doc_id):
+    """Update document preview image SEO fields."""
+    doc = DocumentFile.query.get_or_404(doc_id)
+    
+    data = request.get_json() if request.is_json else request.form
+    
+    if 'alt_text' in data:
+        doc.preview_alt_text = data['alt_text']
+    if 'title_text' in data:
+        doc.preview_title_text = data['title_text']
+    if 'caption' in data:
+        doc.preview_caption = data['caption']
+    
+    db.session.commit()
+    return jsonify({'success': True})
+
+
+@admin_bp.route('/api/document/<int:doc_id>/preview/rename/', methods=['POST'])
+@login_required
+def api_document_preview_rename(doc_id):
+    """Rename document preview image file."""
+    doc = DocumentFile.query.get_or_404(doc_id)
+    
+    if not doc.preview_image:
+        return jsonify({'error': 'No preview image'}), 400
+    
+    data = request.get_json() if request.is_json else request.form
+    new_name = data.get('new_name', '').strip()
+    
+    if not new_name:
+        return jsonify({'error': 'New name is required'}), 400
+    
+    new_path, error = rename_image_file(doc.preview_image, new_name)
+    if error:
+        return jsonify({'error': error}), 400
+    
+    doc.preview_image = new_path
+    db.session.commit()
+    
+    return jsonify({'success': True, 'new_path': new_path})
+
+
+@admin_bp.route('/api/document/<int:doc_id>/preview/optimize/', methods=['POST'])
+@login_required
+def api_document_preview_optimize(doc_id):
+    """Optimize document preview image."""
+    doc = DocumentFile.query.get_or_404(doc_id)
+    
+    if not doc.preview_image:
+        return jsonify({'error': 'No preview image'}), 400
+    
+    data = request.get_json() if request.is_json else request.form
+    quality = int(data.get('quality', 85))
+    max_width = int(data.get('max_width', 1920))
+    max_height = int(data.get('max_height', 1920))
+    convert_to_webp = data.get('convert_to_webp', False)
+    if isinstance(convert_to_webp, str):
+        convert_to_webp = convert_to_webp.lower() in ('true', '1', 'on')
+    
+    new_path, error = optimize_image(
+        doc.preview_image,
+        quality=quality,
+        max_width=max_width,
+        max_height=max_height,
+        convert_to_webp=convert_to_webp
+    )
+    
+    if error:
+        return jsonify({'error': error}), 400
+    
+    if new_path != doc.preview_image:
+        old_path = doc.preview_image.lstrip('/')
+        doc.preview_image = new_path
+        db.session.commit()
+        if os.path.exists(old_path) and new_path.lstrip('/') != old_path:
+            try:
+                os.remove(old_path)
+            except Exception:
+                pass
+    
+    info = get_image_info(new_path)
+    return jsonify({'success': True, 'new_path': new_path, 'info': info})
+
+
+@admin_bp.route('/api/document/<int:doc_id>/rename/', methods=['POST'])
+@login_required
+def api_document_rename(doc_id):
+    """Rename document file."""
+    doc = DocumentFile.query.get_or_404(doc_id)
+    
+    data = request.get_json() if request.is_json else request.form
+    new_name = data.get('new_name', '').strip()
+    
+    if not new_name:
+        return jsonify({'error': 'New name is required'}), 400
+    
+    new_path, error = rename_document_file(doc.file_path, new_name)
+    if error:
+        return jsonify({'error': error}), 400
+    
+    doc.file_path = new_path
+    db.session.commit()
+    
+    return jsonify({'success': True, 'new_path': new_path})
+
+
+@admin_bp.route('/api/document/<int:doc_id>/pdf-metadata/', methods=['GET', 'POST'])
+@login_required
+def api_document_pdf_metadata(doc_id):
+    """Get or update PDF metadata."""
+    doc = DocumentFile.query.get_or_404(doc_id)
+    
+    if not doc.file_path or not doc.file_path.lower().endswith('.pdf'):
+        return jsonify({'error': 'Not a PDF file'}), 400
+    
+    if request.method == 'GET':
+        metadata = get_pdf_metadata(doc.file_path)
+        return jsonify(metadata or {})
+    
+    data = request.get_json() if request.is_json else request.form
+    
+    success, error = update_pdf_metadata(
+        doc.file_path,
+        title=data.get('title'),
+        author=data.get('author'),
+        subject=data.get('subject'),
+        keywords=data.get('keywords')
+    )
+    
+    if not success:
+        return jsonify({'error': error}), 400
+    
+    return jsonify({'success': True})
+

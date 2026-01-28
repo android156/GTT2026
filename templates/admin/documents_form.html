@@ -306,6 +306,32 @@ function savePdfMetadata() {
     .catch(err => alert('Ошибка сохранения'));
 }
 
+function savePreviewSeo() {
+    const data = {
+        alt_text: document.getElementById('previewAltText').value,
+        title_text: document.getElementById('previewTitleText').value,
+        caption: document.getElementById('previewCaption').value
+    };
+    
+    fetch(`/admin/api/document/${docId}/preview/update/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            alert('SEO данные превью сохранены');
+        } else {
+            alert('Ошибка: ' + result.error);
+        }
+    })
+    .catch(err => alert('Ошибка сохранения'));
+}
+
 function renamePreviewImage() {
     const newName = document.getElementById('newPreviewFilename').value.trim();
     if (!newName) {
@@ -365,7 +391,6 @@ function optimizePreviewImage() {
     })
     .catch(err => alert('Ошибка оптимизации'));
 }
-{% endif %}
 {% endif %}
 </script>
 {% endblock %}

@@ -1624,13 +1624,19 @@ def documents_upload():
             if not safe_name:
                 import time
                 safe_name = f"document_{int(time.time())}{ext.lower() if ext else ''}"
-            filename = safe_name
+            # Use slug as filename base if possible
+            slug_base = generate_slug(title or original_name.rsplit('.', 1)[0])
+            if slug_base:
+                filename = f"{slug_base}{ext.lower()}"
+            else:
+                filename = safe_name
+                
             upload_path = os.path.join('static', 'uploads', 'documents')
             os.makedirs(upload_path, exist_ok=True)
             filepath = os.path.join(upload_path, filename)
             file.save(filepath)
             
-            slug = generate_slug(title or filename.rsplit('.', 1)[0])
+            slug = slug_base or generate_slug(title or filename.rsplit('.', 1)[0])
             existing = DocumentFile.query.filter_by(slug=slug).first()
             if existing:
                 import time
@@ -1699,12 +1705,14 @@ def documents_edit(id):
             original_name = new_file.filename
             _, ext = os.path.splitext(original_name)
             safe_name = secure_filename(original_name)
-            if ext and not safe_name.lower().endswith(ext.lower()):
-                safe_name = safe_name + ext.lower() if safe_name else 'document' + ext.lower()
-            if not safe_name:
-                import time
-                safe_name = f"document_{int(time.time())}{ext.lower() if ext else ''}"
-            filename = safe_name
+            
+            # Use slug as filename base if possible
+            slug_base = generate_slug(doc.title or original_name.rsplit('.', 1)[0])
+            if slug_base:
+                filename = f"{slug_base}{ext.lower()}"
+            else:
+                filename = safe_name
+                
             upload_path = os.path.join('static', 'uploads', 'documents')
             os.makedirs(upload_path, exist_ok=True)
             filepath = os.path.join(upload_path, filename)

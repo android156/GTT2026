@@ -93,18 +93,26 @@
         });
     </script>
     {% endif %}
-    {% if page.url_path == 'contacts' or page.url_path == '/contacts/' %}
+    {% if page.url_path == '/contacts/' or page.url_path == '/price/' %}
     <section class="service-cta-section" id="callback" style="margin-top: 60px;">
         <div class="cta-content">
             <div class="cta-info">
+                {% if page.url_path == '/price/' %}
+                <h3>Нужен расчет стоимости?</h3>
+                <p>Мы используем контакты только для расчета стоимости и связи по заявке</p>
+                {% else %}
                 <h3>Остались вопросы?</h3>
                 <p>Оставьте заявку, и наш специалист свяжется с вами в течение 15 минут.</p>
+                {% endif %}
             </div>
         </div>
         <div class="cta-form-wrapper">
             <form action="{{ url_for('public.submit_lead') }}" method="POST" class="lead-form service-lead-form" id="contacts-lead-form">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <input type="hidden" name="page_url" value="{{ request.url }}">
+                {% if page.url_path == '/price/' %}
+                <input type="hidden" name="message" value="Запрос расчета стоимости со страницы цен">
+                {% endif %}
                 <input type="hidden" name="utm_source" value="">
                 <input type="hidden" name="utm_medium" value="">
                 <input type="hidden" name="utm_campaign" value="">
@@ -121,9 +129,11 @@
                 <div class="form-row">
                     <input type="email" name="email" placeholder="Email">
                 </div>
+                {% if page.url_path == '/contacts/' %}
                 <div class="form-row">
                     <textarea name="message" placeholder="Ваш вопрос или сообщение" style="width: 100%; min-height: 100px; padding: 12px; border: 1px solid var(--border-color); border-radius: var(--radius); margin-bottom: 15px; font-family: inherit;"></textarea>
                 </div>
+                {% endif %}
                 <div class="form-row captcha-row">
                     <label id="contacts-captcha-question">Загрузка...</label>
                     <input type="number" name="captcha_answer" placeholder="Ответ" required>

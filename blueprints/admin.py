@@ -1677,7 +1677,7 @@ def documents_edit(id):
         doc.seo_title = request.form.get('seo_title', '').strip()
         doc.seo_description = request.form.get('seo_description', '').strip()
         doc.h1 = request.form.get('h1', '').strip()
-        doc.seo_text_html = sanitize_html(request.form.get('seo_text_html', ''))
+        doc.seo_text_html = request.form.get('seo_text_html', '')
         
         preview = request.files.get('preview_image')
         if preview and preview.filename:

@@ -253,7 +253,7 @@ def static_page(url_path):
         # Учредительные документы для страниц /about/ и /contacts/
         statutory_docs = None
         if url_path in ['/about/', '/contacts/']:
-            statutory_type = DocumentType.query.filter_by(slug='uchreditelnye-dokumenty').first()
+            statutory_type = DocumentType.query.filter_by(slug='legal').first()
             if statutory_type:
                 statutory_docs = DocumentFile.query.filter_by(document_type_id=statutory_type.id).order_by(DocumentFile.sort_order).all()
         

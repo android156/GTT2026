@@ -1634,8 +1634,20 @@ def documents_upload():
                 description=description,
                 file_path='/' + filepath,
                 document_type_id=document_type_id,
-                sort_order=sort_order
+                sort_order=sort_order,
+                seo_title=request.form.get('seo_title', '').strip(),
+                seo_description=request.form.get('seo_description', '').strip(),
+                h1=request.form.get('h1', '').strip(),
+                seo_text_html=sanitize_html(request.form.get('seo_text_html', ''))
             )
+            
+            # Обработка превью при загрузке
+            preview = request.files.get('preview_image')
+            if preview and preview.filename:
+                preview_path = save_uploaded_image(preview, 'documents/previews')
+                if preview_path:
+                    doc.preview_image = preview_path
+                    
             db.session.add(doc)
             db.session.commit()
             flash('Документ загружен', 'success')
@@ -1643,6 +1655,7 @@ def documents_upload():
             doc_type = DocumentType.query.get(document_type_id) if document_type_id else None
             if doc_type and doc_type.has_own_page:
                 return redirect(url_for('admin.documents_edit', id=doc.id))
+            return redirect(url_for('admin.documents_list'))
         return redirect(url_for('admin.documents_list'))
     
     return render_template('admin/documents_form.html', doc=None, document_types=types, preselect_type_id=preselect_type_id)
@@ -1664,7 +1677,7 @@ def documents_edit(id):
         doc.seo_title = request.form.get('seo_title', '').strip()
         doc.seo_description = request.form.get('seo_description', '').strip()
         doc.h1 = request.form.get('h1', '').strip()
-        doc.seo_text_html = bleach.clean(request.form.get('seo_text_html', ''), tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRS, strip=True)
+        doc.seo_text_html = sanitize_html(request.form.get('seo_text_html', ''))
         
         preview = request.files.get('preview_image')
         if preview and preview.filename:

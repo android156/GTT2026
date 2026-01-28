@@ -2176,6 +2176,12 @@ def api_document_info(doc_id):
     if doc.preview_image:
         result['preview_info'] = get_image_info(doc.preview_image)
     
+    # Добавляем информацию об основном файле, если это изображение
+    if doc.file_path:
+        file_ext = doc.file_path.lower().split('.')[-1]
+        if file_ext in ['jpg', 'jpeg', 'png', 'webp']:
+            result['file_info'] = get_image_info(doc.file_path)
+    
     if doc.file_path and doc.file_path.lower().endswith('.pdf'):
         result['pdf_metadata'] = get_pdf_metadata(doc.file_path)
     
@@ -2229,13 +2235,17 @@ def api_document_preview_rename(doc_id):
 @admin_bp.route('/api/document/<int:doc_id>/preview/optimize/', methods=['POST'])
 @login_required
 def api_document_preview_optimize(doc_id):
-    """Optimize document preview image."""
+    """Optimize document image (preview or main file)."""
     doc = DocumentFile.query.get_or_404(doc_id)
     
-    if not doc.preview_image:
-        return jsonify({'error': 'No preview image'}), 400
-    
     data = request.get_json() if request.is_json else request.form
+    is_main_file = data.get('is_main_file', False)
+    
+    image_path = doc.file_path if is_main_file else doc.preview_image
+    
+    if not image_path:
+        return jsonify({'error': 'No image to optimize'}), 400
+    
     quality = int(data.get('quality', 85))
     max_width = int(data.get('max_width', 1920))
     max_height = int(data.get('max_height', 1920))
@@ -2244,7 +2254,7 @@ def api_document_preview_optimize(doc_id):
         convert_to_webp = convert_to_webp.lower() in ('true', '1', 'on')
     
     new_path, error = optimize_image(
-        doc.preview_image,
+        image_path,
         quality=quality,
         max_width=max_width,
         max_height=max_height,
@@ -2254,9 +2264,12 @@ def api_document_preview_optimize(doc_id):
     if error:
         return jsonify({'error': error}), 400
     
-    if new_path != doc.preview_image:
-        old_path = doc.preview_image.lstrip('/')
-        doc.preview_image = new_path
+    if new_path != image_path:
+        old_path = image_path.lstrip('/')
+        if is_main_file:
+            doc.file_path = new_path
+        else:
+            doc.preview_image = new_path
         db.session.commit()
         if os.path.exists(old_path) and new_path.lstrip('/') != old_path:
             try:

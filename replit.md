@@ -36,7 +36,9 @@
 │   ├── schema.py       # JSON-LD
 │   ├── slug.py         # Слаги
 │   ├── importers.py    # CSV импорт
-│   └── size_matcher.py # Парсинг размеров и подбор комплектующих
+│   ├── size_matcher.py # Парсинг размеров и подбор комплектующих
+│   ├── image_utils.py  # Оптимизация изображений
+│   └── pdf_utils.py    # Работа с PDF метаданными
 ├── templates/
 │   ├── base.html
 │   ├── public/
@@ -111,6 +113,12 @@ flask admin ensure
 - Ручные редиректы через админку имеют приоритет
 
 ## Последние изменения
+- 2026-01-28: Инструменты управления документами:
+  - Переименование файлов документов через API /api/document/<id>/rename/
+  - SEO-инструменты для превью-изображений: alt, title, caption, оптимизация, конвертация в WebP
+  - Редактирование метаданных PDF (Title, Author, Subject, Keywords)
+  - Сервис services/pdf_utils.py для работы с PDF файлами (pypdf)
+  - Новые поля DocumentFile: preview_alt_text, preview_title_text, preview_caption
 - 2026-01-28: Система управления типами документов:
   - Модель DocumentType: name, slug, has_own_page, sort_order
   - Фильтрация документов по типу на странице /documentation/

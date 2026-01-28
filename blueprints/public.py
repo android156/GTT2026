@@ -508,8 +508,8 @@ def document_page(slug):
     
     seo = {
         'title': doc.seo_title or doc.title,
-        'description': doc.seo_description or doc.description or '',
-        'h1': doc.h1 or doc.title,
+        'description': doc.description or doc.seo_description or '',
+        'h1': doc.title,
         'seo_text': doc.seo_text_html or ''
     }
     

@@ -2,15 +2,6 @@
 
 {% block hero %}
 <h1 class="visually-hidden">{{ seo.h1 }}</h1>
-{% if hero %}
-<section class="hero page-hero" style="background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('{{ hero.image }}');">
-    <div class="container">
-        <div class="hero-content">
-            <div class="hero-main-title">{{ seo.h1 }}</div>
-        </div>
-    </div>
-</section>
-{% endif %}
 {% endblock %}
 
 {% block content %}
@@ -28,7 +19,7 @@
     <div class="document-content-wrapper">
         <div class="document-preview">
             {% if doc.preview_image %}
-            <img src="{{ doc.preview_image }}" alt="{{ doc.title }}" class="document-preview-img">
+            <img src="{{ doc.preview_image }}" alt="{{ doc.preview_alt_text or doc.title }}" title="{{ doc.preview_title_text or '' }}" class="document-preview-img">
             {% else %}
             <div class="document-preview-placeholder">
                 <span class="placeholder-icon">📄</span>

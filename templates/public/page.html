@@ -33,7 +33,8 @@
         <form method="GET" class="filter-form">
             <div class="filter-row">
                 <div class="filter-types">
-                    <select name="type" onchange="this.form.submit()" class="filter-select">
+                    <label for="doc-type-select">Категория документа</label>
+                    <select name="type" id="doc-type-select" onchange="this.form.submit()" class="filter-select">
                         <option value="" {% if not current_type_slug %}selected{% endif %}>Все типы документов</option>
                         {% for dt in document_types %}
                         <option value="{{ dt.slug }}" {% if current_type_slug == dt.slug %}selected{% endif %}>{{ dt.name }}</option>
@@ -41,7 +42,10 @@
                     </select>
                 </div>
                 <div class="filter-search">
-                    <input type="text" name="q" placeholder="Поиск по названию..." value="{{ search_query or '' }}">
+                    <div class="filter-search-input">
+                        <label for="doc-search-q">Поиск по названию</label>
+                        <input type="text" id="doc-search-q" name="q" placeholder="Начните вводить..." value="{{ search_query or '' }}">
+                    </div>
                     <button type="submit" class="btn btn-primary">Найти</button>
                 </div>
             </div>

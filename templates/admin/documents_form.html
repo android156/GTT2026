@@ -261,29 +261,27 @@ document.querySelector('select[name="document_type_id"]').addEventListener('chan
 const docId = {{ doc.id }};
 const csrfToken = document.querySelector('input[name="csrf_token"]').value;
 
-// Initial load of info if image exists
-if (document.getElementById('previewImageEl') && document.getElementById('previewImageEl').src && !document.getElementById('previewImageEl').src.endsWith('/')) {
-    fetch(`/admin/api/document/${docId}/info/`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.preview_info) {
-                document.getElementById('previewDimensions').textContent = data.preview_info.dimensions;
-                document.getElementById('previewFileSize').textContent = data.preview_info.file_size_str;
-                document.getElementById('previewFormat').textContent = data.preview_info.format;
-                document.getElementById('previewMaxWidth').value = data.preview_info.width || 1200;
-                document.getElementById('previewMaxHeight').value = data.preview_info.height || 1200;
-            }
-            if (data.file_info && document.getElementById('docDimensions')) {
-                document.getElementById('docDimensions').textContent = data.file_info.dimensions || '';
-                document.getElementById('docFileSize').textContent = data.file_info.file_size_str || '';
-                document.getElementById('docFormat').textContent = data.file_info.format || '';
-                
-                // Устанавливаем реальные размеры в поля оптимизации
-                if (data.file_info.width) document.getElementById('docMaxWidth').value = data.file_info.width;
-                if (data.file_info.height) document.getElementById('docMaxHeight').value = data.file_info.height;
-            }
-        });
-}
+// Initial load of info
+fetch(`/admin/api/document/${docId}/info/`)
+    .then(response => response.json())
+    .then(data => {
+        if (data.preview_info && document.getElementById('previewDimensions')) {
+            document.getElementById('previewDimensions').textContent = data.preview_info.dimensions;
+            document.getElementById('previewFileSize').textContent = data.preview_info.file_size_str;
+            document.getElementById('previewFormat').textContent = data.preview_info.format;
+            document.getElementById('previewMaxWidth').value = data.preview_info.width || 1200;
+            document.getElementById('previewMaxHeight').value = data.preview_info.height || 1200;
+        }
+        if (data.file_info && document.getElementById('docDimensions')) {
+            document.getElementById('docDimensions').textContent = data.file_info.dimensions || '';
+            document.getElementById('docFileSize').textContent = data.file_info.file_size_str || '';
+            document.getElementById('docFormat').textContent = data.file_info.format || '';
+            
+            // Устанавливаем реальные размеры в поля оптимизации
+            if (data.file_info.width) document.getElementById('docMaxWidth').value = data.file_info.width;
+            if (data.file_info.height) document.getElementById('docMaxHeight').value = data.file_info.height;
+        }
+    });
 
 function optimizeDocumentImage() {
     const data = {

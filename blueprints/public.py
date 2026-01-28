@@ -250,6 +250,13 @@ def static_page(url_path):
         
         hero = get_hero_for_page(page) or get_hero_for_url(url_path)
         
+        # Учредительные документы для страниц /about/ и /contacts/
+        statutory_docs = None
+        if url_path in ['/about/', '/contacts/']:
+            statutory_type = DocumentType.query.filter_by(slug='uchreditelnye-dokumenty').first()
+            if statutory_type:
+                statutory_docs = DocumentFile.query.filter_by(document_type_id=statutory_type.id).order_by(DocumentFile.sort_order).all()
+        
         documents = None
         document_types = None
         current_type_slug = None
@@ -279,6 +286,7 @@ def static_page(url_path):
                              seo=seo,
                              hero=hero,
                              documents=documents,
+                             statutory_docs=statutory_docs,
                              document_types=document_types,
                              current_type_slug=current_type_slug,
                              search_query=search_query,

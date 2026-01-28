@@ -133,6 +133,29 @@
         </div>
     </section>
     {% endif %}
+
+    {% if statutory_docs %}
+    <div class="statutory-docs-section" style="margin-top: 40px;">
+        <h3 style="margin-bottom: 20px;">Учредительные документы</h3>
+        <div class="documents-list">
+            {% for doc in statutory_docs %}
+            <div class="document-item">
+                {% if doc.document_type and doc.document_type.has_own_page and doc.slug %}
+                <a href="{{ url_for('public.document_page', slug=doc.slug) }}" class="document-link">
+                {% else %}
+                <a href="{{ doc.file_path }}" target="_blank" class="document-link">
+                {% endif %}
+                    <span class="document-icon">📄</span>
+                    <span class="document-name">{{ doc.title }}</span>
+                </a>
+                {% if doc.description %}
+                <p class="document-description">{{ doc.description }}</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
 </div>
 
 {% if seo.seo_text %}

@@ -33,14 +33,15 @@
         <form method="GET" class="filter-form">
             <div class="filter-row">
                 <div class="filter-types">
-                    <a href="/documentation/" class="filter-btn {% if not current_type_slug %}active{% endif %}">Все</a>
-                    {% for dt in document_types %}
-                    <a href="/documentation/?type={{ dt.slug }}" class="filter-btn {% if current_type_slug == dt.slug %}active{% endif %}">{{ dt.name }}</a>
-                    {% endfor %}
+                    <select name="type" onchange="this.form.submit()" class="filter-select">
+                        <option value="" {% if not current_type_slug %}selected{% endif %}>Все типы документов</option>
+                        {% for dt in document_types %}
+                        <option value="{{ dt.slug }}" {% if current_type_slug == dt.slug %}selected{% endif %}>{{ dt.name }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
                 <div class="filter-search">
                     <input type="text" name="q" placeholder="Поиск по названию..." value="{{ search_query or '' }}">
-                    {% if current_type_slug %}<input type="hidden" name="type" value="{{ current_type_slug }}">{% endif %}
                     <button type="submit" class="btn btn-primary">Найти</button>
                 </div>
             </div>

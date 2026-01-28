@@ -2,6 +2,15 @@
 
 {% block hero %}
 <h1 class="visually-hidden">{{ seo.h1 }}</h1>
+{% if hero %}
+<section class="hero page-hero" style="background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('{{ hero.image }}');">
+    <div class="container">
+        <div class="hero-content">
+            {# Заголовок удален по просьбе пользователя #}
+        </div>
+    </div>
+</section>
+{% endif %}
 {% endblock %}
 
 {% block content %}

@@ -116,7 +116,31 @@
             <h3 style="margin-bottom: 20px;">SEO-настройки страницы документа</h3>
             
             <div class="form-group">
-                <label>Превью изображение (первая страница документа)</label>
+                <label>SEO Title</label>
+                <input type="text" name="seo_title" value="{{ doc.seo_title if doc else '' }}" placeholder="Пример: Изопрофлекс 95 — техническое описание | Документация">
+            </div>
+            
+            <div class="form-group">
+                <label>H1</label>
+                <input type="text" name="h1" value="{{ doc.h1 if doc else '' }}" placeholder="Пример: Изопрофлекс 95 — техническое описание">
+            </div>
+            
+            <div class="form-group">
+                <label>SEO Description</label>
+                <textarea name="seo_description" rows="3" placeholder="Пример: Техническое описание труб Изопрофлекс 95 (0,6 МПа): типоразмеры, конструкция...">{{ doc.seo_description if doc else '' }}</textarea>
+            </div>
+            
+            <div class="form-group">
+                <label>SEO-текст страницы (содержит ссылку на скачивание и связанные разделы)</label>
+                <textarea name="seo_text_html" id="seo_text_html" class="form-control" rows="10">{{ doc.seo_text_html if doc else '' }}</textarea>
+                <small style="color:#666;">Текст сохраняется как есть. Вы можете использовать HTML-теги для форматирования.</small>
+            </div>
+        </div>
+
+        <div id="preview-image-tools" style="margin-top: 30px; padding-top: 20px; border-top: 2px solid #ddd;">
+            <h3 style="margin-bottom: 20px;">Инструменты превью изображения</h3>
+            <div class="form-group">
+                <label>Превью изображение (скриншот или фото)</label>
                 <div id="preview-section-wrapper" style="{% if not doc or not doc.preview_image %}display:none;{% endif %}">
                     <div class="preview-edit-section">
                         <div class="preview-image-container">
@@ -179,27 +203,6 @@
                     <small style="color:#666;">{% if doc and doc.preview_image %}Загрузить новое превью{% else %}Рекомендуется: скриншот первой страницы документа{% endif %}</small>
                 </div>
             </div>
-            
-            <div class="form-group">
-                <label>SEO Title</label>
-                <input type="text" name="seo_title" value="{{ doc.seo_title if doc else '' }}" placeholder="Пример: Изопрофлекс 95 — техническое описание | Документация">
-            </div>
-            
-            <div class="form-group">
-                <label>H1</label>
-                <input type="text" name="h1" value="{{ doc.h1 if doc else '' }}" placeholder="Пример: Изопрофлекс 95 — техническое описание">
-            </div>
-            
-            <div class="form-group">
-                <label>SEO Description</label>
-                <textarea name="seo_description" rows="3" placeholder="Пример: Техническое описание труб Изопрофлекс 95 (0,6 МПа): типоразмеры, конструкция...">{{ doc.seo_description if doc else '' }}</textarea>
-            </div>
-            
-            <div class="form-group">
-                <label>SEO-текст страницы (содержит ссылку на скачивание и связанные разделы)</label>
-                <textarea name="seo_text_html" id="seo_text_html" class="form-control" rows="10">{{ doc.seo_text_html if doc else '' }}</textarea>
-                <small style="color:#666;">Текст сохраняется как есть. Вы можете использовать HTML-теги для форматирования.</small>
-            </div>
         </div>
         
         <div style="margin-top: 20px;">
@@ -221,7 +224,7 @@ const docId = {{ doc.id }};
 const csrfToken = document.querySelector('input[name="csrf_token"]').value;
 
 // Initial load of info if image exists
-if (document.getElementById('preview-section-wrapper') && document.getElementById('preview-section-wrapper').style.display !== 'none') {
+if (document.getElementById('previewImageEl') && document.getElementById('previewImageEl').src && !document.getElementById('previewImageEl').src.endsWith('/')) {
     fetch(`/admin/api/document/${docId}/info/`)
         .then(response => response.json())
         .then(data => {

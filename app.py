@@ -70,7 +70,7 @@ def create_app():
 
 
 def init_default_data():
-    from models import Page, MenuItem, Setting
+    from models import Page, MenuItem, Setting, RedirectRule
     
     default_pages = [
         {'slug': 'about', 'url_path': '/about/', 'title': 'О компании', 'content_html': '<p>Информация о компании ГлавТрубТорг.</p>'},
@@ -112,6 +112,17 @@ def init_default_data():
         if not Setting.query.filter_by(key=setting_data['key']).first():
             setting = Setting(**setting_data)
             db.session.add(setting)
+    
+    if not RedirectRule.query.filter_by(from_path='/catalog/*', is_pattern=True).first():
+        catalog_redirect = RedirectRule(
+            from_path='/catalog/*',
+            to_path='/*',
+            code=301,
+            is_active=True,
+            is_pattern=True,
+            comment='Системный редирект: /catalog/xxx/ -> /xxx/'
+        )
+        db.session.add(catalog_redirect)
     
     db.session.commit()
 

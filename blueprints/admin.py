@@ -1778,10 +1778,11 @@ def redirects_add():
     if request.method == 'POST':
         from_path = request.form.get('from_path', '').strip()
         to_path = request.form.get('to_path', '').strip()
+        is_pattern = request.form.get('is_pattern') == 'on'
         
         if not from_path.startswith('/'):
             from_path = '/' + from_path
-        if not from_path.endswith('/'):
+        if not is_pattern and not from_path.endswith('/'):
             from_path = from_path + '/'
         if not to_path.startswith('/'):
             to_path = '/' + to_path
@@ -1796,6 +1797,7 @@ def redirects_add():
             to_path=to_path,
             code=int(request.form.get('code', 301)),
             is_active=request.form.get('is_active') == 'on',
+            is_pattern=is_pattern,
             comment=request.form.get('comment', '')
         )
         db.session.add(rule)
@@ -1814,10 +1816,11 @@ def redirects_edit(id):
     if request.method == 'POST':
         from_path = request.form.get('from_path', '').strip()
         to_path = request.form.get('to_path', '').strip()
+        is_pattern = request.form.get('is_pattern') == 'on'
         
         if not from_path.startswith('/'):
             from_path = '/' + from_path
-        if not from_path.endswith('/'):
+        if not is_pattern and not from_path.endswith('/'):
             from_path = from_path + '/'
         if not to_path.startswith('/'):
             to_path = '/' + to_path
@@ -1826,6 +1829,7 @@ def redirects_edit(id):
         rule.to_path = to_path
         rule.code = int(request.form.get('code', 301))
         rule.is_active = request.form.get('is_active') == 'on'
+        rule.is_pattern = is_pattern
         rule.comment = request.form.get('comment', '')
         db.session.commit()
         flash('Редирект обновлён', 'success')

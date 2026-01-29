@@ -300,6 +300,7 @@ class RedirectRule(db.Model):
     to_path = db.Column(db.String(500), nullable=False)
     code = db.Column(db.Integer, default=301)
     is_active = db.Column(db.Boolean, default=True)
+    is_pattern = db.Column(db.Boolean, default=False)
     comment = db.Column(db.String(300), default='')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

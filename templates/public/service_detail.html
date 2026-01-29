@@ -72,6 +72,7 @@
     </div>
     {% endif %}
     
+    {% if service.slug != 'dostavka' %}
     <section class="service-cta-section" id="callback">
         <div class="cta-content">
             <div class="cta-info">
@@ -108,6 +109,7 @@
             </form>
         </div>
     </section>
+    {% endif %}
     
     {% if service.seo_text_html %}
     <div class="seo-text">

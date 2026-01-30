@@ -1,0 +1,9 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /login/
+Disallow: /api/
+Disallow: /wm/
+Disallow: /get-captcha/
+Allow: /
+
+Sitemap: {{ request.url_root.rstrip('/') }}/sitemap.xml

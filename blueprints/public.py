@@ -542,6 +542,13 @@ def document_page(slug):
                          og=get_og_tags(seo['title'], seo['description']))
 
 
+@public_bp.route('/robots.txt')
+def robots():
+    response = make_response(render_template('public/robots.txt'))
+    response.headers['Content-Type'] = 'text/plain'
+    return response
+
+
 @public_bp.route('/sitemap.xml')
 def sitemap():
     pages = []
@@ -597,20 +604,6 @@ def sitemap():
     
     sitemap_xml = render_template('sitemap.xml', pages=pages)
     return Response(sitemap_xml, mimetype='application/xml')
-
-
-@public_bp.route('/robots.txt')
-def robots():
-    from services.seo import get_absolute_url
-    robots_txt = f"""User-agent: *
-Allow: /
-Disallow: /admin/
-Disallow: /login/
-Disallow: /logout/
-
-Sitemap: {get_absolute_url('/sitemap.xml')}
-"""
-    return Response(robots_txt, mimetype='text/plain')
 
 
 @public_bp.route('/wm/<image_type>/<int:image_id>/')
